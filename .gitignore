@@ -1,10 +1,11 @@
 .vs/
-appsettings*.json
 obj/
 bin/
 
-node_modules/
-build/
+appsettings*.json
 *.user
 *.jfm
 *.dbmdl
+
+node_modules/
+build/
