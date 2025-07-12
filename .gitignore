@@ -1,0 +1,10 @@
+.vs/
+appsettings*.json
+obj/
+bin/
+
+node_modules/
+build/
+*.user
+*.jfm
+*.dbmdl
