@@ -56,5 +56,35 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="Tables" />
+    <Folder Include="PostDeployment" />
+    <Folder Include="Triggers" />
+    <Folder Include="PostDeployment\TestInserts" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="PostDeployment\PostDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Tables\Account.sql" />
+    <Build Include="Triggers\AccountUpdated.sql" />
+    <Build Include="Tables\Role.sql" />
+    <Build Include="Tables\AccountRole.sql" />
+    <None Include="PostDeployment\TestInserts\AccountRole_Inserts.sql" />
+    <None Include="PostDeployment\TestInserts\Role_Inserts.sql" />
+    <Build Include="Triggers\RoleUpdated.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="Database.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <SqlCmdVariable Include="BuildConfiguration">
+      <DefaultValue>Release</DefaultValue>
+      <Value>$(SqlCmdVar__1)</Value>
+    </SqlCmdVariable>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Local_Debug.publish.xml" />
+    <None Include="Local_Release.publish.xml" />
+    <None Include="PostDeployment\TestInserts\Account_Inserts.sql" />
   </ItemGroup>
 </Project>

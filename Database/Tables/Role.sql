@@ -1,0 +1,9 @@
+﻿CREATE TABLE [dbo].[Role]
+(
+	[RoleId] INT NOT NULL IDENTITY, 
+    [Name] NVARCHAR(100) NOT NULL, 
+    [CreatedOnUtc] DATETIME NOT NULL CONSTRAINT [DF_Role_CreatedOnUtc] DEFAULT GETUTCDATE(), 
+    [ModifiedOnUtc] DATETIME NOT NULL CONSTRAINT [DF_Role_ModifiedOnUtc] DEFAULT GETUTCDATE(), 
+    CONSTRAINT [PK_Role_RoleId] PRIMARY KEY ([RoleId]),
+    CONSTRAINT [UQ_Role_Name] UNIQUE ([Name])
+)
