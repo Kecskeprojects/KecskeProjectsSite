@@ -44,8 +44,7 @@ public class AccountController(
             return Problem("Registration unsuccessful!");
         }
 
-        LoggedInAccount? account = await userManager.SignIn(HttpContext, form.Email, form.Password);
-        DatabaseActionResult<int> _ = await accountService.UpdateLastLoginAsync(form.Email!);
+        LoggedInAccount? account = await userManager.SignIn(HttpContext, form.UserName, form.Password);
 
         return Ok(account);
     }
@@ -59,8 +58,8 @@ public class AccountController(
             return Problem();
         }
 
-        LoggedInAccount? account = await userManager.SignIn(HttpContext, form.Email, form.Password);
-        DatabaseActionResult<int> _ = await accountService.UpdateLastLoginAsync(form.Email!);
+        LoggedInAccount? account = await userManager.SignIn(HttpContext, form.UserName, form.Password);
+        DatabaseActionResult<int> _ = await accountService.UpdateLastLoginAsync(account?.AccountId);
 
         return Ok(account);
     }

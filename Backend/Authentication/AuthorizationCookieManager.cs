@@ -15,28 +15,27 @@ public class AuthorizationCookieManager(AccountService accountService)
 {
     private readonly AccountService accountService = accountService;
 
-    public async Task<LoggedInAccount?> SignIn(HttpContext httpContext, string? email, string? password)
+    public async Task<LoggedInAccount?> SignIn(HttpContext httpContext, string? username, string? password)
     {
-        email = email?.ToLower().Trim();
+        username = username?.Trim();
         DatabaseActionResult<Account?> account =
             await accountService.FirstOrDefaultAsync(
-                a => a.Email.ToLower() == email,
+                a => a.UserName.Equals(username),
                 a => a.Roles);
 
         if (account.Data is null || string.IsNullOrWhiteSpace(password))
         {
-            throw new DataException("Email or Password incorrect");
+            throw new DataException("Username or Password incorrect");
         }
 
         PasswordHasher<Account> hasher = new();
         string hashedPass = Encoding.UTF8.GetString(account.Data.Password);
         if (hasher.VerifyHashedPassword(account.Data, hashedPass, password) == PasswordVerificationResult.Failed)
         {
-            throw new DataException("Email or Password incorrect");
+            throw new DataException("Username or Password incorrect");
         }
 
-        ClaimsIdentity identity = new(GetUserClaims(account.Data), CookieAuthenticationDefaults.AuthenticationScheme);
-        ClaimsPrincipal principal = new(identity);
+        ClaimsPrincipal principal = CreateAccountClaimsPricipal(account.Data);
 
         await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
@@ -48,13 +47,12 @@ public class AuthorizationCookieManager(AccountService accountService)
         await httpContext.SignOutAsync();
     }
 
-    private static List<Claim> GetUserClaims(Account account)
+    private static ClaimsPrincipal CreateAccountClaimsPricipal(Account account)
     {
         List<Claim> claims =
         [
             new Claim(ClaimTypes.NameIdentifier, account.AccountId.ToString(), ClaimValueTypes.String),
             new Claim(ClaimTypes.Name, account.UserName, ClaimValueTypes.String),
-            new Claim(ClaimTypes.Email, account.Email, ClaimValueTypes.String),
         ];
 
         foreach (Role role in account.Roles)
@@ -62,7 +60,10 @@ public class AuthorizationCookieManager(AccountService accountService)
             claims.Add(new Claim(ClaimTypes.Role, role.Name, ClaimValueTypes.String));
         }
 
-        return claims;
+        ClaimsIdentity identity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        ClaimsPrincipal principal = new(identity);
+
+        return principal;
     }
 
     public LoggedInAccount? GetLoggedInUser(ClaimsPrincipal principal)
@@ -72,12 +73,11 @@ public class AuthorizationCookieManager(AccountService accountService)
             return null;
         }
 
-        int userId = int.TryParse(identity.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int id) ? id : 0;
+        int accountId = int.TryParse(identity.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int id) ? id : 0;
         return new LoggedInAccount
             {
-                AccountId = userId,
+                AccountId = accountId,
                 UserName = identity.FindFirst(ClaimTypes.Name)?.Value,
-                Email = identity.FindFirst(ClaimTypes.Email)?.Value,
                 Roles = [ ..identity.FindAll(ClaimTypes.Role).Select(x => x?.Value)]
             };
     }

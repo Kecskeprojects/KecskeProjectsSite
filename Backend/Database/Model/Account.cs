@@ -7,13 +7,11 @@ public partial class Account
 {
     public int AccountId { get; set; }
 
-    public string Email { get; set; } = null!;
-
     public byte[] Password { get; set; } = null!;
 
     public string UserName { get; set; } = null!;
 
-    public DateTime? LastLoginUtc { get; set; }
+    public DateTime LastLoginOnUtc { get; set; }
 
     public DateTime CreatedOnUtc { get; set; }
 

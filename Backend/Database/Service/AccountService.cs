@@ -12,14 +12,13 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
 {
     public async Task<DatabaseActionResult<int>> RegisterAsync(RegisterData form)
     {
-        if (string.IsNullOrEmpty(form.Email) || string.IsNullOrEmpty(form.UserName) || string.IsNullOrEmpty(form.Password))
+        if (string.IsNullOrEmpty(form.UserName) || string.IsNullOrEmpty(form.Password))
         {
-            return CreateResult(DatabaseActionResultEnum.FailureWithSpecialMessage, 0, message: "Email, Username or Password cannot be empty.");
+            return CreateResult(DatabaseActionResultEnum.FailureWithSpecialMessage, 0, message: "Username or Password cannot be empty.");
         }
 
         Account account = new()
         {
-            Email = form.Email.ToLower().Trim(),
             UserName = form.UserName.Trim()
         };
 
@@ -31,14 +30,19 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
         return CreateResult(DatabaseActionResultEnum.Success, result);
     }
 
-    public async Task<DatabaseActionResult<int>> UpdateLastLoginAsync(string email)
+    public async Task<DatabaseActionResult<int>> UpdateLastLoginAsync(int? accountId)
     {
-        Account? account = await repository.FirstOrDefaultAsync(a => a.Email == email);
+        if(accountId is null)
+        {
+            return CreateResult(DatabaseActionResultEnum.NotFound, 0);
+        }
+
+        Account? account = await repository.FindByIdAsync(accountId.Value);
         if (account is null)
         {
             return CreateResult(DatabaseActionResultEnum.NotFound, 0);
         }
-        account.LastLoginUtc = DateTime.UtcNow;
+        account.LastLoginOnUtc = DateTime.UtcNow;
         int result = await repository.UpdateAsync(account);
         return CreateResult(DatabaseActionResultEnum.Success, result);
     }

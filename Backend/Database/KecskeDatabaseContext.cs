@@ -26,18 +26,19 @@ public partial class KecskeDatabaseContext : DbContext
 
             entity.ToTable("Account", tb => tb.HasTrigger("AccountUpdated"));
 
-            entity.HasIndex(e => e.Email, "UQ_Account_Email").IsUnique();
+            entity.HasIndex(e => e.UserName, "UQ_Account_UserName").IsUnique();
 
             entity.Property(e => e.CreatedOnUtc)
                 .HasDefaultValueSql("(getutcdate())")
                 .HasColumnType("datetime");
-            entity.Property(e => e.Email).HasMaxLength(100);
-            entity.Property(e => e.LastLoginUtc).HasColumnType("datetime");
+            entity.Property(e => e.LastLoginOnUtc)
+                .HasDefaultValueSql("(getutcdate())")
+                .HasColumnType("datetime");
             entity.Property(e => e.ModifiedOnUtc)
                 .HasDefaultValueSql("(getutcdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.Password).HasMaxLength(84);
-            entity.Property(e => e.UserName).HasMaxLength(100);
+            entity.Property(e => e.UserName).HasMaxLength(200);
         });
 
         modelBuilder.Entity<Role>(entity =>
