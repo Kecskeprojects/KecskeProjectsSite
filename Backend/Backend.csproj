@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <Folder Include="Communication\Outgoing\" />
-    <Folder Include="Tools\" />
   </ItemGroup>
 
 </Project>
