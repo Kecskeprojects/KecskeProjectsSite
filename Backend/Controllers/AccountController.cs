@@ -12,10 +12,10 @@ namespace Backend.Controllers;
 [Route("api/[controller]/[action]")]
 public class AccountController(
     AccountService accountService,
-    UserManager userManager
+    AuthorizationCookieManager userManager
     ) : ControllerBase
 {
-    private readonly UserManager userManager = userManager;
+    private readonly AuthorizationCookieManager userManager = userManager;
 
     [ErrorLoggingFilter]
     [HttpPost]

@@ -12,6 +12,7 @@ namespace Backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
 
@@ -34,7 +35,7 @@ namespace Backend
             }
             else
             {
-                //app.UseExceptionHandler("/Error/Log"); //Todo: Would this work the same as ErrorLoggingFilterAttribute
+                //app.UseExceptionHandler("/Error/Log"); //Todo: Would this work the same as ErrorLoggingFilterAttribute?
                 app.MapGet("/", () => "The backend is running, now shoo!");
             }
 
@@ -53,7 +54,7 @@ namespace Backend
         private static void ConfigureServices(ConfigurationManager configuration, IServiceCollection services)
         {
             //Authorization
-            services.AddTransient<UserManager>();
+            services.AddTransient<AuthorizationCookieManager>();
             services.AddSingleton<CustomCookieAuthenticationEvents>();
 
             services

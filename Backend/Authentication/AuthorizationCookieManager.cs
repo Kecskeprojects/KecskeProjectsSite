@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Backend.Authentication;
 
-public class UserManager(AccountService accountService)
+public class AuthorizationCookieManager(AccountService accountService)
 {
     private readonly AccountService accountService = accountService;
 
