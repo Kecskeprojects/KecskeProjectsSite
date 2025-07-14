@@ -1,6 +1,4 @@
-﻿using Azure;
-using Microsoft.AspNetCore.Mvc;
-using System.Net;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Base;
 

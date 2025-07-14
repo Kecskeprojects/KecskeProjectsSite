@@ -1,6 +1,6 @@
 ﻿using Backend.Communication.Incoming;
 using Backend.Communication.Internal;
-using Backend.Database.Models;
+using Backend.Database.Model;
 using Backend.Database.Repository;
 using Backend.Enum;
 using Microsoft.AspNetCore.Identity;
@@ -19,8 +19,8 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
 
         Account account = new()
         {
-            Email = form.Email,
-            UserName = form.UserName
+            Email = form.Email.ToLower().Trim(),
+            UserName = form.UserName.Trim()
         };
 
         PasswordHasher<Account> hasher = new();

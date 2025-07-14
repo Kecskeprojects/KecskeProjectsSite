@@ -22,8 +22,4 @@
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.3" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Folder Include="Communication\Outgoing\" />
-	</ItemGroup>
-
 </Project>

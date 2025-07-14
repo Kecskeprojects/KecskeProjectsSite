@@ -1,5 +1,6 @@
 ﻿using Backend.Communication.Internal;
-using Backend.Database.Models;
+using Backend.Communication.Outgoing;
+using Backend.Database.Model;
 using Backend.Database.Service;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -14,14 +15,15 @@ public class AuthorizationCookieManager(AccountService accountService)
 {
     private readonly AccountService accountService = accountService;
 
-    public async Task SignIn(HttpContext httpContext, string? email, string? password)
+    public async Task<LoggedInAccount?> SignIn(HttpContext httpContext, string? email, string? password)
     {
+        email = email?.ToLower().Trim();
         DatabaseActionResult<Account?> account =
             await accountService.FirstOrDefaultAsync(
-                a => a.Email == email,
+                a => a.Email.ToLower() == email,
                 a => a.Roles);
 
-        if( account.Data is null || password is null)
+        if (account.Data is null || string.IsNullOrWhiteSpace(password))
         {
             throw new DataException("Email or Password incorrect");
         }
@@ -37,6 +39,8 @@ public class AuthorizationCookieManager(AccountService accountService)
         ClaimsPrincipal principal = new(identity);
 
         await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+        return GetLoggedInUser(principal);
     }
 
     public async Task SignOut(HttpContext httpContext)
@@ -59,5 +63,22 @@ public class AuthorizationCookieManager(AccountService accountService)
         }
 
         return claims;
+    }
+
+    public LoggedInAccount? GetLoggedInUser(ClaimsPrincipal principal)
+    {
+        if (principal.Identity is not ClaimsIdentity identity || !identity.IsAuthenticated)
+        {
+            return null;
+        }
+
+        int userId = int.TryParse(identity.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int id) ? id : 0;
+        return new LoggedInAccount
+            {
+                AccountId = userId,
+                UserName = identity.FindFirst(ClaimTypes.Name)?.Value,
+                Email = identity.FindFirst(ClaimTypes.Email)?.Value,
+                Roles = [ ..identity.FindAll(ClaimTypes.Role).Select(x => x?.Value)]
+            };
     }
 }

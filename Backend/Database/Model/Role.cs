@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Backend.Database.Models;
+namespace Backend.Database.Model;
 
 public partial class Role
 {

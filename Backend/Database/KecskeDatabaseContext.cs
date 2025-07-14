@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Backend.Database.Models;
+using Backend.Database.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Database;

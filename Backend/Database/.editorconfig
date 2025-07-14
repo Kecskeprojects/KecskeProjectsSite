@@ -1,8 +1,8 @@
 # top-most EditorConfig file
 root = true
 
-[/Models/**]
+[/Model/**]
 generated_code = true
 
-[MainDbContext.cs]
+[KecskeDatabaseContext.cs]
 generated_code = true

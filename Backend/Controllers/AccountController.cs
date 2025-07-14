@@ -1,9 +1,12 @@
 ﻿using Backend.Authentication;
 using Backend.Communication.Incoming;
 using Backend.Communication.Internal;
+using Backend.Communication.Outgoing;
+using Backend.Controllers.Base;
 using Backend.CustomAttributes;
 using Backend.Database.Service;
 using Backend.Enum;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
@@ -13,13 +16,22 @@ namespace Backend.Controllers;
 public class AccountController(
     AccountService accountService,
     AuthorizationCookieManager userManager
-    ) : ControllerBase
+    ) : ApiControllerBase
 {
     private readonly AuthorizationCookieManager userManager = userManager;
 
+    [Authorize]
+    [ErrorLoggingFilter]
+    [HttpGet]
+    public IActionResult GetLoggedInUser()
+    {
+        LoggedInAccount? account = userManager.GetLoggedInUser(HttpContext.User);
+        return Ok(account);
+    }
+
     [ErrorLoggingFilter]
     [HttpPost]
-    public async Task<IActionResult> Register([FromBody] RegisterData form)
+    public async Task<IActionResult> Register([FromBody] RegisterData form) //Todo: model validation
     {
         if (!ModelState.IsValid)
         {
@@ -27,29 +39,30 @@ public class AccountController(
         }
 
         DatabaseActionResult<int> result = await accountService.RegisterAsync(form);
-
         if (result.Status != DatabaseActionResultEnum.Success)
         {
             return Problem("Registration unsuccessful!");
         }
-        await userManager.SignIn(HttpContext, form.Email, form.Password);
-        return Ok();
+
+        LoggedInAccount? account = await userManager.SignIn(HttpContext, form.Email, form.Password);
+        DatabaseActionResult<int> _ = await accountService.UpdateLastLoginAsync(form.Email!);
+
+        return Ok(account);
     }
 
     [ErrorLoggingFilter]
     [HttpPost]
-    public async Task<IActionResult> Login([FromBody] LoginData form)
+    public async Task<IActionResult> Login([FromBody] LoginData form) //Todo: model validation
     {
         if (!ModelState.IsValid)
         {
             return Problem();
         }
 
-        await userManager.SignIn(HttpContext, form.Email, form.Password);
-
+        LoggedInAccount? account = await userManager.SignIn(HttpContext, form.Email, form.Password);
         DatabaseActionResult<int> _ = await accountService.UpdateLastLoginAsync(form.Email!);
 
-        return Ok();
+        return Ok(account);
     }
 
     [ErrorLoggingFilter]
