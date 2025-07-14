@@ -13,6 +13,7 @@ public class Program
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+        //Todo: add file logging
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
 
