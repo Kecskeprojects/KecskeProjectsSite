@@ -75,10 +75,10 @@ public class AuthorizationCookieManager(AccountService accountService)
 
         int accountId = int.TryParse(identity.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int id) ? id : 0;
         return new LoggedInAccount
-            {
-                AccountId = accountId,
-                UserName = identity.FindFirst(ClaimTypes.Name)?.Value,
-                Roles = [ ..identity.FindAll(ClaimTypes.Role).Select(x => x?.Value)]
-            };
+        {
+            AccountId = accountId,
+            UserName = identity.FindFirst(ClaimTypes.Name)?.Value,
+            Roles = [.. identity.FindAll(ClaimTypes.Role).Select(x => x?.Value)]
+        };
     }
 }

@@ -32,7 +32,7 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
 
     public async Task<DatabaseActionResult<int>> UpdateLastLoginAsync(int? accountId)
     {
-        if(accountId is null)
+        if (accountId is null)
         {
             return CreateResult(DatabaseActionResultEnum.NotFound, 0);
         }
