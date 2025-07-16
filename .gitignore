@@ -2,6 +2,7 @@
 obj/
 bin/
 TestInserts/
+update-scaffold.txt
 
 appsettings*.json
 *.user
@@ -10,4 +11,4 @@ appsettings*.json
 
 node_modules/
 build/
-/Backend/Database/update-scaffold.txt
+.env
