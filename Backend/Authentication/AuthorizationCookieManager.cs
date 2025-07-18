@@ -23,7 +23,7 @@ public class AuthorizationCookieManager(AccountService accountService)
                 a => a.Roles);
 
         if (result.Data is null
-            || HashTools.VerifyPassword(result.Data, password, result.Data.Password)
+            || !HashTools.VerifyPassword(result.Data, password, result.Data.Password)
             || !result.Data.IsRegistrationApproved)
         {
             return null;

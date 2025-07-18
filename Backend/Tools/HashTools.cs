@@ -13,6 +13,7 @@ public static class HashTools
 
         return Encoding.UTF8.GetBytes(hash);
     }
+
     public static bool VerifyPassword(Account account, string rawPassword, byte[] hashedPassword)
     {
         PasswordHasher<Account> hasher = new();
