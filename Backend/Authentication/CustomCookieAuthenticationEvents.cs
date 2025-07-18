@@ -1,24 +1,38 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Backend.Communication.Outgoing;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Text.Json;
 
 namespace Backend.Authentication;
 
 public sealed class CustomCookieAuthenticationEvents : CookieAuthenticationEvents
 {
-    public override Task RedirectToAccessDenied(
+    private static readonly JsonSerializerOptions DefaultJsonSerializeOption = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
+
+    public override async Task RedirectToAccessDenied(
               RedirectContext<CookieAuthenticationOptions> context)
     {
         ArgumentNullException.ThrowIfNull(context);
 
+        ErrorActionResult error = new("You do not have the right roles for this page!");
+        context.Response.ContentType = "application/json";
         context.Response.StatusCode = StatusCodes.Status403Forbidden;
-        return Task.CompletedTask;
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(error, DefaultJsonSerializeOption));
     }
 
-    public override Task RedirectToLogin(RedirectContext<CookieAuthenticationOptions> context)
+    public override async Task RedirectToLogin(RedirectContext<CookieAuthenticationOptions> context)
     {
         ArgumentNullException.ThrowIfNull(context);
 
+        ErrorActionResult error = new("You are not logged in!");
+        context.Response.ContentType = "application/json";
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-        return Task.CompletedTask;
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(error, DefaultJsonSerializeOption));
     }
 }
