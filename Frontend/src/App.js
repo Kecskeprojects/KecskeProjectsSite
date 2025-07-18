@@ -27,6 +27,7 @@ export default function App() {
   }, [user]);
 
   if (loading) {
+    //https://uiball.com/ldrs/
     return (
       <div style={{ margin: "200px auto auto auto", width: "min-content" }}>
         <LineSpinner size={500} color="rgb(0,0,0)" speed={1} stroke={20} />
