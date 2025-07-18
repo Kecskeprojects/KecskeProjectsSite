@@ -1,7 +1,7 @@
 import { useContext } from "react";
-import { UserContext } from "./Contexts";
-import UserData from "./Models/UserData";
-import AccountService from "./Services/AccountService";
+import { UserContext } from "../components/Contexts";
+import UserData from "../models/UserData";
+import AccountService from "../services/AccountService";
 
 export default function Login() {
   const context = useContext(UserContext);

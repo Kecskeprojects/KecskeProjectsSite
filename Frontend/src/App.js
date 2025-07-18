@@ -2,28 +2,32 @@ import { LineSpinner } from "ldrs/react";
 import "ldrs/react/LineSpinner.css";
 import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import "./App.css";
-import { UserContext } from "./Contexts";
-import ExampleComponent from "./ExampleComponent";
-import Home from "./Home";
-import Layout from "./Layout";
-import Login from "./Login";
-import UserData from "./Models/UserData";
-import AccountService from "./Services/AccountService";
+import { UserContext } from "./components/Contexts";
+import "./css/App.css";
+import Layout from "./layout/Layout";
+import UserData from "./models/UserData";
+import ExampleComponent from "./pages/ExampleComponent";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import AccountService from "./services/AccountService";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      AccountService.GetLoggedInUser()
-        .then((data) => {
-          setUser(new UserData(data));
-          setLoading(false);
-        })
-        .catch((error) => console.log(error));
+    if (user?.AccountId) {
+      return;
     }
+
+    AccountService.GetLoggedInUser()
+      .then((data) => {
+        if (!data.error) {
+          setUser(new UserData(data));
+        }
+        setLoading(false);
+      })
+      .catch((error) => console.log(error));
   }, [user]);
 
   if (loading) {
@@ -37,7 +41,7 @@ export default function App() {
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
-      {!user ? (
+      {!user?.AccountId ? (
         <Login />
       ) : (
         <BrowserRouter>

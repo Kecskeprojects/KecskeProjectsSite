@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { UserContext } from "./Contexts";
+import { UserContext } from "../components/Contexts";
 
 export default function Home() {
   const context = useContext(UserContext);
