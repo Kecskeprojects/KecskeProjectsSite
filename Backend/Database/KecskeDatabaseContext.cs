@@ -31,9 +31,7 @@ public partial class KecskeDatabaseContext : DbContext
             entity.Property(e => e.CreatedOnUtc)
                 .HasDefaultValueSql("(getutcdate())")
                 .HasColumnType("datetime");
-            entity.Property(e => e.LastLoginOnUtc)
-                .HasDefaultValueSql("(getutcdate())")
-                .HasColumnType("datetime");
+            entity.Property(e => e.LastLoginOnUtc).HasColumnType("datetime");
             entity.Property(e => e.ModifiedOnUtc)
                 .HasDefaultValueSql("(getutcdate())")
                 .HasColumnType("datetime");

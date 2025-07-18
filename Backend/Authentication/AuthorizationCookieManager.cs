@@ -2,12 +2,11 @@
 using Backend.Communication.Outgoing;
 using Backend.Database.Model;
 using Backend.Database.Service;
+using Backend.Tools;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
 using System.Data;
 using System.Security.Claims;
-using System.Text;
 
 namespace Backend.Authentication;
 
@@ -15,27 +14,22 @@ public class AuthorizationCookieManager(AccountService accountService)
 {
     private readonly AccountService accountService = accountService;
 
-    public async Task<LoggedInAccount?> SignIn(HttpContext httpContext, string? username, string? password)
+    public async Task<LoggedInAccount?> SignIn(HttpContext httpContext, string username, string password)
     {
-        username = username?.Trim();
-        DatabaseActionResult<Account?> account =
+        username = username.Trim();
+        DatabaseActionResult<Account?> result =
             await accountService.FirstOrDefaultAsync(
                 a => a.UserName.Equals(username),
                 a => a.Roles);
 
-        if (account.Data is null || string.IsNullOrWhiteSpace(password))
+        if (result.Data is null
+            || HashTools.VerifyPassword(result.Data, password, result.Data.Password)
+            || !result.Data.IsRegistrationApproved)
         {
-            throw new DataException("Username or Password incorrect");
+            return null;
         }
 
-        PasswordHasher<Account> hasher = new();
-        string hashedPass = Encoding.UTF8.GetString(account.Data.Password);
-        if (hasher.VerifyHashedPassword(account.Data, hashedPass, password) == PasswordVerificationResult.Failed)
-        {
-            throw new DataException("Username or Password incorrect");
-        }
-
-        ClaimsPrincipal principal = CreateAccountClaimsPricipal(account.Data);
+        ClaimsPrincipal principal = CreateAccountClaimsPricipal(result.Data);
 
         await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 

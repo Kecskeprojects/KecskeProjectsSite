@@ -11,7 +11,9 @@ public partial class Account
 
     public string UserName { get; set; } = null!;
 
-    public DateTime LastLoginOnUtc { get; set; }
+    public bool IsRegistrationApproved { get; set; }
+
+    public DateTime? LastLoginOnUtc { get; set; }
 
     public DateTime CreatedOnUtc { get; set; }
 

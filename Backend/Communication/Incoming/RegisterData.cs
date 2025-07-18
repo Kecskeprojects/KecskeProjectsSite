@@ -1,7 +1,14 @@
-﻿namespace Backend.Communication.Incoming;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Backend.Communication.Incoming;
 
 public class RegisterData
 {
-    public string? UserName { get; set; }
-    public string? Password { get; set; }
+    [Required]
+    [Length(1, 200, ErrorMessage = "Username cannot be empty or over 200 characters!")]
+    public string UserName { get; set; } = null!;
+
+    [Required]
+    [Length(10, 100, ErrorMessage = "Password has to be between 10-100 characters!")]
+    public string Password { get; set; } = null!;
 }

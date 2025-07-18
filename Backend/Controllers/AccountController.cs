@@ -26,42 +26,38 @@ public class AccountController(
     public IActionResult GetLoggedInUser()
     {
         LoggedInAccount? account = userManager.GetLoggedInUser(HttpContext.User);
-        return Ok(account);
+        return account != null
+            ? Ok(account)
+            : ErrorResult(StatusCodes.Status401Unauthorized, "You are not logged in!");
     }
 
     [ErrorLoggingFilter]
     [HttpPost]
-    public async Task<IActionResult> Register([FromForm] RegisterData form) //Todo: model validation
+    public async Task<IActionResult> Register([FromForm] RegisterData form)
     {
-        if (!ModelState.IsValid)
-        {
-            return Problem();
-        }
-
         DatabaseActionResult<int> result = await accountService.RegisterAsync(form);
-        if (result.Status != DatabaseActionResultEnum.Success)
+
+        return result.Status switch
         {
-            return Problem("Registration unsuccessful!");
-        }
-
-        LoggedInAccount? account = await userManager.SignIn(HttpContext, form.UserName, form.Password);
-
-        return Ok(account);
+            DatabaseActionResultEnum.Success => MessageResult("Registration successful, once an admin approves your user, you can log in."),
+            DatabaseActionResultEnum.AlreadyExists => ErrorResult(StatusCodes.Status409Conflict, "Username already exists."),
+            _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while registering.")
+        };
     }
 
     [ErrorLoggingFilter]
     [HttpPost]
-    public async Task<IActionResult> Login([FromForm] LoginData form) //Todo: model validation
+    public async Task<IActionResult> Login([FromForm] LoginData form)
     {
-        if (!ModelState.IsValid)
+        LoggedInAccount? account = await userManager.SignIn(HttpContext, form.UserName, form.Password);
+        if (account != null)
         {
-            return Problem();
+            await accountService.UpdateLastLoginAsync(account.AccountId);
+
+            return Ok(account);
         }
 
-        LoggedInAccount? account = await userManager.SignIn(HttpContext, form.UserName, form.Password);
-        DatabaseActionResult<int> _ = await accountService.UpdateLastLoginAsync(account?.AccountId);
-
-        return Ok(account);
+        return ErrorResult(StatusCodes.Status401Unauthorized, "Username or Password incorrect!");
     }
 
     [ErrorLoggingFilter]
@@ -70,6 +66,6 @@ public class AccountController(
     {
         await userManager.SignOut(HttpContext);
 
-        return Ok();
+        return MessageResult("You have been logged out!");
     }
 }
