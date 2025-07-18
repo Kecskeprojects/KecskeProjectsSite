@@ -31,7 +31,7 @@ public class AccountController(
 
     [ErrorLoggingFilter]
     [HttpPost]
-    public async Task<IActionResult> Register([FromBody] RegisterData form) //Todo: model validation
+    public async Task<IActionResult> Register([FromForm] RegisterData form) //Todo: model validation
     {
         if (!ModelState.IsValid)
         {
@@ -51,7 +51,7 @@ public class AccountController(
 
     [ErrorLoggingFilter]
     [HttpPost]
-    public async Task<IActionResult> Login([FromBody] LoginData form) //Todo: model validation
+    public async Task<IActionResult> Login([FromForm] LoginData form) //Todo: model validation
     {
         if (!ModelState.IsValid)
         {

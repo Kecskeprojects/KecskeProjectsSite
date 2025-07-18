@@ -39,12 +39,12 @@ public class Program
             app.MapGet("/", () => "The backend is running, now shoo!");
         }
 
+        app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000").AllowCredentials());
+
         app.UseHttpsRedirection();
 
         app.UseAuthentication();
         app.UseAuthorization();
-
-        app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
         app.MapControllers();
 
