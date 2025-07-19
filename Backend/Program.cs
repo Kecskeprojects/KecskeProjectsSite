@@ -1,7 +1,9 @@
 using Backend.Authentication;
+using Backend.BackgroundServices;
 using Backend.Database;
 using Backend.Database.Repository;
 using Backend.Database.Service;
+using Backend.Tools.ExtensionTools;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,9 +15,9 @@ public class Program
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        //Todo: add file logging
+        builder.Services.AddHostedService<LogToFileBackgroundService>();
         builder.Logging.ClearProviders();
-        builder.Logging.AddConsole();
+        builder.Logging.AddFileLogger();
 
         // Add services to the container.
         ConfigureServices(builder.Configuration, builder.Services);
@@ -52,6 +54,7 @@ public class Program
 
         app.MapControllers();
 
+        app.Logger.LogInformation("Starting Kecske Backend");
         app.Run();
     }
 

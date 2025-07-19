@@ -1,6 +1,6 @@
 ﻿using Backend.Communication.Internal;
 using Backend.Database.Repository;
-using Backend.Enum;
+using Backend.Enums;
 using System.Linq.Expressions;
 
 namespace Backend.Database.Service;

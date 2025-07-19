@@ -1,4 +1,4 @@
-﻿using Backend.Enum;
+﻿using Backend.Enums;
 
 namespace Backend.Communication.Internal;
 

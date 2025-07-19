@@ -2,7 +2,7 @@
 using Backend.Communication.Internal;
 using Backend.Database.Model;
 using Backend.Database.Repository;
-using Backend.Enum;
+using Backend.Enums;
 using Backend.Tools;
 
 namespace Backend.Database.Service;

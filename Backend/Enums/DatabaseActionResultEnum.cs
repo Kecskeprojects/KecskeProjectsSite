@@ -1,4 +1,4 @@
-﻿namespace Backend.Enum;
+﻿namespace Backend.Enums;
 
 public enum DatabaseActionResultEnum
 {
