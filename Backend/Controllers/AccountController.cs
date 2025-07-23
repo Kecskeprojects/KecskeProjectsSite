@@ -15,17 +15,19 @@ namespace Backend.Controllers;
 [Route("api/[controller]/[action]")]
 public class AccountController(
     AccountService accountService,
-    AuthorizationCookieManager userManager
-    ) : ApiControllerBase
+    AuthorizationCookieManager userManager,
+    ILogger<AccountController> logger
+    ) : ApiControllerBase(userManager, logger)
 {
-    private readonly AuthorizationCookieManager userManager = userManager;
+    private readonly AccountService accountService = accountService;
+    private readonly ILogger<AccountController> logger = logger;
 
     [Authorize]
     [ErrorLoggingFilter]
     [HttpGet]
     public IActionResult GetLoggedInUser()
     {
-        LoggedInAccount? account = userManager.GetLoggedInUser(HttpContext.User);
+        LoggedInAccount? account = GetLoggedInUserFromCookie();
         return account != null
             ? Ok(account)
             : ErrorResult(StatusCodes.Status401Unauthorized, "You are not logged in!");
@@ -36,6 +38,11 @@ public class AccountController(
     public async Task<IActionResult> Register([FromForm] RegisterData form)
     {
         DatabaseActionResult<int> result = await accountService.RegisterAsync(form);
+
+        if (result.Status <= DatabaseActionResultEnum.Success)
+        {
+            logger.LogError("Registration successful for {UserName}, once an admin approves your user, you can log in.", form.UserName);
+        }
 
         return result.Status switch
         {
@@ -54,6 +61,7 @@ public class AccountController(
         {
             await accountService.UpdateLastLoginAsync(account.AccountId);
 
+            logger.LogInformation("User {UserName} logged in successfully.", account.UserName);
             return Ok(account);
         }
 
@@ -64,6 +72,9 @@ public class AccountController(
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
+        LoggedInAccount? user = GetLoggedInUserFromCookie();
+
+        logger.LogInformation("User {UserName} is logging out.", user?.UserName);
         await userManager.SignOut(HttpContext);
 
         return MessageResult("You have been logged out!");

@@ -25,9 +25,7 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
 
         account.Password = HashTools.GetHashBytes(account, form.Password);
 
-        int result = await repository.AddAsync(account);
-
-        return CreateResult(DatabaseActionResultEnum.Success, result);
+        return await AddAsync(account);
     }
 
     public async Task<DatabaseActionResult<int>> UpdateLastLoginAsync(int accountId)
@@ -38,7 +36,7 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
             return CreateResult(DatabaseActionResultEnum.NotFound, 0);
         }
         account.LastLoginOnUtc = DateTime.UtcNow;
-        int result = await repository.UpdateAsync(account);
-        return CreateResult(DatabaseActionResultEnum.Success, result);
+
+        return await SaveChangesAsync();
     }
 }

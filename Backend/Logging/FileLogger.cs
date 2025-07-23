@@ -16,7 +16,7 @@ public class FileLogger(string name, Func<FileLoggerConfiguration> getCurrentCon
     public bool IsEnabled(LogLevel logLevel)
     {
         LogLevel minLogLevel = EnumTools.ParseEnum<LogLevel>(getCurrentConfig().MinLogLevel);
-        return ((int)minLogLevel) <= ((int)logLevel);
+        return ((int) minLogLevel) <= ((int) logLevel);
     }
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)

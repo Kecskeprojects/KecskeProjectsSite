@@ -10,6 +10,14 @@ public class ErrorLoggingFilterAttribute : ExceptionFilterAttribute
     {
         ErrorActionResult error = new(context.Exception.Message);
 
+        context.HttpContext.RequestServices
+            .GetService<ILogger<ErrorLoggingFilterAttribute>>()?
+            .LogError(
+                context.Exception,
+                "An error occurred in the request.\nWith status code: {statusCode}\nWith request path: {Path}",
+                context.HttpContext.Response.StatusCode,
+                context.HttpContext.Request.Path);
+
         context.Result = new ObjectResult(error)
         {
             StatusCode = StatusCodes.Status500InternalServerError,
