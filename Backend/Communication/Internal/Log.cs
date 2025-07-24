@@ -9,6 +9,6 @@ public class Log(LogLevel level, string log)
     public string Title => $"[{TimeStamp:HH:mm:ss}][{Level}]:";
     public string Content =>
         Title
-        + (Level == LogLevel.Information? " " : "\t ")
+        + (Level == LogLevel.Information ? " " : "\t ")
         + content.Replace("\n", "\n\t\t\t ");
 }
