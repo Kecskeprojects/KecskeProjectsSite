@@ -9,6 +9,8 @@ public class LogToFileBackgroundService(IConfiguration configuration) : Backgrou
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await Task.Delay(5000, stoppingToken); // Initial delay to force ExecuteAsync to be async
+
         string logFolderPath = configuration.GetValue<string>("LogPath") ?? "log";
 
         if (!Path.IsPathFullyQualified(logFolderPath))
