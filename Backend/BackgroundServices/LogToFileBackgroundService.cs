@@ -31,12 +31,12 @@ public class LogToFileBackgroundService(IConfiguration configuration) : Backgrou
             {
                 try
                 {
-                    File.AppendAllText(Path.Combine(logFolderPath, $"Backend_Log[{DateTime.UtcNow:yyyy-MM-dd}].txt"), "\n" + msg.Content);
+                    File.AppendAllText(Path.Combine(logFolderPath, $"Backend-Log-{DateTime.UtcNow:yyyy-MM-dd}.txt"), msg.Content + "\n");
                     break; // Exit the retry loop if successful
                 }
                 catch (Exception ex)
                 {
-                    LogStorage.AddLog(new Log(LogLevel.Critical, ex.ToString()));
+                    LogStorage.AddLog(new Log(LogLevel.Critical, ex.ToString(), this.ToString()));
                     await Task.Delay(100, stoppingToken); // Wait before retrying
                 }
             }

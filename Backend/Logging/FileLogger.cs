@@ -6,8 +6,6 @@ namespace Backend.Logging;
 
 public class FileLogger(string name, Func<FileLoggerConfiguration> getCurrentConfig) : ILogger
 {
-    private readonly string name = name;
-
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull
     {
         return default!;
@@ -29,7 +27,7 @@ public class FileLogger(string name, Func<FileLoggerConfiguration> getCurrentCon
         FileLoggerConfiguration config = getCurrentConfig();
         if (config.EventId == 0 || config.EventId == eventId.Id)
         {
-            LogStorage.AddLog(new Log(logLevel, formatter(state, exception)));
+            LogStorage.AddLog(new Log(logLevel, formatter(state, exception), name));
         }
     }
 }
