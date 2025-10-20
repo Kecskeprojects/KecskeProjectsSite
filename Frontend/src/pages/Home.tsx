@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../components/Contexts";
+import RoleEnum from "../enum/RoleEnum";
 
 export default function Home() {
   const context = useContext(UserContext);
@@ -11,7 +12,7 @@ export default function Home() {
       <div>
         <Link to="example">Example Page</Link>
         <br />
-        {context.user?.hasRole("Admin") ? "IsAdmin" : "IsNotAdmin"}
+        {context.user?.hasRole(RoleEnum.Admin) ? "IsAdmin" : "IsNotAdmin"}
       </div>
     </div>
   );

@@ -47,6 +47,7 @@ export default function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="example" element={<ExampleComponent />} />
+              <Route path="example/:id" element={<ExampleComponent />} />
             </Route>
           </Routes>
         </BrowserRouter>
