@@ -6,6 +6,7 @@ namespace Backend.Database.Repository;
 public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEntity : class
 {
     protected readonly KecskeDatabaseContext context = context;
+    //Todo: Potentially can be improved with memory caching: https://learn.microsoft.com/en-us/aspnet/core/performance/caching/memory?view=aspnetcore-9.0
 
     public ValueTask<TEntity?> FindByIdAsync(int id)
     {
