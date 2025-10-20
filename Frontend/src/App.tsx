@@ -12,8 +12,8 @@ import Login from "./pages/Login";
 import AccountService from "./services/AccountService";
 
 export default function App() {
-  const [user, setUser] = useState(new UserData(null));
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<UserData>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (user?.AccountId) {
@@ -22,9 +22,7 @@ export default function App() {
 
     AccountService.GetLoggedInUser()
       .then((data) => {
-        if (!data.error) {
-          setUser(new UserData(data));
-        }
+        setUser(data);
         setLoading(false);
       })
       .catch((error) => console.log(error));

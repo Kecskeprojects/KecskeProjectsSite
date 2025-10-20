@@ -11,7 +11,7 @@ export default function Home() {
       <div>
         <Link to="example">Example Page</Link>
         <br />
-        {context.user.hasRole("Admin") ? "IsAdmin" : "IsNotAdmin"}
+        {context.user?.hasRole("Admin") ? "IsAdmin" : "IsNotAdmin"}
       </div>
     </div>
   );

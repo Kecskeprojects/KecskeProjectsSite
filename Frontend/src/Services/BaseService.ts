@@ -1,5 +1,7 @@
 export default class BaseService {
-  static async Get(route: string, additionalHeaders?: Headers) {
+  static GetUserStateEndpoint: string = "/Account/GetLoggedInUser";
+
+  static async Get(route: string, additionalHeaders?: Headers): Promise<any> {
     return BaseService.BaseFetch("GET", route, undefined, additionalHeaders);
   }
 
@@ -7,7 +9,7 @@ export default class BaseService {
     route: string,
     body?: FormData,
     additionalHeaders?: Headers
-  ) {
+  ): Promise<any> {
     return BaseService.BaseFetch("POST", route, body, additionalHeaders);
   }
 
@@ -15,7 +17,7 @@ export default class BaseService {
     route: string,
     body?: FormData,
     additionalHeaders?: Headers
-  ) {
+  ): Promise<any> {
     return BaseService.BaseFetch("PUT", route, body, additionalHeaders);
   }
 
@@ -23,7 +25,7 @@ export default class BaseService {
     route: string,
     body?: FormData,
     additionalHeaders?: Headers
-  ) {
+  ): Promise<any> {
     return BaseService.BaseFetch("DELETE", route, body, additionalHeaders);
   }
 
@@ -32,7 +34,7 @@ export default class BaseService {
     route: string,
     body?: FormData,
     additionalHeaders?: Headers
-  ) {
+  ): Promise<any> {
     if (!route.startsWith("/") && !route.startsWith("\\")) {
       route = "/" + route;
     }
@@ -66,7 +68,7 @@ export default class BaseService {
       console.log(`Status Code: ${status}\nError: ${body.error}`);
     }
 
-    if (status === 401 && !route.startsWith("/Account/GetLoggedInUser")) {
+    if (status === 401 && !route.startsWith(BaseService.GetUserStateEndpoint)) {
       window.location.reload();
     }
   }

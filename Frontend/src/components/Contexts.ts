@@ -1,7 +1,6 @@
 import { createContext } from "react";
-import UserData from "../models/UserData";
+import UserContextModel from "../models/UserContextModel";
 
-export const UserContext = createContext({
-  user: new UserData(undefined),
-  setUser: (newUser: UserData) => {},
-});
+export const UserContext = createContext<UserContextModel>(
+  new UserContextModel()
+);
