@@ -1,7 +1,7 @@
 import { LineSpinner } from "ldrs/react";
 import "ldrs/react/LineSpinner.css";
 import { useEffect, useState } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { UserContext } from "./components/Contexts";
 import "./css/App.css";
 import Layout from "./layout/Layout";
@@ -48,6 +48,7 @@ export default function App() {
               <Route index element={<Home />} />
               <Route path="example" element={<ExampleComponent />} />
               <Route path="example/:id" element={<ExampleComponent />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
         </BrowserRouter>
