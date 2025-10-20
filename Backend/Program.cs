@@ -78,7 +78,7 @@ public class Program
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.Cookie.SameSite = SameSiteMode.Strict;
                     options.EventsType = typeof(CustomCookieAuthenticationEvents);
-                    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+                    options.ExpireTimeSpan = TimeSpan.FromDays(1);
                     options.SlidingExpiration = true;
                 });
 

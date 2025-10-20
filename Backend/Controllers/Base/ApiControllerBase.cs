@@ -28,6 +28,6 @@ public class ApiControllerBase(ILogger logger) : ControllerBase
             error,
             statusCode,
             HttpContext.Request.Path);
-        return StatusCode(statusCode, new MessageActionResult(error));
+        return StatusCode(statusCode, new ErrorActionResult(error));
     }
 }
