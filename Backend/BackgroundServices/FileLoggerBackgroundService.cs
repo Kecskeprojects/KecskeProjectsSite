@@ -3,7 +3,7 @@ using Backend.Logging;
 
 namespace Backend.BackgroundServices;
 
-public class LogToFileBackgroundService(IConfiguration configuration) : BackgroundService
+public class FileLoggerBackgroundService(IConfiguration configuration) : BackgroundService
 {
     private readonly IConfiguration configuration = configuration;
 
@@ -23,7 +23,7 @@ public class LogToFileBackgroundService(IConfiguration configuration) : Backgrou
             Directory.CreateDirectory(logFolderPath);
         }
 
-        IEnumerable<Log> logs = LogStorage.GetConsumingEnumerable(stoppingToken);
+        IEnumerable<Log> logs = FileLoggerLogStorage.GetConsumingEnumerable(stoppingToken);
         foreach (Log msg in logs)
         {
             int maxTries = 3;
@@ -36,7 +36,7 @@ public class LogToFileBackgroundService(IConfiguration configuration) : Backgrou
                 }
                 catch (Exception ex)
                 {
-                    LogStorage.AddLog(new Log(LogLevel.Critical, ex.ToString(), this.ToString()));
+                    FileLoggerLogStorage.AddLog(new Log(LogLevel.Critical, ex.ToString(), this.ToString()));
                     await Task.Delay(100, stoppingToken); // Wait before retrying
                 }
             }

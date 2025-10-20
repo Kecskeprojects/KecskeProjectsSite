@@ -1,4 +1,4 @@
-﻿namespace Backend.Logging;
+﻿namespace Backend.Communication.Internal;
 
 public class FileLoggerConfiguration
 {

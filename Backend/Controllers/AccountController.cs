@@ -17,10 +17,9 @@ public class AccountController(
     AccountService accountService,
     AuthorizationCookieManager userManager,
     ILogger<AccountController> logger
-    ) : ApiControllerBase(userManager, logger)
+    ) : ApiControllerBase(logger)
 {
     private readonly AccountService accountService = accountService;
-    private readonly ILogger<AccountController> logger = logger;
 
     [Authorize]
     [ErrorLoggingFilter]
@@ -41,7 +40,7 @@ public class AccountController(
 
         if (result.Status <= DatabaseActionResultEnum.Success)
         {
-            logger.LogError("Registration successful for {UserName}, once an admin approves your user, you can log in.", form.UserName);
+            Logger.LogError("Registration successful for {UserName}, once an admin approves your user, you can log in.", form.UserName);
         }
 
         return result.Status switch
@@ -61,7 +60,7 @@ public class AccountController(
         {
             await accountService.UpdateLastLoginAsync(account.AccountId);
 
-            logger.LogInformation("User {UserName} logged in successfully.", account.UserName);
+            Logger.LogInformation("User {UserName} logged in successfully.", account.UserName);
             return Ok(account);
         }
 
@@ -74,7 +73,7 @@ public class AccountController(
     {
         LoggedInAccount? user = GetLoggedInUserFromCookie();
 
-        logger.LogInformation("User {UserName} is logging out.", user?.UserName);
+        Logger.LogInformation("User {UserName} is logging out.", user?.UserName);
         await userManager.SignOut(HttpContext);
 
         return MessageResult("You have been logged out!");

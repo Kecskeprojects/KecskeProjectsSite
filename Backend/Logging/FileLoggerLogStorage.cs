@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace Backend.Logging;
 
-public static class LogStorage
+public static class FileLoggerLogStorage
 {
     private static readonly BlockingCollection<Log> LogMessages = [];
 

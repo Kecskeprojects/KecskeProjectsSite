@@ -1,4 +1,5 @@
-﻿using Backend.Logging;
+﻿using Backend.Communication.Internal;
+using Backend.Logging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Configuration;
 

@@ -1,21 +1,17 @@
-﻿using Backend.Authentication;
-using Backend.Communication.Outgoing;
+﻿using Backend.Communication.Outgoing;
+using Backend.Tools;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Base;
 
-public class ApiControllerBase(
-    AuthorizationCookieManager userManager,
-    ILogger<ApiControllerBase> logger
-    ) : ControllerBase
+public class ApiControllerBase(ILogger logger) : ControllerBase
 {
-    protected readonly AuthorizationCookieManager userManager = userManager;
-    private readonly ILogger<ApiControllerBase> logger = logger;
+    protected ILogger Logger { get; } = logger;
 
     [NonAction]
     protected LoggedInAccount? GetLoggedInUserFromCookie()
     {
-        return userManager.GetLoggedInUser(HttpContext.User);
+        return ClaimsPrincipalTools.GetLoggedInUser(HttpContext.User);
     }
 
     [NonAction]
@@ -27,7 +23,7 @@ public class ApiControllerBase(
     [NonAction]
     protected IActionResult ErrorResult(int statusCode, string error)
     {
-        logger.LogError(
+        Logger.LogError(
             "An error occurred: {error}\nWith status code: {statusCode}\nWith request path: {Path}",
             error,
             statusCode,

@@ -15,7 +15,7 @@ public class Program
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddHostedService<LogToFileBackgroundService>();
+        builder.Services.AddHostedService<FileLoggerBackgroundService>();
         builder.Logging.ClearProviders();
         builder.Logging.AddFileLogger();
 

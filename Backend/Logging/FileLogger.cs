@@ -27,7 +27,7 @@ public class FileLogger(string name, Func<FileLoggerConfiguration> getCurrentCon
         FileLoggerConfiguration config = getCurrentConfig();
         if (config.EventId == 0 || config.EventId == eventId.Id)
         {
-            LogStorage.AddLog(new Log(logLevel, formatter(state, exception), name));
+            FileLoggerLogStorage.AddLog(new Log(logLevel, formatter(state, exception), name));
         }
     }
 }

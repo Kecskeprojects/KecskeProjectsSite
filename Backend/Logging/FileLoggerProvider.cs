@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Backend.Communication.Internal;
+using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 
 namespace Backend.Logging;

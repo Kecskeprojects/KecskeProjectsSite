@@ -9,6 +9,6 @@ public class LoginData
     public string UserName { get; set; } = null!;
 
     [Required]
-    [Length(6, 100, ErrorMessage = "Password has to be between 10-100 characters!")]
+    [Length(6, 100, ErrorMessage = "Password has to be between 6-100 characters!")]
     public string Password { get; set; } = null!;
 }
