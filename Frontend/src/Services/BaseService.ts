@@ -1,21 +1,38 @@
 export default class BaseService {
-  static async Get(route, additionalHeaders = {}) {
-    return BaseService.BaseFetch("GET", route, null, additionalHeaders);
+  static async Get(route: string, additionalHeaders?: Headers) {
+    return BaseService.BaseFetch("GET", route, undefined, additionalHeaders);
   }
 
-  static async Post(route, body = {}, additionalHeaders = {}) {
+  static async Post(
+    route: string,
+    body?: FormData,
+    additionalHeaders?: Headers
+  ) {
     return BaseService.BaseFetch("POST", route, body, additionalHeaders);
   }
 
-  static async Put(route, body = {}, additionalHeaders = {}) {
+  static async Put(
+    route: string,
+    body?: FormData,
+    additionalHeaders?: Headers
+  ) {
     return BaseService.BaseFetch("PUT", route, body, additionalHeaders);
   }
 
-  static async Delete(route, body = {}, additionalHeaders = {}) {
+  static async Delete(
+    route: string,
+    body?: FormData,
+    additionalHeaders?: Headers
+  ) {
     return BaseService.BaseFetch("DELETE", route, body, additionalHeaders);
   }
 
-  static async BaseFetch(method, route, body, additionalHeaders) {
+  static async BaseFetch(
+    method: string,
+    route: string,
+    body?: FormData,
+    additionalHeaders?: Headers
+  ) {
     if (!route.startsWith("/") && !route.startsWith("\\")) {
       route = "/" + route;
     }
@@ -25,9 +42,7 @@ export default class BaseService {
       {
         method: method,
         credentials: "include",
-        headers: new Headers({
-          ...additionalHeaders,
-        }),
+        headers: additionalHeaders,
         body: body,
       }
     );
@@ -46,7 +61,7 @@ export default class BaseService {
     return responseBody;
   }
 
-  static ErrorHandling(route, status, body) {
+  static ErrorHandling(route: string, status: number, body: any) {
     if (body.error) {
       console.log(`Status Code: ${status}\nError: ${body.error}`);
     }

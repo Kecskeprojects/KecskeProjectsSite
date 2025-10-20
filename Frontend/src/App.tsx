@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 import AccountService from "./services/AccountService";
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(new UserData(null));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

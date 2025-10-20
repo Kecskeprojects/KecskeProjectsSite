@@ -5,7 +5,7 @@ export default class AccountService {
     return BaseService.Get("/Account/GetLoggedInUser");
   }
 
-  static async Login(LoginData) {
+  static async Login(LoginData: FormData) {
     return BaseService.Post("/Account/Login", LoginData);
   }
 
@@ -13,7 +13,7 @@ export default class AccountService {
     return BaseService.Post("/Account/Logout");
   }
 
-  static async Register(RegisterData) {
+  static async Register(RegisterData: FormData) {
     return BaseService.Post("/Account/Register", RegisterData);
   }
 }

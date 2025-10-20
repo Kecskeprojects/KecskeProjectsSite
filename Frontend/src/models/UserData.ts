@@ -1,5 +1,9 @@
 export default class UserData {
-  constructor(userDataJson) {
+  AccountId: number;
+  UserName: string;
+  Roles: Array<string>;
+
+  constructor(userDataJson: any) {
     this.AccountId = 0;
     this.UserName = "";
     this.Roles = [];
@@ -11,11 +15,11 @@ export default class UserData {
     }
   }
 
-  isEmpty() {
+  isEmpty(): boolean {
     return !this.AccountId;
   }
 
-  hasRole(roleName) {
+  hasRole(roleName: string): boolean {
     return this.Roles?.includes(roleName);
   }
 }
