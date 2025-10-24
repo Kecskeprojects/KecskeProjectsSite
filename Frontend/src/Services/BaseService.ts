@@ -1,4 +1,5 @@
 export default class BaseService {
+  static BackendRoute: string | undefined = process.env.REACT_APP_BACKEND_URL;
   static GetUserStateEndpoint: string = "/Account/GetLoggedInUser";
 
   static async Get(route: string, additionalHeaders?: Headers): Promise<any> {
@@ -39,15 +40,12 @@ export default class BaseService {
       route = "/" + route;
     }
 
-    const response = await fetch(
-      `${process.env.REACT_APP_BACKEND_URL}${route}`,
-      {
-        method: method,
-        credentials: "include",
-        headers: additionalHeaders,
-        body: body,
-      }
-    );
+    const response = await fetch(`${BaseService.BackendRoute}${route}`, {
+      method: method,
+      credentials: "include",
+      headers: additionalHeaders,
+      body: body,
+    });
 
     const responseBody = await response.json();
 

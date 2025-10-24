@@ -21,7 +21,7 @@ export default function ExampleComponent() {
             <div key={index}>
               <video width={640} height={360} controls>
                 <source
-                  src={`${process.env.REACT_APP_BACKEND_URL}/File/GetSingle/${file.RelativeRoute}`}
+                  src={`${FileService.FileResponseEndpoint}/${file.RelativeRoute}`}
                   type="video/mp4"
                 />
               </video>
