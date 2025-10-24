@@ -3,6 +3,7 @@ import FileTypeEnum from "../enum/FileTypeEnum";
 export default class FileData {
   Type: FileTypeEnum;
   Extension: string;
+  IsFolder: boolean;
   Name: string;
   SizeMb: number;
   SizeGb: number;
@@ -16,6 +17,7 @@ export default class FileData {
     this.CreatedAt = data.createdAt;
     this.RelativeRoute = data.relativeRoute;
     this.Extension = data.extension;
+    this.IsFolder = data.isFolder;
 
     switch (data.extension) {
       case ".mp4":

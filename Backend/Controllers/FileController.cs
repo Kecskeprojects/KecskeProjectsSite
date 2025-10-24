@@ -29,6 +29,7 @@ public class FileController(
             Name = fileInfo.Name,
             SizeInMb = (fileInfo.Length / (1024 * 1024)).ToString(),
             SizeInGb = (fileInfo.Length / (1024 * 1024 * 1024)).ToString(),
+            IsFolder = fileInfo.Attributes.HasFlag(FileAttributes.Directory),
             CreatedAt = fileInfo.CreationTime,
             RelativeRoute = fileInfo.FullName.Replace("C:\\Users\\Kirsch_Adam_Peter\\Downloads\\", "")
         });

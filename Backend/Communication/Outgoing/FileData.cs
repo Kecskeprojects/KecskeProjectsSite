@@ -8,4 +8,5 @@ public class FileData
     public string SizeInGb { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public string RelativeRoute { get; set; } = null!;
+    public bool IsFolder { get; set; }
 }
