@@ -1,6 +1,7 @@
 ﻿using Backend.Communication.Outgoing;
 using Backend.Controllers.Base;
 using Backend.CustomAttributes;
+using Backend.Services;
 using Backend.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,7 @@ namespace Backend.Controllers;
 [Route("api/[controller]/[action]")]
 public class FileController(
     ILogger<AccountController> logger,
+    FileStorageService fileStorageService,
     IConfiguration configuration
     ) : ApiControllerBase(logger)
 {
@@ -23,10 +25,10 @@ public class FileController(
         string fullPath = FileTools.GetFullPath(baseFolder, folder);
 
         string[] directories = Directory.GetDirectories(fullPath);
-        List<FileData> fileDataList = FileTools.GetDirectoryData(baseFolder, directories);
+        List<FileData> fileDataList = fileStorageService.GetDirectoryData(baseFolder, directories);
 
         string[] files = Directory.GetFiles(fullPath);
-        fileDataList.AddRange(FileTools.GetFileData(baseFolder, files));
+        fileDataList.AddRange(fileStorageService.GetFileData(baseFolder, files));
 
         return Ok(fileDataList);
     }
@@ -43,7 +45,7 @@ public class FileController(
 
         foreach (string file in files)
         {
-            string fileHash = FileTools.GetHashedHexString(file);
+            string fileHash = HashTools.GetMD5HashHexString(file);
             if (clientHash.Equals(fileHash, StringComparison.OrdinalIgnoreCase))
             {
                 return PhysicalFile(file, "application/octet-stream", enableRangeProcessing: true);

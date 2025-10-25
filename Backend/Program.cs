@@ -3,7 +3,8 @@ using Backend.BackgroundServices;
 using Backend.Database;
 using Backend.Database.Repository;
 using Backend.Database.Service;
-using Backend.Tools.ExtensionTools;
+using Backend.Services;
+using Backend.Tools.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -76,7 +77,11 @@ public class Program
                 {
                     options.Cookie.HttpOnly = true;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+#if DEBUG
+                    options.Cookie.SameSite = SameSiteMode.None; //Chrome checks the Same Site mode of the cookie, otherwise the site cannot be tested in chrome
+#else
                     options.Cookie.SameSite = SameSiteMode.Strict;
+#endif
                     options.EventsType = typeof(CustomCookieAuthenticationEvents);
                     options.ExpireTimeSpan = TimeSpan.FromDays(1);
                     options.SlidingExpiration = true;
@@ -88,5 +93,6 @@ public class Program
         services.AddScoped(typeof(GenericRepository<>));
         services.AddScoped(typeof(GenericService<>));
         services.AddScoped<AccountService>();
+        services.AddScoped<FileStorageService>();
     }
 }

@@ -23,6 +23,7 @@ export default class FileData {
 
     switch (data.extension) {
       case ".mp4":
+      case ".mkv":
         this.Type = FileTypeEnum.Video;
         break;
       case ".png":
