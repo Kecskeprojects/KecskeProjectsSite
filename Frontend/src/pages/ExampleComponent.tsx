@@ -21,7 +21,9 @@ export default function ExampleComponent() {
             <div key={index}>
               <video width={640} height={360} controls>
                 <source
-                  src={`${FileService.FileResponseEndpoint}/${file.RelativeRoute}`}
+                  src={`${FileService.FileResponseEndpoint}/${
+                    file.Identifier ?? ""
+                  }?folder=${file.Folder ?? ""}`}
                   type="video/mp4"
                 />
               </video>

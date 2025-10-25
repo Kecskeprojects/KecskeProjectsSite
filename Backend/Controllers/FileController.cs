@@ -1,6 +1,7 @@
 ﻿using Backend.Communication.Outgoing;
 using Backend.Controllers.Base;
 using Backend.CustomAttributes;
+using Backend.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,51 +17,39 @@ public class FileController(
     [Authorize]
     [ErrorLoggingFilter]
     [HttpGet]
-    public IActionResult GetList(string? folder)
+    public IActionResult GetList([FromQuery] string? folder)
     {
-        string? baseRoute = configuration.GetValue<string>("BaseFileRoute");
-        if(string.IsNullOrWhiteSpace(baseRoute))
-        {
-            throw new InvalidOperationException("Base location for files is not configured.");
-        }
+        string? baseFolder = configuration.GetValue<string>("BaseFileRoute");
+        string fullPath = FileTools.GetFullPath(baseFolder, folder);
 
-        string route = baseRoute + (string.IsNullOrWhiteSpace(folder) ? folder : null);
-        if(Directory.Exists(route) == false)
-        {
-            return ErrorResult(StatusCodes.Status404NotFound, "Specified location doesn't exist");
-        };
-        
-        string[] files = Directory.GetFiles(route);
+        string[] directories = Directory.GetDirectories(fullPath);
+        List<FileData> fileDataList = FileTools.GetDirectoryData(baseFolder, directories);
 
-        IEnumerable<FileInfo> fileInfos = files
-            .Select(filePath => new FileInfo(filePath))
-            .Where(info => !info.Attributes.HasFlag(FileAttributes.System)
-                        && !info.Attributes.HasFlag(FileAttributes.Hidden));
-        IEnumerable<FileData> fileDataList = fileInfos.Select(fileInfo => new FileData
-        {
-            Extension = fileInfo.Extension,
-            Name = fileInfo.Name,
-            SizeInMb = (fileInfo.Length / (1024 * 1024)).ToString(),
-            SizeInGb = (fileInfo.Length / (1024 * 1024 * 1024)).ToString(),
-            IsFolder = fileInfo.Attributes.HasFlag(FileAttributes.Directory),
-            CreatedAt = fileInfo.CreationTime,
-            RelativeRoute = fileInfo.FullName.Replace(baseRoute + "\\", "")
-        });
+        string[] files = Directory.GetFiles(fullPath);
+        fileDataList.AddRange(FileTools.GetFileData(baseFolder, files));
 
         return Ok(fileDataList);
     }
 
     [Authorize]
     [ErrorLoggingFilter]
-    [HttpGet("{id}")]
-    public IActionResult GetSingle(string id)
+    [HttpGet("{clientHash}")]
+    public IActionResult GetSingle(string clientHash, [FromQuery] string? folder)
     {
-        string? baseRoute = configuration.GetValue<string>("BaseFileRoute");
-        if(string.IsNullOrWhiteSpace(baseRoute))
+        string? baseFolder = configuration.GetValue<string>("BaseFileRoute");
+        string fullPath = FileTools.GetFullPath(baseFolder, folder);
+
+        string[] files = Directory.GetFiles(fullPath);
+
+        foreach (string file in files)
         {
-            throw new InvalidOperationException("Base location for files is not configured.");
+            string fileHash = FileTools.GetHashedHexString(file);
+            if (clientHash.Equals(fileHash, StringComparison.OrdinalIgnoreCase))
+            {
+                return PhysicalFile(file, "application/octet-stream", enableRangeProcessing: true);
+            }
         }
 
-        return PhysicalFile($"{baseRoute}\\{id}", "application/octet-stream", enableRangeProcessing: true);
+        return ErrorResult(StatusCodes.Status404NotFound, "File not found");
     }
 }

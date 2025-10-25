@@ -1,6 +1,5 @@
-import { LineSpinner } from "ldrs/react";
-import "ldrs/react/LineSpinner.css";
 import { useEffect, useState } from "react";
+import { ImSpinner2 } from "react-icons/im";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { UserContext } from "./components/Contexts";
 import "./css/App.css";
@@ -26,13 +25,16 @@ export default function App() {
         setLoading(false);
       })
       .catch((error) => console.log(error));
-  }, [user]);
+  }, []);
 
   if (loading) {
     //https://uiball.com/ldrs/
     return (
-      <div style={{ margin: "200px auto auto auto", width: "min-content" }}>
-        <LineSpinner size={500} color="rgb(0,0,0)" speed={1} stroke={20} />
+      <div
+        className="animate-spin"
+        style={{ margin: "200px auto auto auto", width: "min-content" }}
+      >
+        <ImSpinner2 className="animate-spin" size={500} color="rgb(0,0,0)" />
       </div>
     );
   }

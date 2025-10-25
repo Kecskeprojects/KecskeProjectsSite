@@ -2,11 +2,12 @@
 
 public class FileData
 {
-    public string Extension { get; set; } = null!;
+    public string? Extension { get; set; }
     public string Name { get; set; } = null!;
-    public string SizeInMb { get; set; } = null!;
-    public string SizeInGb { get; set; } = null!;
-    public DateTime CreatedAt { get; set; }
-    public string RelativeRoute { get; set; } = null!;
+    public decimal SizeInMb { get; set; }
+    public decimal SizeInGb { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
+    public string Identifier { get; set; } = null!;
     public bool IsFolder { get; set; }
+    public string? Folder { get; set; }
 }

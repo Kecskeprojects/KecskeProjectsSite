@@ -5,19 +5,21 @@ export default class FileData {
   Extension: string;
   IsFolder: boolean;
   Name: string;
-  SizeMb: number;
-  SizeGb: number;
-  CreatedAt: Date;
-  RelativeRoute: string; //Todo: This has to be modified to contain as little information on folder structure as possible, multiple variables, naming, etc.
+  SizeInMb: number;
+  SizeInGb: number;
+  CreatedAtUtc: Date;
+  Identifier: string;
+  Folder: string;
 
   constructor(data: any) {
     this.Name = data.name;
-    this.SizeMb = data.sizeMb;
-    this.SizeGb = data.sizeMb / 1024.0;
-    this.CreatedAt = data.createdAt;
-    this.RelativeRoute = data.relativeRoute;
+    this.SizeInMb = data.sizeInMb;
+    this.SizeInGb = data.sizeInGb;
+    this.CreatedAtUtc = data.createdAtUtc;
+    this.Identifier = data.identifier;
     this.Extension = data.extension;
     this.IsFolder = data.isFolder;
+    this.Folder = data.folder;
 
     switch (data.extension) {
       case ".mp4":

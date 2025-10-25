@@ -3,7 +3,7 @@ using Backend.Logging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Configuration;
 
-namespace Backend.Tools.ExtensionTools;
+namespace Backend.Tools.Extensions;
 public static class FileLoggerExtensions
 {
     public static ILoggingBuilder AddFileLogger(this ILoggingBuilder builder)
