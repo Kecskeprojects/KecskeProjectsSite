@@ -9,15 +9,28 @@ namespace Backend.Controllers;
 [ApiController]
 [Route("api/[controller]/[action]")]
 public class FileController(
-    ILogger<AccountController> logger
+    ILogger<AccountController> logger,
+    IConfiguration configuration
     ) : ApiControllerBase(logger)
 {
     [Authorize]
     [ErrorLoggingFilter]
     [HttpGet]
-    public IActionResult GetList()
+    public IActionResult GetList(string? folder)
     {
-        string[] files = Directory.GetFiles("C:\\Users\\Kirsch_Adam_Peter\\Downloads");
+        string? baseRoute = configuration.GetValue<string>("BaseFileRoute");
+        if(string.IsNullOrWhiteSpace(baseRoute))
+        {
+            throw new InvalidOperationException("Base location for files is not configured.");
+        }
+
+        string route = baseRoute + (string.IsNullOrWhiteSpace(folder) ? folder : null);
+        if(Directory.Exists(route) == false)
+        {
+            return ErrorResult(StatusCodes.Status404NotFound, "Specified location doesn't exist");
+        };
+        
+        string[] files = Directory.GetFiles(route);
 
         IEnumerable<FileInfo> fileInfos = files
             .Select(filePath => new FileInfo(filePath))
@@ -31,7 +44,7 @@ public class FileController(
             SizeInGb = (fileInfo.Length / (1024 * 1024 * 1024)).ToString(),
             IsFolder = fileInfo.Attributes.HasFlag(FileAttributes.Directory),
             CreatedAt = fileInfo.CreationTime,
-            RelativeRoute = fileInfo.FullName.Replace("C:\\Users\\Kirsch_Adam_Peter\\Downloads\\", "")
+            RelativeRoute = fileInfo.FullName.Replace(baseRoute + "\\", "")
         });
 
         return Ok(fileDataList);
@@ -42,6 +55,12 @@ public class FileController(
     [HttpGet("{id}")]
     public IActionResult GetSingle(string id)
     {
-        return PhysicalFile($"C:\\Users\\Kirsch_Adam_Peter\\Downloads\\{id}", "application/octet-stream", enableRangeProcessing: true);
+        string? baseRoute = configuration.GetValue<string>("BaseFileRoute");
+        if(string.IsNullOrWhiteSpace(baseRoute))
+        {
+            throw new InvalidOperationException("Base location for files is not configured.");
+        }
+
+        return PhysicalFile($"{baseRoute}\\{id}", "application/octet-stream", enableRangeProcessing: true);
     }
 }
