@@ -1,5 +1,5 @@
 export default class BaseService {
-  static BackendRoute: string | undefined = process.env.REACT_APP_BACKEND_URL;
+  static BackendRoute: string | undefined = import.meta.env.VITE_BACKEND_URL;
   static GetUserStateEndpoint: string = "/Account/GetLoggedInUser";
 
   static async Get(route: string, additionalHeaders?: Headers): Promise<any> {
@@ -49,8 +49,7 @@ export default class BaseService {
 
     const responseBody = await response.json();
 
-    if (process.env.NODE_ENV === "development") {
-      console.log(response.status);
+    if (import.meta.env.MODE !== "production") {
       console.log(responseBody);
     }
 
@@ -62,6 +61,7 @@ export default class BaseService {
   }
 
   static ErrorHandling(route: string, status: number, body: any) {
+    //Todo: Proper user friendly error handling using floating popups or something
     if (body.error) {
       console.log(`Status Code: ${status}\nError: ${body.error}`);
     }

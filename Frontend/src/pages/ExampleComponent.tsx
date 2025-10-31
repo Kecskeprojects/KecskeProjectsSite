@@ -8,7 +8,6 @@ export default function ExampleComponent() {
 
   useEffect(() => {
     FileService.GetFileData().then((data) => {
-      console.log(data);
       setFiles(data);
     });
   }, []);

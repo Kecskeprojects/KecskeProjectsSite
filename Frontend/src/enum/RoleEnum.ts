@@ -1,5 +1,5 @@
-const enum RoleEnum {
-  Admin = "Admin",
-}
+const RoleEnum = {
+  Admin: "Admin",
+};
 
 export default RoleEnum;

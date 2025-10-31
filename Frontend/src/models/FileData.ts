@@ -1,7 +1,7 @@
 import FileTypeEnum from "../enum/FileTypeEnum";
 
 export default class FileData {
-  Type: FileTypeEnum;
+  Type: string;
   Extension: string;
   IsFolder: boolean;
   Name: string;

@@ -28,7 +28,6 @@ export default function App() {
   }, []);
 
   if (loading) {
-    //https://uiball.com/ldrs/
     return (
       <div
         className="animate-spin"

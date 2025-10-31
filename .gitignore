@@ -10,5 +10,5 @@ appsettings*.json
 *.dbmdl
 
 node_modules/
-build/
+dist/
 .env
