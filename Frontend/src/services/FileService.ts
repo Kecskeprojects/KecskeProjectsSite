@@ -3,14 +3,22 @@ import ConvertTools from "../tools/ConvertTools";
 import BaseService from "./BaseService";
 
 export default class FileService {
-  static FileResponseEndpoint: string = `${BaseService.BackendRoute}/File/GetSingle`;
+  static GetSingleFileEndpoint(
+    identifier: string | undefined,
+    folder: string | undefined
+  ) {
+    identifier = identifier ? identifier : "";
+    folder = folder ? folder : "";
+
+    return `${BaseService.BackendRoute}/File/GetSingle/${identifier}?folder=${folder}`;
+  }
 
   static async GetFileData(
     folder?: string | undefined
   ): Promise<Array<FileData>> {
-    const rawDataList = await BaseService.Get(
-      `/File/GetList?folder=${folder ?? ""}`
-    );
+    folder = folder ? folder : "";
+
+    const rawDataList = await BaseService.Get(`/File/GetList?folder=${folder}`);
     return ConvertTools.ConvertListToType(FileData, rawDataList);
   }
 }
