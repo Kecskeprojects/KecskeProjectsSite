@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ImSpinner2 } from "react-icons/im";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { UserContext } from "./components/Contexts";
+import ProtectedRoute from "./components/ProtectedRoute";
 import "./css/App.css";
 import Layout from "./layout/Layout";
 import UserData from "./models/UserData";
@@ -47,8 +48,24 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
-              <Route path="example" element={<ExampleComponent />} />
-              <Route path="example/:id" element={<ExampleComponent />} />
+              <Route
+                path="example"
+                element={
+                  <ProtectedRoute
+                    roles={["Admin"]}
+                    element={<ExampleComponent />}
+                  />
+                }
+              />
+              <Route
+                path="example/:id"
+                element={
+                  <ProtectedRoute
+                    roles={["Admin"]}
+                    element={<ExampleComponent />}
+                  />
+                }
+              />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
