@@ -6,7 +6,7 @@ export default class FileService {
   static GetSingleFileEndpoint(
     identifier: string | undefined,
     folder: string | undefined
-  ) {
+  ): string {
     identifier = identifier ? identifier : "";
     folder = folder ? folder : "";
 

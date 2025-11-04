@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { ImSpinner2 } from "react-icons/im";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { UserContext } from "./components/Contexts";
-import ProtectedRoute from "./components/ProtectedRoute";
+import LoginChecker from "./components/LoginChecker";
+import RoleChecker from "./components/RoleChecker";
 import "./css/App.css";
 import Layout from "./layout/Layout";
 import UserData from "./models/UserData";
@@ -11,7 +12,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import AccountService from "./services/AccountService";
 
-export default function App() {
+export default function App(): JSX.Element {
   const [user, setUser] = useState<UserData>();
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -30,34 +31,28 @@ export default function App() {
 
   if (loading) {
     return (
-      <div
-        className="animate-spin"
-        style={{ margin: "200px auto auto auto", width: "min-content" }}
-      >
-        <ImSpinner2 className="animate-spin" size={500} color="rgb(0,0,0)" />
-      </div>
+      <ImSpinner2 className="animate-spin" size={"50vh"} color="rgb(0,0,0)" />
     );
   }
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
-      {!user?.AccountId ? (
-        <Login />
-      ) : (
-        <BrowserRouter>
-          <Routes>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route element={<LoginChecker />}>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
-              <Route element={<ProtectedRoute roles={["Admin"]} />}>
+              <Route element={<RoleChecker roles={["Admin"]} />}>
                 <Route path="example" element={<ExampleComponent />}>
                   <Route path=":id" element={<ExampleComponent />} />
                 </Route>
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
-          </Routes>
-        </BrowserRouter>
-      )}
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </UserContext.Provider>
   );
 }

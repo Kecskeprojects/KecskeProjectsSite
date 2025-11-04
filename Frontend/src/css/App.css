@@ -4,6 +4,7 @@
 
 .animate-spin {
   animation: spin 3s infinite linear;
+  margin: auto;
 }
 
 @keyframes spin {

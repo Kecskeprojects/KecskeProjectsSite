@@ -60,7 +60,7 @@ export default class BaseService {
     return responseBody;
   }
 
-  static ErrorHandling(route: string, status: number, body: any) {
+  static ErrorHandling(route: string, status: number, body: any): void {
     //Todo: Proper user friendly error handling using floating popups or something
     if (body.error) {
       console.log(`Status Code: ${status}\nError: ${body.error}`);
@@ -70,7 +70,7 @@ export default class BaseService {
       (status === 401 || status === 403) &&
       !route.startsWith(BaseService.GetUserStateEndpoint)
     ) {
-      window.location.replace("/");
+      window.location.replace("/login");
     }
   }
 }

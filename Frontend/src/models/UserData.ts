@@ -11,10 +11,6 @@ export default class UserData {
     }
   }
 
-  isEmpty(): boolean {
-    return !this.AccountId;
-  }
-
   hasRole(roleName: string): boolean {
     return this.Roles ? this.Roles.includes(roleName) : false;
   }

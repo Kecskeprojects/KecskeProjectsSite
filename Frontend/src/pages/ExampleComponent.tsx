@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { useParams } from "react-router-dom";
 import FileTypeEnum from "../enum/FileTypeEnum";
 import FileData from "../models/FileData";
 import FileService from "../services/FileService";
 
-export default function ExampleComponent() {
+export default function ExampleComponent(): JSX.Element {
   const { id } = useParams();
   const [files, setFiles] = useState<Array<FileData>>();
 

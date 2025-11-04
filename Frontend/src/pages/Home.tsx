@@ -1,9 +1,9 @@
-import { useContext } from "react";
+import { useContext, type JSX } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../components/Contexts";
 import RoleEnum from "../enum/RoleEnum";
 
-export default function Home() {
+export default function Home(): JSX.Element {
   const context = useContext(UserContext);
 
   return (
