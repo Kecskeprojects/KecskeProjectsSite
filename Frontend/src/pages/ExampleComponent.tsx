@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import FileTypeEnum from "../enum/FileTypeEnum";
 import FileData from "../models/FileData";
 import FileService from "../services/FileService";
 
 export default function ExampleComponent() {
+  const { id } = useParams();
   const [files, setFiles] = useState<Array<FileData>>();
 
   useEffect(() => {
@@ -14,6 +16,7 @@ export default function ExampleComponent() {
 
   return (
     <div>
+      <div>ID: {id}</div>
       {files?.map((file, index) => {
         if (file.Type == FileTypeEnum.Video) {
           return (

@@ -48,24 +48,11 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
-              <Route
-                path="example"
-                element={
-                  <ProtectedRoute
-                    roles={["Admin"]}
-                    element={<ExampleComponent />}
-                  />
-                }
-              />
-              <Route
-                path="example/:id"
-                element={
-                  <ProtectedRoute
-                    roles={["Admin"]}
-                    element={<ExampleComponent />}
-                  />
-                }
-              />
+              <Route element={<ProtectedRoute roles={["Admin"]} />}>
+                <Route path="example" element={<ExampleComponent />}>
+                  <Route path=":id" element={<ExampleComponent />} />
+                </Route>
+              </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
