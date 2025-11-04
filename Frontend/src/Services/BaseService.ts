@@ -66,8 +66,11 @@ export default class BaseService {
       console.log(`Status Code: ${status}\nError: ${body.error}`);
     }
 
-    if (status === 401 && !route.startsWith(BaseService.GetUserStateEndpoint)) {
-      window.location.reload();
+    if (
+      (status === 401 || status === 403) &&
+      !route.startsWith(BaseService.GetUserStateEndpoint)
+    ) {
+      window.location.replace("/");
     }
   }
 }
