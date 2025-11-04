@@ -36,16 +36,11 @@ public class AccountController(
     [HttpPost]
     public async Task<IActionResult> Register([FromForm] RegisterData form)
     {
-        DatabaseActionResult<int> result = await accountService.RegisterAsync(form);
-
-        if (result.Status <= DatabaseActionResultEnum.Success)
-        {
-            Logger.LogError("Registration successful for {UserName}, once an admin approves your user, you can log in.", form.UserName);
-        }
+        DatabaseActionResult<string?> result = await accountService.RegisterAsync(form);
 
         return result.Status switch
         {
-            DatabaseActionResultEnum.Success => MessageResult("Registration successful, once an admin approves your user, you can log in."),
+            DatabaseActionResultEnum.Success => Ok(result.Data),
             DatabaseActionResultEnum.AlreadyExists => ErrorResult(StatusCodes.Status409Conflict, "Username already exists."),
             _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while registering.")
         };
@@ -78,4 +73,21 @@ public class AccountController(
 
         return MessageResult("You have been logged out!");
     }
+
+    [ErrorLoggingFilter]
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword([FromForm] ResetPasswordData form)
+    {
+        DatabaseActionResult<int> result = await accountService.ResetPasswordAsync(form);
+
+        return result.Status switch
+        {
+            DatabaseActionResultEnum.Success => Ok("Your password has been reset!"),
+            DatabaseActionResultEnum.NotFound => ErrorResult(StatusCodes.Status428PreconditionRequired, "User with that name doesn't exist."),
+            DatabaseActionResultEnum.DifferingHash => ErrorResult(StatusCodes.Status401Unauthorized, "Key is incorrect."),
+            _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while resetting password.")
+        };
+    }
+
+    //Todo: Add endpoint generate new secret key by user ID (admin only), and a listing to get a list of users for admin purposes
 }

@@ -36,6 +36,7 @@ public partial class KecskeDatabaseContext : DbContext
                 .HasDefaultValueSql("(getutcdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.Password).HasMaxLength(84);
+            entity.Property(e => e.SecretKey).HasMaxLength(84);
             entity.Property(e => e.UserName).HasMaxLength(200);
         });
 

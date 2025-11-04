@@ -9,6 +9,8 @@ public partial class Account
 
     public byte[] Password { get; set; } = null!;
 
+    public byte[] SecretKey { get; set; } = null!;
+
     public string UserName { get; set; } = null!;
 
     public bool IsRegistrationApproved { get; set; }

@@ -25,7 +25,7 @@ public class FileStorageService
                 SizeInGb = 0,
                 IsFolder = true,
                 CreatedAtUtc = directoryInfo.CreationTime.ToUniversalTime(),
-                Identifier = HashTools.GetMD5HashHexString(directoryInfo.FullName),
+                Identifier = EncryptionTools.GetMD5HashHexString(directoryInfo.FullName),
                 Folder = FileTools.GetPathRelativeToBaseFolder(baseFolder, directoryInfo.Parent?.FullName)
             });
         }
@@ -54,7 +54,7 @@ public class FileStorageService
                 SizeInGb = Math.Round(fileInfo.Length / (1024.0m * 1024.0m * 1024.0m), 3),
                 IsFolder = false,
                 CreatedAtUtc = fileInfo.CreationTime.ToUniversalTime(),
-                Identifier = HashTools.GetMD5HashHexString(fileInfo.FullName),
+                Identifier = EncryptionTools.GetMD5HashHexString(fileInfo.FullName),
                 Folder = FileTools.GetPathRelativeToBaseFolder(baseFolder, fileInfo.DirectoryName)
             });
         }

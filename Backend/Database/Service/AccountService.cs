@@ -9,13 +9,13 @@ namespace Backend.Database.Service;
 
 public class AccountService(GenericRepository<Account> repository) : GenericService<Account>(repository)
 {
-    public async Task<DatabaseActionResult<int>> RegisterAsync(RegisterData form)
+    public async Task<DatabaseActionResult<string?>> RegisterAsync(RegisterData form)
     {
         string username = form.UserName.Trim();
         bool usernameAlreadyRegistered = await repository.ExistsAsync(a => a.UserName.Contains(username));
         if (usernameAlreadyRegistered)
         {
-            return CreateResult(DatabaseActionResultEnum.AlreadyExists, 0);
+            return CreateResult(DatabaseActionResultEnum.AlreadyExists, (string?)null);
         }
 
         Account account = new()
@@ -23,9 +23,20 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
             UserName = form.UserName.Trim()
         };
 
-        account.Password = HashTools.GetHashBytes(account, form.Password);
+        account.Password = EncryptionTools.GetHashBytes(account, form.Password);
 
-        return await AddAsync(account);
+        //Secret key used to reset password
+        string uuid = Guid.NewGuid().ToString();
+        account.SecretKey = EncryptionTools.GetHashBytes(account, uuid);
+        account.Password = EncryptionTools.GetHashBytes(account, form.Password);
+
+        int result = await repository.AddAsync(account);
+
+        return CreateResult(
+            result > 0
+                ? DatabaseActionResultEnum.Success
+                : DatabaseActionResultEnum.Failure,
+            uuid);
     }
 
     public async Task<DatabaseActionResult<int>> UpdateLastLoginAsync(int accountId)
@@ -37,6 +48,24 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
         }
         account.LastLoginOnUtc = DateTime.UtcNow;
 
+        return await SaveChangesAsync();
+    }
+
+    internal async Task<DatabaseActionResult<int>> ResetPasswordAsync(ResetPasswordData form)
+    {
+        string username = form.UserName.Trim();
+        Account? account = await repository.FirstOrDefaultAsync(a => a.UserName.Equals(username));
+        if (account is null)
+        {
+            return CreateResult(DatabaseActionResultEnum.NotFound, 0);
+        }
+
+        if(!EncryptionTools.VerifyPassword(account, form.SecretKey, account.SecretKey))
+        {
+            return CreateResult(DatabaseActionResultEnum.DifferingHash, 0);
+        }
+
+        account.Password = EncryptionTools.GetHashBytes(account, form.Password);
         return await SaveChangesAsync();
     }
 }

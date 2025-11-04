@@ -7,6 +7,7 @@ public enum DatabaseActionResultEnum
     PartialSuccess = 2,
     NotFound = 3,
     AlreadyExists = 4,
+    DifferingHash = 5,
 
     FailureWithSpecialMessage = 100,
 }

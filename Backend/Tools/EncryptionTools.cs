@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Backend.Tools;
 
-public static class HashTools
+public static class EncryptionTools
 {
     public static byte[] GetHashBytes(Account account, string password)
     {

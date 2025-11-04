@@ -45,7 +45,7 @@ public class FileController(
 
         foreach (string file in files)
         {
-            string fileHash = HashTools.GetMD5HashHexString(file);
+            string fileHash = EncryptionTools.GetMD5HashHexString(file);
             if (clientHash.Equals(fileHash, StringComparison.OrdinalIgnoreCase))
             {
                 return PhysicalFile(file, "application/octet-stream", enableRangeProcessing: true);
