@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Backend.Controllers;
 
 [ApiController]
+[ErrorLoggingFilter]
 [Route("api/[controller]/[action]")]
 public class AccountController(
     AccountService accountService,
@@ -22,7 +23,6 @@ public class AccountController(
     private readonly AccountService accountService = accountService;
 
     [Authorize]
-    [ErrorLoggingFilter]
     [HttpGet]
     public IActionResult GetLoggedInUser()
     {
@@ -32,7 +32,6 @@ public class AccountController(
             : ErrorResult(StatusCodes.Status401Unauthorized, "You are not logged in!");
     }
 
-    [ErrorLoggingFilter]
     [HttpPost]
     public async Task<IActionResult> Register([FromForm] RegisterData form)
     {
@@ -46,7 +45,6 @@ public class AccountController(
         };
     }
 
-    [ErrorLoggingFilter]
     [HttpPost]
     public async Task<IActionResult> Login([FromForm] LoginData form)
     {
@@ -62,7 +60,6 @@ public class AccountController(
         return ErrorResult(StatusCodes.Status401Unauthorized, "Username or Password incorrect!");
     }
 
-    [ErrorLoggingFilter]
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
@@ -74,7 +71,6 @@ public class AccountController(
         return MessageResult("You have been logged out!");
     }
 
-    [ErrorLoggingFilter]
     [HttpPost]
     public async Task<IActionResult> ResetPassword([FromForm] ResetPasswordData form)
     {

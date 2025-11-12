@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Backend.CustomAttributes;
 
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true)]
 public class ErrorLoggingFilterAttribute : ExceptionFilterAttribute
 {
     public override void OnException(ExceptionContext context)

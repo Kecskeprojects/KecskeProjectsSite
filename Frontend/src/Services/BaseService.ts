@@ -1,15 +1,20 @@
+import axios, { AxiosHeaders } from "axios";
+
 export default class BaseService {
   static BackendRoute: string | undefined = import.meta.env.VITE_BACKEND_URL;
   static GetUserStateEndpoint: string = "/Account/GetLoggedInUser";
 
-  static async Get(route: string, additionalHeaders?: Headers): Promise<any> {
+  static async Get(
+    route: string,
+    additionalHeaders?: AxiosHeaders
+  ): Promise<any> {
     return BaseService.BaseFetch("GET", route, undefined, additionalHeaders);
   }
 
   static async Post(
     route: string,
     body?: FormData,
-    additionalHeaders?: Headers
+    additionalHeaders?: AxiosHeaders
   ): Promise<any> {
     return BaseService.BaseFetch("POST", route, body, additionalHeaders);
   }
@@ -17,7 +22,7 @@ export default class BaseService {
   static async Put(
     route: string,
     body?: FormData,
-    additionalHeaders?: Headers
+    additionalHeaders?: AxiosHeaders
   ): Promise<any> {
     return BaseService.BaseFetch("PUT", route, body, additionalHeaders);
   }
@@ -25,7 +30,7 @@ export default class BaseService {
   static async Delete(
     route: string,
     body?: FormData,
-    additionalHeaders?: Headers
+    additionalHeaders?: AxiosHeaders
   ): Promise<any> {
     return BaseService.BaseFetch("DELETE", route, body, additionalHeaders);
   }
@@ -34,20 +39,30 @@ export default class BaseService {
     method: string,
     route: string,
     body?: FormData,
-    additionalHeaders?: Headers
+    additionalHeaders?: AxiosHeaders
   ): Promise<any> {
     if (!route.startsWith("/") && !route.startsWith("\\")) {
       route = "/" + route;
     }
 
-    const response = await fetch(`${BaseService.BackendRoute}${route}`, {
+    const response = await axios(`${BaseService.BackendRoute}${route}`, {
       method: method,
-      credentials: "include",
+      withCredentials: import.meta.env.MODE !== "production",
       headers: additionalHeaders,
-      body: body,
+      data: body,
+      validateStatus: () => true, //Disable throwing errors at 3xx, 4xx and 5xx status codes
+      //Todo: Perhaps errors should be handled the axios way
     });
+    // const response = await fetch(`${BaseService.BackendRoute}${route}`, {
+    //   method: method,
+    //   credentials: "include",
+    //   headers: additionalHeaders,
+    //   body: body,
+    // });
 
-    const responseBody = await response.json();
+    //const responseBody = await response.json();
+
+    const responseBody = response.data;
 
     if (import.meta.env.MODE !== "production") {
       console.log(responseBody);
