@@ -5,10 +5,12 @@ using Backend.Services;
 using Backend.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 
 namespace Backend.Controllers;
 
 [ApiController]
+[ErrorLoggingFilter]
 [Route("api/[controller]/[action]")]
 public class FileController(
     ILogger<AccountController> logger,
@@ -17,7 +19,6 @@ public class FileController(
     ) : ApiControllerBase(logger)
 {
     [Authorize]
-    [ErrorLoggingFilter]
     [HttpGet]
     public IActionResult GetList([FromQuery] string? folder)
     {
@@ -34,7 +35,6 @@ public class FileController(
     }
 
     [Authorize]
-    [ErrorLoggingFilter]
     [HttpGet("{clientHash}")]
     public IActionResult GetSingle(string clientHash, [FromQuery] string? folder)
     {
@@ -52,6 +52,28 @@ public class FileController(
             }
         }
 
-        return ErrorResult(StatusCodes.Status404NotFound, "File not found");
+        return ErrorResult(StatusCodes.Status500InternalServerError, "File not found");
+    }
+
+    //Todo: Use folder parameter
+    [Authorize]
+    [HttpPost]
+    [DisableFormValueModelBinding]
+    public async Task<IActionResult> Upload([FromQuery] string? folder)
+    {
+        if (!Request.ContentType?.StartsWith("multipart/form-data") ?? true)
+        {
+            return BadRequest("The request does not contain valid multipart form data.");
+        }
+
+        string? boundary = HeaderUtilities.RemoveQuotes(MediaTypeHeaderValue.Parse(Request.ContentType).Boundary).Value;
+        if (string.IsNullOrWhiteSpace(boundary))
+        {
+            return BadRequest("Missing boundary in multipart form data.");
+        }
+
+        CancellationToken cancellationToken = HttpContext.RequestAborted;
+        string filePath = await fileStorageService.SaveViaMultipartReaderAsync(boundary, Request.Body, cancellationToken);
+        return Ok("Saved file at " + filePath);
     }
 }

@@ -35,6 +35,7 @@ export default class BaseService {
     return BaseService.BaseFetch("DELETE", route, body, additionalHeaders);
   }
 
+  //Todo: Sanitize query parts centrally
   static async BaseFetch(
     method: string,
     route: string,
@@ -53,14 +54,6 @@ export default class BaseService {
       validateStatus: () => true, //Disable throwing errors at 3xx, 4xx and 5xx status codes
       //Todo: Perhaps errors should be handled the axios way
     });
-    // const response = await fetch(`${BaseService.BackendRoute}${route}`, {
-    //   method: method,
-    //   credentials: "include",
-    //   headers: additionalHeaders,
-    //   body: body,
-    // });
-
-    //const responseBody = await response.json();
 
     const responseBody = response.data;
 
