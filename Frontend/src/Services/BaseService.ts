@@ -36,6 +36,7 @@ export default class BaseService {
   }
 
   //Todo: Sanitize query parts centrally
+  //Todo: implement onprogress and ondownload
   static async BaseFetch(
     method: string,
     route: string,
