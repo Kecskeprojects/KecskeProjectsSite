@@ -24,6 +24,7 @@ export default class FileService {
   }
 
   //Todo: Add additional file parameters to differentiate file uploads
+  //Todo: Figure out what response is actually needed
   static async Upload(
     fileData: FormData,
     folder: string | undefined
