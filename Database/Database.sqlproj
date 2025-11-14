@@ -60,6 +60,7 @@
     <Folder Include="PostDeployment" />
     <Folder Include="Triggers" />
     <Folder Include="PostDeployment\TestInserts" />
+    <Folder Include="Patches" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="PostDeployment\PostDeployment.sql" />
