@@ -57,7 +57,7 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
     #region Add
     public async Task<int> AddAsync(TEntity item, bool saveChanges = true)
     {
-        context.Set<TEntity>().Add(item);
+        _ = context.Set<TEntity>().Add(item);
 
         return saveChanges ? await context.SaveChangesAsync() : 0;
     }
@@ -73,7 +73,7 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
     #region Remove
     public async Task<int> RemoveAsync(TEntity item, bool saveChanges = true)
     {
-        context.Set<TEntity>().Remove(item);
+        _ = context.Set<TEntity>().Remove(item);
 
         return saveChanges ? await context.SaveChangesAsync() : 0;
     }
@@ -89,7 +89,7 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
     #region Update
     public async Task<int> UpdateAsync(TEntity item, bool saveChanges = true)
     {
-        context.Set<TEntity>().Update(item);
+        _ = context.Set<TEntity>().Update(item);
 
         return saveChanges ? await context.SaveChangesAsync() : 0;
     }

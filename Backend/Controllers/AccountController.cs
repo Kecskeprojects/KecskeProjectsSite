@@ -51,7 +51,7 @@ public class AccountController(
         LoggedInAccount? account = await userManager.SignIn(HttpContext, form.UserName, form.Password);
         if (account != null)
         {
-            await accountService.UpdateLastLoginAsync(account.AccountId);
+            _ = await accountService.UpdateLastLoginAsync(account.AccountId);
 
             Logger.LogInformation("User {UserName} logged in successfully.", account.UserName);
             return Ok(account);

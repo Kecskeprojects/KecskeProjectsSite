@@ -16,44 +16,44 @@ public class Program
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddHostedService<FileLoggerBackgroundService>();
-        builder.Logging.ClearProviders();
-        builder.Logging.AddFileLogger();
+        _ = builder.Services.AddHostedService<FileLoggerBackgroundService>();
+        _ = builder.Logging.ClearProviders();
+        _ = builder.Logging.AddFileLogger();
 
         // Add services to the container.
         ConfigureServices(builder.Configuration, builder.Services);
 
-        builder.Services.AddControllers();
+        _ = builder.Services.AddControllers();
 
-        builder.Services.AddOpenApi();
+        _ = builder.Services.AddOpenApi();
 
         WebApplication app = builder.Build();
 
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
-            app.UseSwaggerUI(options =>
+            _ = app.MapOpenApi();
+            _ = app.UseSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("/openapi/v1.json", "v1");
             });
         }
         else
         {
-            app.MapGet("/", () => "The backend is running, now shoo!");
+            _ = app.MapGet("/", () => "The backend is running, now shoo!");
         }
 
-        app.UseCors(options => options
+        _ = app.UseCors(options => options
             .AllowAnyHeader()
             .AllowAnyMethod()
             .WithOrigins("http://localhost:5173", "http://localhost:4173")
             .AllowCredentials());
 
-        app.UseHttpsRedirection();
+        _ = app.UseHttpsRedirection();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
 
-        app.MapControllers();
+        _ = app.MapControllers();
 
         app.Logger.LogInformation("Starting Kecske Backend");
         app.Run();

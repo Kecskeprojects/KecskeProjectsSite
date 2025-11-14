@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Configuration;
 
 namespace Backend.Tools.Extensions;
+
 public static class FileLoggerExtensions
 {
     public static ILoggingBuilder AddFileLogger(this ILoggingBuilder builder)
@@ -19,8 +20,8 @@ public static class FileLoggerExtensions
 
     public static ILoggingBuilder AddFileLogger(this ILoggingBuilder builder, Action<FileLoggerConfiguration> configure)
     {
-        builder.AddFileLogger();
-        builder.Services.Configure(configure);
+        _ = builder.AddFileLogger();
+        _ = builder.Services.Configure(configure);
 
         return builder;
     }

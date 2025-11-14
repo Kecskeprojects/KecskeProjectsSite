@@ -15,7 +15,7 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
         bool usernameAlreadyRegistered = await repository.ExistsAsync(a => a.UserName.Contains(username));
         if (usernameAlreadyRegistered)
         {
-            return CreateResult(DatabaseActionResultEnum.AlreadyExists, (string?)null);
+            return CreateResult(DatabaseActionResultEnum.AlreadyExists, (string?) null);
         }
 
         Account account = new()
@@ -60,7 +60,7 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
             return CreateResult(DatabaseActionResultEnum.NotFound, 0);
         }
 
-        if(!EncryptionTools.VerifyPassword(account, form.SecretKey, account.SecretKey))
+        if (!EncryptionTools.VerifyPassword(account, form.SecretKey, account.SecretKey))
         {
             return CreateResult(DatabaseActionResultEnum.DifferingHash, 0);
         }

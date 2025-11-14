@@ -7,11 +7,12 @@ public class Log(LogLevel level, string log, string? loggingContext)
 
     private readonly string? loggingContext = loggingContext;
 
-    private readonly string content = log;
     private string Title => $"[{TimeStamp:HH:mm:ss}][{Level}]:";
-    public string Content =>
-        Title
-        + (Level == LogLevel.Information ? " " : "\t ")
-        //+ (string.IsNullOrWhiteSpace(loggingContext) ? "" : $"in '{loggingContext}'\n\t\t\t ")
-        + content.Replace("\n", "\n\t\t\t ");
+    public string Content
+    {
+        get => Title
+            + (Level == LogLevel.Information ? " " : "\t ")
+            //+ (string.IsNullOrWhiteSpace(loggingContext) ? "" : $"in '{loggingContext}'\n\t\t\t ")
+            + field.Replace("\n", "\n\t\t\t ");
+    } = log;
 }

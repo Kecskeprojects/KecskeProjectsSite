@@ -20,7 +20,7 @@ public class FileLoggerBackgroundService(IConfiguration configuration) : Backgro
 
         if (!Directory.Exists(logFolderPath))
         {
-            Directory.CreateDirectory(logFolderPath);
+            _ = Directory.CreateDirectory(logFolderPath);
         }
 
         IEnumerable<Log> logs = FileLoggerLogStorage.GetConsumingEnumerable(stoppingToken);
