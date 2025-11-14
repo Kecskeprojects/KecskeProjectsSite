@@ -61,6 +61,7 @@
     <Folder Include="Triggers" />
     <Folder Include="PostDeployment\TestInserts" />
     <Folder Include="Patches" />
+    <Folder Include="Patches\Deployed" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="PostDeployment\PostDeployment.sql" />
