@@ -108,7 +108,7 @@ export default class BaseService {
 
     const responseBody = response?.data;
 
-    if (!EnvironmentTools.IsProduction()) {
+    if (!EnvironmentTools.IsProduction() && responseBody) {
       console.log(responseBody);
     }
 
