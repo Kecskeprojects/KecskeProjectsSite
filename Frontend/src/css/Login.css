@@ -46,7 +46,7 @@
   position: absolute;
   z-index: 2;
   animation: loginappear 4s forwards;
-  animation-delay: 3.5s;
+  animation-delay: 3.6s;
   background-color: aquamarine;
 
   top: calc(50vh - 5px);
@@ -59,7 +59,7 @@
 
 .login-input {
   animation: logininputappear 4s forwards;
-  animation-delay: 3.5s;
+  animation-delay: 3.6s;
   opacity: 0;
   width: 0;
   height: 0;
@@ -67,7 +67,7 @@
 
 .login-button {
   animation: loginbuttonappear 4s forwards;
-  animation-delay: 3.5s;
+  animation-delay: 3.6s;
   opacity: 0;
   width: 0;
   height: 0;
