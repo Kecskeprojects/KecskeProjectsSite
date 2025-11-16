@@ -5,7 +5,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace Backend.Services;
 
-public class FileStorageService(ILogger<FileStorageService> logger)
+public class FileStorageService(ILogger<FileStorageService> logger, IConfiguration configuration)
 {
     public List<FileData> GetDirectoryData(string? baseFolder, string[] directoryRoutes)
     {
@@ -64,36 +64,39 @@ public class FileStorageService(ILogger<FileStorageService> logger)
         return fileDataList;
     }
 
-    private const int BufferSize = 16 * 1024 * 1024; // 16 MB buffer size
-    private const string UploadFilePath = "D:\\test.mp4";
-
-    //Todo: handle file being uploaded to same location with same name
-    //Todo: Handle additional file data to differentiate parallel file uploads
-    public async Task<string> SaveViaMultipartReaderAsync(string boundary, Stream contentStream, CancellationToken cancellationToken)
+    public async Task<string> SaveViaMultipartReaderAsync(string fullPath, bool newFile, string boundary, Stream contentStream, CancellationToken cancellationToken)
     {
-        string targetFilePath = Path.Combine(UploadFilePath);
-        //CheckAndRemoveLocalFile(targetFilePath);
-
-        using FileStream outputFileStream = new(
-            path: targetFilePath,
-            mode: FileMode.Append,
-            access: FileAccess.Write,
-            share: FileShare.None,
-            bufferSize: BufferSize,
-            useAsync: true);
-
         MultipartReader reader = new(boundary, contentStream);
         MultipartSection? section;
         long totalBytesRead = 0;
 
         // Process each section in the multipart body
+        string fileName = "";
         while ((section = await reader.ReadNextSectionAsync(cancellationToken)) != null)
         {
             // Check if the section is a file
             ContentDispositionHeaderValue? contentDisposition = section.GetContentDispositionHeader();
             if (contentDisposition != null && contentDisposition.IsFileDisposition())
             {
-                logger.LogInformation($"Processing file: {contentDisposition.FileName.Value}");
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    throw new ArgumentNullException(fileName, "File name must be earlier in the form data than the file content!");
+                }
+
+                if(newFile && File.Exists(Path.Combine(fullPath, fileName)))
+                {
+                    throw new IOException($"File '{fileName}' already exists in this folder.");
+                }
+
+                using FileStream outputFileStream = new(
+                    path: Path.Combine(fullPath, fileName),
+                    mode: FileMode.Append,
+                    access: FileAccess.Write,
+                    share: FileShare.None,
+                    bufferSize: 16 * 1024 * 1024, // 16 MB buffer size
+                    useAsync: true);
+
+                logger.LogInformation("Processing file: {Value}", contentDisposition.FileName.Value);
 
                 // Write the file content to the target file
                 await section.Body.CopyToAsync(outputFileStream, cancellationToken);
@@ -105,20 +108,21 @@ public class FileStorageService(ILogger<FileStorageService> logger)
                 string key = contentDisposition.Name.Value!;
                 using StreamReader streamReader = new(section.Body);
                 string value = await streamReader.ReadToEndAsync(cancellationToken);
-                logger.LogInformation($"Received metadata: {key} = {value}");
+                logger.LogInformation("Received metadata: {key} = {value}", key, value);
+                switch (key)
+                {
+                    case "fileName":
+                    {
+                        fileName = value;
+                        break;
+                    }
+                    default:
+                        break;
+                }
             }
         }
 
-        logger.LogInformation($"File upload completed (via multipart). Total bytes read: {totalBytesRead} bytes.");
-        return targetFilePath;
-    }
-
-    private void CheckAndRemoveLocalFile(string filePath)
-    {
-        if (File.Exists(filePath))
-        {
-            File.Delete(filePath);
-            logger.LogDebug($"Removed existing output file: {filePath}");
-        }
+        logger.LogInformation("File upload completed (via multipart). Total bytes read: {totalBytesRead} bytes.", totalBytesRead);
+        return "Success!";
     }
 }

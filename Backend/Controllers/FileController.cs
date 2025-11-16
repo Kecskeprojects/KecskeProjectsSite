@@ -55,12 +55,14 @@ public class FileController(
         return ErrorResult(StatusCodes.Status500InternalServerError, "File not found");
     }
 
-    //Todo: Use folder parameter
     [Authorize]
     [HttpPost]
     [DisableFormValueModelBinding]
-    public async Task<IActionResult> Upload([FromQuery] string? folder)
+    public async Task<IActionResult> Upload([FromQuery] string? folder, [FromQuery] bool newFile)
     {
+        string? baseFolder = configuration.GetValue<string>("BaseFileRoute");
+        string fullPath = FileTools.GetFullPath(baseFolder, folder);
+
         if (!Request.ContentType?.StartsWith("multipart/form-data") ?? true)
         {
             return BadRequest("The request does not contain valid multipart form data.");
@@ -73,7 +75,7 @@ public class FileController(
         }
 
         CancellationToken cancellationToken = HttpContext.RequestAborted;
-        string filePath = await fileStorageService.SaveViaMultipartReaderAsync(boundary, Request.Body, cancellationToken);
-        return Ok("Saved file at " + filePath);
+        string response = await fileStorageService.SaveViaMultipartReaderAsync(fullPath, newFile, boundary, Request.Body, cancellationToken);
+        return Ok(response);
     }
 }

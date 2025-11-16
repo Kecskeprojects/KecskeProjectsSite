@@ -1,78 +1,148 @@
-import axios, { AxiosHeaders } from "axios";
+import axios, { AxiosHeaders, type AxiosProgressEvent } from "axios";
+import BackendServiceTools from "../tools/BackendServiceTools";
+import EnvironmentTools from "../tools/EnvironmentTools";
 
 export default class BaseService {
-  static BackendRoute: string | undefined = import.meta.env.VITE_BACKEND_URL;
   static GetUserStateEndpoint: string = "/Account/GetLoggedInUser";
 
   static async Get(
     route: string,
+    queryItems?: any,
     additionalHeaders?: AxiosHeaders
   ): Promise<any> {
-    return BaseService.BaseFetch("GET", route, undefined, additionalHeaders);
+    return BaseService.BaseFetch(
+      "GET",
+      route,
+      queryItems,
+      undefined,
+      undefined,
+      undefined,
+      additionalHeaders
+    );
   }
 
   static async Post(
     route: string,
+    queryItems?: any,
     body?: FormData,
+    onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
+    onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void,
     additionalHeaders?: AxiosHeaders
   ): Promise<any> {
-    return BaseService.BaseFetch("POST", route, body, additionalHeaders);
+    return BaseService.BaseFetch(
+      "POST",
+      route,
+      queryItems,
+      body,
+      onUploadProgress,
+      onDownloadProgress,
+      additionalHeaders
+    );
   }
 
   static async Put(
     route: string,
+    queryItems?: any,
     body?: FormData,
     additionalHeaders?: AxiosHeaders
   ): Promise<any> {
-    return BaseService.BaseFetch("PUT", route, body, additionalHeaders);
+    return BaseService.BaseFetch(
+      "PUT",
+      route,
+      queryItems,
+      body,
+      undefined,
+      undefined,
+      additionalHeaders
+    );
   }
 
   static async Delete(
     route: string,
+    queryItems?: any,
     body?: FormData,
     additionalHeaders?: AxiosHeaders
   ): Promise<any> {
-    return BaseService.BaseFetch("DELETE", route, body, additionalHeaders);
+    return BaseService.BaseFetch(
+      "DELETE",
+      route,
+      queryItems,
+      body,
+      undefined,
+      undefined,
+      additionalHeaders
+    );
   }
 
-  //Todo: Sanitize query parts centrally
-  //Todo: implement onprogress and ondownload
   static async BaseFetch(
     method: string,
     route: string,
+    queryItems?: any,
     body?: FormData,
+    onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
+    onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void,
     additionalHeaders?: AxiosHeaders
   ): Promise<any> {
     if (!route.startsWith("/") && !route.startsWith("\\")) {
       route = "/" + route;
     }
 
-    const response = await axios(`${BaseService.BackendRoute}${route}`, {
-      method: method,
-      withCredentials: import.meta.env.MODE !== "production",
-      headers: additionalHeaders,
-      data: body,
-      validateStatus: () => true, //Disable throwing errors at 3xx, 4xx and 5xx status codes
-      //Todo: Perhaps errors should be handled the axios way
-    });
-
-    const responseBody = response.data;
-
-    if (import.meta.env.MODE !== "production") {
-      console.log(responseBody);
+    const query = BackendServiceTools.BuildQuery(queryItems);
+    let response;
+    try {
+      response = await axios(
+        `${EnvironmentTools.getBackendRoute()}${route}${query}`,
+        {
+          method: method,
+          withCredentials: !EnvironmentTools.IsProduction(),
+          headers: additionalHeaders,
+          data: body,
+          validateStatus: (status) => status < 400,
+          onDownloadProgress: onDownloadProgress,
+          onUploadProgress: onUploadProgress,
+        }
+      );
+    } catch (error) {
+      BaseService.ErrorHandling(route, error);
     }
 
-    if (response.status !== 200) {
-      BaseService.ErrorHandling(route, response.status, responseBody);
+    const responseBody = response?.data;
+
+    if (!EnvironmentTools.IsProduction()) {
+      console.log(responseBody);
     }
 
     return responseBody;
   }
 
-  static ErrorHandling(route: string, status: number, body: any): void {
+  static ErrorHandling(route: string, errorData: any): void {
+    if (!EnvironmentTools.IsProduction()) {
+      //console.log(errorData.toJSON());
+      //console.log(errorData.config);
+      if (errorData.response) {
+        // The request was made and the server responded with a status code
+        console.log("[Error] Response From Backend:");
+        console.log(errorData.response.data);
+        console.log(errorData.response.status);
+      } else if (errorData.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest
+        console.log("[Error] No Response From Backend:");
+        console.log(errorData.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log("[Error] Pre-Request Configuration Issue:");
+        console.log(errorData.message);
+      }
+    }
+
     //Todo: Proper user friendly error handling using floating popups or something
-    if (body.error) {
-      console.log(`Status Code: ${status}\nError: ${body.error}`);
+    const status = errorData?.response?.status
+      ? errorData?.response?.status
+      : errorData?.request?.status;
+    const errorMessage = errorData?.response?.data?.error;
+    if (errorMessage) {
+      console.log(`Status Code: ${status}\nError: ${errorMessage}`);
     }
 
     if (

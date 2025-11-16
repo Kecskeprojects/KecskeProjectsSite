@@ -1,5 +1,8 @@
+import type { AxiosProgressEvent } from "axios";
 import FileData from "../models/FileData";
+import BackendServiceTools from "../tools/BackendServiceTools";
 import ConvertTools from "../tools/ConvertTools";
+import EnvironmentTools from "../tools/EnvironmentTools";
 import FileTools from "../tools/FileTools";
 import BaseService from "./BaseService";
 
@@ -8,48 +11,61 @@ export default class FileService {
     identifier: string | undefined,
     folder: string | undefined
   ): string {
-    identifier = identifier ? identifier : "";
-    folder = folder ? folder : "";
+    identifier = BackendServiceTools.SanitizeQueryParameter(identifier);
+    folder = BackendServiceTools.SanitizeQueryParameter(folder);
 
-    return `${BaseService.BackendRoute}/File/GetSingle/${identifier}?folder=${folder}`;
+    return `${EnvironmentTools.getBackendRoute()}/File/GetSingle/${identifier}?folder=${folder}`;
   }
 
   static async GetFileData(
     folder?: string | undefined
   ): Promise<Array<FileData>> {
-    folder = folder ? folder : "";
+    const queryItems = {
+      folder: folder,
+    };
 
-    const rawDataList = await BaseService.Get(`/File/GetList?folder=${folder}`);
+    const rawDataList = await BaseService.Get("/File/GetList", queryItems);
     return ConvertTools.ConvertListToType(FileData, rawDataList);
   }
 
-  //Todo: Add additional file parameters to differentiate file uploads
-  //Todo: Figure out what response is actually needed
   static async Upload(
     fileData: FormData,
-    folder: string | undefined
+    folder: string | undefined,
+    onUploadProgress: (progressEvent: AxiosProgressEvent) => void
   ): Promise<string | undefined> {
-    folder = folder ? folder : "";
+    const queryItems = {
+      folder: folder,
+      newFile: true,
+    };
 
-    const file = FileTools.getFileData(fileData);
+    const files = FileTools.getFileData(fileData);
 
-    if (!file) {
+    if (!files || files.length === 0) {
       return;
     }
 
-    const blobs = FileTools.getBlobChunksByLimit(file);
+    for (const file of files) {
+      const blobs = FileTools.getBlobChunksByLimit(file);
 
-    let response = "";
-    for (const blob of blobs) {
-      const partialFormData = FileTools.getFileUploadData(fileData);
-      partialFormData.append("file", blob);
+      for (const blob of blobs) {
+        const partialFormData = FileTools.getFileUploadData(fileData, file);
+        partialFormData.append("file", blob);
 
-      response += await BaseService.Post(
-        `/File/Upload?folder=${folder}`,
-        partialFormData
-      );
+        const response = await BaseService.Post(
+          "/File/Upload",
+          queryItems,
+          partialFormData,
+          onUploadProgress
+        );
+
+        if (response != "Success!") {
+          return "Error during file upload!";
+        }
+
+        queryItems.newFile = false; //This is a flag to help check for existing files before uploading
+      }
     }
 
-    return response;
+    return "File uploaded successfully!";
   }
 }

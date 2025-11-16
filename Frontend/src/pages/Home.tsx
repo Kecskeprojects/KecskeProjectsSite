@@ -11,7 +11,7 @@ export default function Home(): JSX.Element {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    FileService.Upload(formData, "")
+    FileService.Upload(formData, "", () => {})
       .then(() => {})
       .catch((error) => console.log(error));
   }

@@ -8,7 +8,7 @@ export default class AccountService {
   }
 
   static async Login(LoginData: FormData): Promise<UserData> {
-    const data = await BaseService.Post("/Account/Login", LoginData);
+    const data = await BaseService.Post("/Account/Login", null, LoginData);
     return new UserData(data);
   }
 
@@ -19,6 +19,6 @@ export default class AccountService {
 
   //Todo: Define return type
   static async Register(RegisterData: FormData): Promise<any> {
-    return BaseService.Post("/Account/Register", RegisterData);
+    return BaseService.Post("/Account/Register", null, RegisterData);
   }
 }

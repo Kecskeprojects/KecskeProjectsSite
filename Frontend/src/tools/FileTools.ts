@@ -1,12 +1,8 @@
+import EnvironmentTools from "./EnvironmentTools";
+
 export default class FileTools {
-  static getBlobChunksByLimit(file: File | Blob): Array<Blob> {
-    const gbLimit = FileTools.getFileSizeLimit();
-    if (isNaN(gbLimit)) {
-      throw Error("File upload size limit set incorrectly");
-    }
-
-    const size = file.size;
-
+  static getBlobChunksByLimit(file: File): Array<Blob> {
+    const gbLimit = EnvironmentTools.getFileSizeLimit();
     const byteLimit = FileTools.getGBInBytes(gbLimit);
 
     const blobs = new Array<Blob>();
@@ -16,6 +12,7 @@ export default class FileTools {
       return [file];
     }
 
+    const size = file.size;
     for (let i = 0; i < chunkCount; i++) {
       const start = i * byteLimit;
       const end = (i + 1) * byteLimit;
@@ -28,32 +25,32 @@ export default class FileTools {
     return blobs;
   }
 
-  static getFileSizeLimit(): number {
-    const value = import.meta.env.VITE_MAX_FILE_UPLOAD_SIZE_IN_GB;
-
-    return parseFloat(value);
-  }
-
   static getGBInBytes(gb: number): number {
     return gb * 1024.0 * 1024.0 * 1024.0;
   }
 
-  static getFileData(formData: FormData): Blob | undefined {
+  static getFileData(formData: FormData): Array<File> | undefined {
+    const files = [];
     for (const data of formData) {
-      if (data[1] instanceof Blob) {
-        return data[1];
+      if (data[1] instanceof File) {
+        files.push(data[1]);
       }
     }
+    return files;
   }
 
-  static getFileUploadData(formData: FormData): FormData {
+  static getFileUploadData(formData: FormData, file: File): FormData {
     const newFormData = new FormData();
+    newFormData.append("fileName", file.name);
+    newFormData.append("totalSize", file.size.toString());
+
     for (const data of formData) {
-      if (data[1] instanceof Blob) {
+      if (data[1] instanceof File) {
         continue;
       }
       newFormData.append(data[0], data[1]);
     }
+
     return newFormData;
   }
 }
