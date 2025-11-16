@@ -1,6 +1,7 @@
 import React, { useContext, type JSX } from "react";
 import { Navigate } from "react-router-dom";
 import { UserContext } from "../components/Contexts";
+import "../css/Login.css";
 import AccountService from "../services/AccountService";
 
 export default function Login(): JSX.Element {
@@ -25,6 +26,8 @@ export default function Login(): JSX.Element {
 
   return (
     <div>
+      <div className="tear"></div>
+      <div className="ripple"></div>
       <form onSubmit={PerformLogin}>
         <input type="text" name="username" />
         <br />

@@ -1,0 +1,70 @@
+.tear {
+  border-radius: 80% 0 55% 50% / 55% 0 80% 50%;
+  background-color: black;
+  border: 3px solid black;
+  transform: rotate(-45deg);
+  position: absolute;
+
+  animation: teardrop 3s forwards;
+  animation-delay: 1s;
+
+  top: -500px;
+  left: calc(50vw - 50px);
+  right: calc(50vw - 50px);
+  width: 100px;
+  height: 100px;
+}
+
+.ripple {
+  margin: auto;
+  margin-top: calc(50vh - 8px);
+  background-color: black;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: grid;
+  animation: ripple 3s linear;
+  visibility: hidden;
+  animation-delay: 3.7s;
+  animation-iteration-count: 3;
+}
+
+.ripple::before,
+.ripple::after {
+  content: "";
+  grid-area: 1/1;
+  border-radius: 50%;
+  animation: inherit;
+  animation-delay: 4.7s;
+}
+
+.ripple::after {
+  animation-delay: 5.7s;
+}
+
+@keyframes ripple {
+  0% {
+    visibility: visible;
+    box-shadow: 0 0 0 0.7rem rgba(255, 255, 255, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 8rem rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes teardrop {
+  30% {
+    width: 120px;
+    height: 120px;
+    left: calc(50vw - 60px);
+    right: calc(50vw - 60px);
+  }
+  100% {
+    top: calc(50vh - 5px);
+    border-width: 0;
+    width: 10px;
+    height: 10px;
+    left: calc(50vw - 5px);
+    right: calc(50vw - 5px);
+  }
+}
