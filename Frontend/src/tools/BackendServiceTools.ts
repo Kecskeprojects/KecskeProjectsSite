@@ -9,7 +9,12 @@ export default class BackendServiceTools {
 
     let query = "?";
     keys.forEach((key) => {
-      const value = this.SanitizeQueryParameter(tempItem[key]);
+      const originalValue = tempItem[key];
+      if (BackendServiceTools.SkipQueryParameter(originalValue)) {
+        return;
+      }
+
+      const value = this.SanitizeQueryParameter(originalValue);
       if (value) {
         query += query === "?" ? "" : "&";
         query += `${key}=${value}`;
@@ -19,8 +24,18 @@ export default class BackendServiceTools {
     return query;
   }
 
+  static SkipQueryParameter(queryItem: any): boolean {
+    const type = typeof queryItem;
+
+    return type === "function" || queryItem === undefined || queryItem === null;
+  }
+
   static SanitizeQueryParameter(queryItem: any): any {
     const type = typeof queryItem;
+
+    if (type === "function") {
+      return "";
+    }
 
     if (type === "bigint" || type == "boolean" || type === "number") {
       return queryItem;
@@ -28,10 +43,6 @@ export default class BackendServiceTools {
 
     if (type === "string") {
       return encodeURIComponent(queryItem ? queryItem : "");
-    }
-
-    if (type === "function") {
-      return "";
     }
 
     const stringified = JSON.stringify(queryItem);

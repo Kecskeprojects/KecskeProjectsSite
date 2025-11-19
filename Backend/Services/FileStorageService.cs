@@ -5,7 +5,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace Backend.Services;
 
-public class FileStorageService(ILogger<FileStorageService> logger, IConfiguration configuration)
+public class FileStorageService(ILogger<FileStorageService> logger)
 {
     public List<FileData> GetDirectoryData(string? baseFolder, string[] directoryRoutes)
     {
@@ -96,7 +96,10 @@ public class FileStorageService(ILogger<FileStorageService> logger, IConfigurati
                     bufferSize: 16 * 1024 * 1024, // 16 MB buffer size
                     useAsync: true);
 
-                logger.LogInformation("Processing file: {Value}", contentDisposition.FileName.Value);
+                if (logger.IsEnabled(LogLevel.Information))
+                {
+                    logger.LogInformation($"Processing file: {contentDisposition.FileName.Value}");
+                }
 
                 // Write the file content to the target file
                 await section.Body.CopyToAsync(outputFileStream, cancellationToken);
@@ -108,7 +111,6 @@ public class FileStorageService(ILogger<FileStorageService> logger, IConfigurati
                 string key = contentDisposition.Name.Value!;
                 using StreamReader streamReader = new(section.Body);
                 string value = await streamReader.ReadToEndAsync(cancellationToken);
-                logger.LogInformation("Received metadata: {key} = {value}", key, value);
                 switch (key)
                 {
                     case "fileName":
@@ -122,7 +124,10 @@ public class FileStorageService(ILogger<FileStorageService> logger, IConfigurati
             }
         }
 
-        logger.LogInformation("File upload completed (via multipart). Total bytes read: {totalBytesRead} bytes.", totalBytesRead);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation($"File upload completed (via multipart). Total bytes read: {totalBytesRead} bytes.");
+        }
         return "Success!";
     }
 }
