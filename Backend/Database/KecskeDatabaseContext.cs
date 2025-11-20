@@ -29,11 +29,11 @@ public partial class KecskeDatabaseContext : DbContext
             entity.HasIndex(e => e.UserName, "UQ_Account_UserName").IsUnique();
 
             entity.Property(e => e.CreatedOnUtc)
-                .HasDefaultValueSql("(getutcdate())")
+                .HasDefaultValueSql("(getutcdate())", "DF_Account_CreatedOnUtc")
                 .HasColumnType("datetime");
             entity.Property(e => e.LastLoginOnUtc).HasColumnType("datetime");
             entity.Property(e => e.ModifiedOnUtc)
-                .HasDefaultValueSql("(getutcdate())")
+                .HasDefaultValueSql("(getutcdate())", "DF_Account_ModifiedOnUtc")
                 .HasColumnType("datetime");
             entity.Property(e => e.Password).HasMaxLength(84);
             entity.Property(e => e.SecretKey).HasMaxLength(84);
@@ -49,10 +49,10 @@ public partial class KecskeDatabaseContext : DbContext
             entity.HasIndex(e => e.Name, "UQ_Role_Name").IsUnique();
 
             entity.Property(e => e.CreatedOnUtc)
-                .HasDefaultValueSql("(getutcdate())")
+                .HasDefaultValueSql("(getutcdate())", "DF_Role_CreatedOnUtc")
                 .HasColumnType("datetime");
             entity.Property(e => e.ModifiedOnUtc)
-                .HasDefaultValueSql("(getutcdate())")
+                .HasDefaultValueSql("(getutcdate())", "DF_Role_ModifiedOnUtc")
                 .HasColumnType("datetime");
             entity.Property(e => e.Name).HasMaxLength(100);
 
