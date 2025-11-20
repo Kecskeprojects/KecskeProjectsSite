@@ -53,10 +53,7 @@ public class AccountController(
         {
             _ = await accountService.UpdateLastLoginAsync(account.AccountId);
 
-            if (Logger.IsEnabled(LogLevel.Information))
-            {
-                Logger.LogInformation($"User {account.UserName} logged in successfully.");
-            }
+            Logger.LogInformation($"User {account.UserName} logged in successfully.");
             return Ok(account);
         }
 
@@ -68,10 +65,7 @@ public class AccountController(
     {
         LoggedInAccount? user = GetLoggedInUserFromCookie();
 
-        if (Logger.IsEnabled(LogLevel.Information))
-        {
-            Logger.LogInformation("User {UserName} is logging out.", user?.UserName);
-        }
+        Logger.LogInformation("User {UserName} is logging out.", user?.UserName);
         await userManager.SignOut(HttpContext);
 
         return MessageResult("You have been logged out!");
