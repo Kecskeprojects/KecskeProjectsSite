@@ -14,7 +14,9 @@ public class FileStorageService(ILogger<FileStorageService> logger)
         foreach (string directoryRoute in directoryRoutes)
         {
             DirectoryInfo directoryInfo = new(directoryRoute);
-            if (!directoryInfo.Exists || directoryInfo.Attributes.HasFlag(FileAttributes.System) || directoryInfo.Attributes.HasFlag(FileAttributes.Hidden))
+            if (!directoryInfo.Exists
+                || directoryInfo.Attributes.HasFlag(FileAttributes.System)
+                || directoryInfo.Attributes.HasFlag(FileAttributes.Hidden))
             {
                 continue;
             }
@@ -43,7 +45,9 @@ public class FileStorageService(ILogger<FileStorageService> logger)
         {
             FileInfo fileInfo = new(fileRoute);
 
-            if (!fileInfo.Exists || fileInfo.Attributes.HasFlag(FileAttributes.System) || fileInfo.Attributes.HasFlag(FileAttributes.Hidden))
+            if (!fileInfo.Exists
+                || fileInfo.Attributes.HasFlag(FileAttributes.System)
+                || fileInfo.Attributes.HasFlag(FileAttributes.Hidden))
             {
                 continue;
             }
