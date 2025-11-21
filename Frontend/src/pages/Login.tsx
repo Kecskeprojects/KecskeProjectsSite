@@ -28,15 +28,18 @@ export default function Login(): JSX.Element {
     <div>
       <div className="tear"></div>
       <div className="ripple"></div>
-      <form className="login" onSubmit={PerformLogin}>
-        <input className="login-input" type="text" name="username" />
-        <br />
-        <input className="login-input" type="password" name="password" />
-        <br />
-        <button className="login-button" type="submit">
-          Login
-        </button>
-      </form>
+      <div className="login">
+        <h1>Login</h1>
+        <form onSubmit={PerformLogin}>
+          <input className="login-input" type="text" name="username" />
+          <br />
+          <input className="login-input" type="password" name="password" />
+          <br />
+          <button className="login-button" type="submit">
+            Login
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
