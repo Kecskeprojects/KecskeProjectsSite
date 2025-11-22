@@ -1,14 +1,19 @@
+import Constants from "../enum/Constants";
 import UserData from "../models/UserData";
 import BaseService from "./BaseService";
 
 export default class AccountService {
   static async GetLoggedInUser(): Promise<UserData> {
-    const data = await BaseService.Get(BaseService.GetUserStateEndpoint);
+    const data = await BaseService.Get(Constants.GetUserStateEndpoint);
     return new UserData(data);
   }
 
   static async Login(LoginData: FormData): Promise<UserData> {
-    const data = await BaseService.Post("/Account/Login", null, LoginData);
+    const data = await BaseService.Post(
+      Constants.LoginEndpoint,
+      null,
+      LoginData
+    );
     return new UserData(data);
   }
 

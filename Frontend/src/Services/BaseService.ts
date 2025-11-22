@@ -1,10 +1,9 @@
 import axios, { AxiosHeaders, type AxiosProgressEvent } from "axios";
+import Constants from "../enum/Constants";
 import BackendServiceTools from "../tools/BackendServiceTools";
 import EnvironmentTools from "../tools/EnvironmentTools";
 
 export default class BaseService {
-  static GetUserStateEndpoint: string = "/Account/GetLoggedInUser";
-
   static async Get(
     route: string,
     queryItems?: any,
@@ -147,9 +146,10 @@ export default class BaseService {
 
     if (
       (status === 401 || status === 403) &&
-      !route.startsWith(BaseService.GetUserStateEndpoint)
+      !route.startsWith(Constants.GetUserStateEndpoint) &&
+      !route.startsWith(Constants.LoginEndpoint)
     ) {
-      window.location.replace("/login");
+      window.location.replace(Constants.LoginRoute);
     }
   }
 }

@@ -1,10 +1,11 @@
 import { useEffect, useState, type JSX } from "react";
 import { ImSpinner2 } from "react-icons/im";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { UserContext } from "./components/Contexts";
-import LoginChecker from "./components/LoginChecker";
-import RoleChecker from "./components/RoleChecker";
+import { UserContext } from "./Contexts";
+import LoginChecker from "./auth/LoginChecker";
+import RoleChecker from "./auth/RoleChecker";
 import "./css/App.css";
+import Constants from "./enum/Constants";
 import Layout from "./layout/Layout";
 import UserData from "./models/UserData";
 import ExampleComponent from "./pages/ExampleComponent";
@@ -39,7 +40,7 @@ export default function App(): JSX.Element {
     <UserContext.Provider value={{ user, setUser }}>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path={Constants.LoginRoute} element={<Login />} />
           <Route element={<LoginChecker />}>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />

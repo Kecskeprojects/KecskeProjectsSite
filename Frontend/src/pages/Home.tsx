@@ -1,6 +1,6 @@
 import { useContext, type JSX } from "react";
 import { Link } from "react-router-dom";
-import { UserContext } from "../components/Contexts";
+import { UserContext } from "../Contexts";
 import RoleEnum from "../enum/RoleEnum";
 import FileService from "../services/FileService";
 

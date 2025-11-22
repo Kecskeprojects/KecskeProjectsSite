@@ -1,6 +1,6 @@
 import React, { useContext, type JSX } from "react";
 import { Navigate } from "react-router-dom";
-import { UserContext } from "../components/Contexts";
+import { UserContext } from "../Contexts";
 import "../css/Login.css";
 import AccountService from "../services/AccountService";
 

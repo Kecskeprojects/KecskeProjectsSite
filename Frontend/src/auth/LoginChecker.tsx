@@ -1,6 +1,7 @@
 import { useContext, type JSX } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { UserContext } from "./Contexts";
+import { UserContext } from "../Contexts";
+import Constants from "../enum/Constants";
 
 export default function LoginChecker(): JSX.Element {
   const userContext = useContext(UserContext);
@@ -9,5 +10,5 @@ export default function LoginChecker(): JSX.Element {
     return <Outlet />;
   }
 
-  return <Navigate to="/login" replace />;
+  return <Navigate to={Constants.LoginRoute} replace />;
 }
