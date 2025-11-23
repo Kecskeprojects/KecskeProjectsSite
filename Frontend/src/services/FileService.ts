@@ -7,19 +7,14 @@ import FileTools from "../tools/FileTools";
 import BaseService from "./BaseService";
 
 export default class FileService {
-  static GetSingleFileEndpoint(
-    identifier: string | undefined,
-    folder: string | undefined
-  ): string {
+  static GetSingleFileEndpoint(identifier?: string, folder?: string): string {
     identifier = BackendServiceTools.SanitizeQueryParameter(identifier);
     folder = BackendServiceTools.SanitizeQueryParameter(folder);
 
     return `${EnvironmentTools.getBackendRoute()}/File/GetSingle/${identifier}?folder=${folder}`;
   }
 
-  static async GetFileData(
-    folder?: string | undefined
-  ): Promise<Array<FileData>> {
+  static async GetFileData(folder?: string): Promise<Array<FileData>> {
     const queryItems = {
       folder: folder,
     };
@@ -30,8 +25,8 @@ export default class FileService {
 
   static async Upload(
     fileData: FormData,
-    folder: string | undefined,
-    onUploadProgress: (progressEvent: AxiosProgressEvent) => void
+    folder?: string,
+    onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
   ): Promise<string | undefined> {
     const queryItems = {
       folder: folder,

@@ -1,10 +1,10 @@
 import { useContext, type JSX } from "react";
 import { Link } from "react-router-dom";
 import InputBase from "../components/input/InputBase";
-import { UserContext } from "../Contexts";
 import InputTypesEnum from "../enum/InputTypesEnum";
 import RoleEnum from "../enum/RoleEnum";
 import FileService from "../services/FileService";
+import { UserContext } from "../utilities/Contexts";
 
 export default function Home(): JSX.Element {
   const context = useContext(UserContext);

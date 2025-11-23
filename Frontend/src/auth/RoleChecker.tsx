@@ -1,9 +1,9 @@
 import { useContext, type JSX } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { UserContext } from "../Contexts";
+import { UserContext } from "../utilities/Contexts";
 
 export type RoleCheckerProps = {
-  roles?: Array<string> | undefined;
+  roles?: Array<string>;
 };
 
 export default function RoleChecker(props: RoleCheckerProps): JSX.Element {

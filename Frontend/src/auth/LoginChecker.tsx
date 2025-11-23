@@ -1,7 +1,7 @@
 import { useContext, type JSX } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { UserContext } from "../Contexts";
 import Constants from "../enum/Constants";
+import { UserContext } from "../utilities/Contexts";
 
 export default function LoginChecker(): JSX.Element {
   const userContext = useContext(UserContext);

@@ -15,7 +15,7 @@ export default class UserData {
     return this.Roles ? this.Roles.includes(roleName) : false;
   }
 
-  hasRoles(roleNames: Array<string> | undefined): boolean {
+  hasRoles(roleNames?: Array<string>): boolean {
     if (!roleNames) {
       return true;
     }

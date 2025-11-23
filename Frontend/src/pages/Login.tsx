@@ -1,8 +1,8 @@
 import React, { useContext, type JSX } from "react";
 import { Navigate } from "react-router-dom";
-import { UserContext } from "../Contexts";
 import "../css/Login.css";
 import AccountService from "../services/AccountService";
+import { UserContext } from "../utilities/Contexts";
 
 export default function Login(): JSX.Element {
   const context = useContext(UserContext);

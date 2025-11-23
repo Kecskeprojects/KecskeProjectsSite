@@ -1,7 +1,6 @@
 import { useEffect, useState, type JSX } from "react";
 import { ImSpinner2 } from "react-icons/im";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { UserContext } from "./Contexts";
 import LoginChecker from "./auth/LoginChecker";
 import RoleChecker from "./auth/RoleChecker";
 import "./css/App.css";
@@ -12,6 +11,7 @@ import ExampleComponent from "./pages/ExampleComponent";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import AccountService from "./services/AccountService";
+import { UserContext } from "./utilities/Contexts";
 
 export default function App(): JSX.Element {
   const [user, setUser] = useState<UserData>();
