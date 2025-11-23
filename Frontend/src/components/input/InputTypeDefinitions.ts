@@ -1,22 +1,20 @@
-import InputTypesEnum from "../../enum/InputTypesEnum";
+import DisabledInput from "./InputDefinitions/DisabledInput";
+import FileInput from "./InputDefinitions/FileInput";
+import type IInputDefinition from "./InputDefinitions/IInputDefinition";
+import MultiFileInput from "./InputDefinitions/MultiFileInput";
+import PasswordInput from "./InputDefinitions/PasswordInput";
+import TextInput from "./InputDefinitions/TextInput";
 
-export type InputTypeParameters = {
-  name: string;
-  typeText: string;
-  disabled?: boolean;
-};
-//https://www.w3schools.com/tags/tag_input.asp
 export default class InputTypeDefinitions {
   static getType(typeName: string) {
     return InputTypeDefinitions.Types.find((x) => x.name === typeName);
   }
 
-  static Types = new Array<InputTypeParameters>(
-    { name: InputTypesEnum.Text, typeText: InputTypesEnum.Text },
-    {
-      name: InputTypesEnum.Disabled,
-      typeText: InputTypesEnum.Text,
-      disabled: true,
-    }
+  static Types = new Array<IInputDefinition>(
+    new TextInput(),
+    new PasswordInput(),
+    new FileInput(),
+    new MultiFileInput(),
+    new DisabledInput()
   );
 }

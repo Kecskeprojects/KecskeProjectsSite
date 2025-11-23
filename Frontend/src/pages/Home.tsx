@@ -1,6 +1,8 @@
 import { useContext, type JSX } from "react";
 import { Link } from "react-router-dom";
+import InputBase from "../components/input/InputBase";
 import { UserContext } from "../Contexts";
+import InputTypesEnum from "../enum/InputTypesEnum";
 import RoleEnum from "../enum/RoleEnum";
 import FileService from "../services/FileService";
 
@@ -25,7 +27,15 @@ export default function Home(): JSX.Element {
         {context.user?.hasRole(RoleEnum.Admin) ? "IsAdmin" : "IsNotAdmin"}
 
         <form onSubmit={PerformUpload}>
-          <input type="file" name="file" />
+          <InputBase
+            inputType={InputTypesEnum.File}
+            label="Add File:"
+            name="file"
+            editedItem={{}}
+            updated={(e) => {
+              e.preventDefault();
+            }}
+          />
           <br />
           <button type="submit">Upload</button>
         </form>

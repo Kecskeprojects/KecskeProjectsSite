@@ -8,9 +8,7 @@ export type InputBaseProps = {
   inputType: string;
   editedItem: any;
   className?: string;
-  updated: (
-    event: React.FormEvent<HTMLInputElement>
-  ) => React.FormEventHandler<HTMLInputElement> | undefined;
+  updated: (event: React.FormEvent<HTMLInputElement>) => void;
   validation?: (inputName: string, editedItem: any) => string;
   isHidden?: (inputName: string, editedItem: any) => boolean;
   isDisabled?: (inputName: string, editedItem: any) => boolean;
@@ -44,6 +42,7 @@ export default function InputBase(props: InputBaseProps): JSX.Element {
         name={props.name}
         type={type.typeText}
         disabled={type.disabled}
+        multiple={type.multiple}
       />
     );
   }
