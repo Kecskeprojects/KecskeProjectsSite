@@ -1,4 +1,4 @@
-import type { IWindowDescription } from "./IWindowDescription";
+import type { IWindowDescription } from "../../../interface/IWindowDescription";
 
 export default class LoginWindowDescription implements IWindowDescription {
   title: string;

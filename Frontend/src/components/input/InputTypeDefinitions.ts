@@ -1,6 +1,6 @@
+import type IInputDefinition from "../../interface/IInputDefinition";
 import DisabledInput from "./InputDefinitions/DisabledInput";
 import FileInput from "./InputDefinitions/FileInput";
-import type IInputDefinition from "./InputDefinitions/IInputDefinition";
 import MultiFileInput from "./InputDefinitions/MultiFileInput";
 import PasswordInput from "./InputDefinitions/PasswordInput";
 import TextInput from "./InputDefinitions/TextInput";

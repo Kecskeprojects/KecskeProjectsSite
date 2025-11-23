@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import type { IWindowDescription } from "./WindowDescriptions/IWindowDescription";
+import type { IWindowDescription } from "../../interface/IWindowDescription";
 
 export type EditWindowBaseProps = {
   windowDescription: IWindowDescription;

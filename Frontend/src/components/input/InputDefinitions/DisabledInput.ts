@@ -1,5 +1,5 @@
 import InputTypesEnum from "../../../enum/InputTypesEnum";
-import type IInputDefinition from "./IInputDefinition";
+import type IInputDefinition from "../../../interface/IInputDefinition";
 
 export default class DisabledInput implements IInputDefinition {
   name: string;
