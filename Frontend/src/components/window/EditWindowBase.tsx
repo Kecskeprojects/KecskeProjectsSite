@@ -8,5 +8,5 @@ export type EditWindowBaseProps = {
 export default function EditWindowBase(
   props: EditWindowBaseProps
 ): JSX.Element {
-  return <div></div>;
+  return <div>{props.windowDescription.title}</div>;
 }
