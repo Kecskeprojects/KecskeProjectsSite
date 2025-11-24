@@ -1,11 +1,12 @@
 import Constants from "../enum/Constants";
+import type ResponseObject from "../models/ResponseObject";
 import UserData from "../models/UserData";
 import BaseService from "./BaseService";
 
 export default class AccountService {
   static async GetLoggedInUser(): Promise<UserData> {
     const data = await BaseService.Get(Constants.GetUserStateEndpoint);
-    return new UserData(data);
+    return new UserData(data?.content);
   }
 
   static async Login(LoginData: FormData): Promise<UserData> {
@@ -17,13 +18,11 @@ export default class AccountService {
     return new UserData(data);
   }
 
-  //Todo: Define return type
-  static async Logout(): Promise<any> {
+  static async Logout(): Promise<ResponseObject> {
     return BaseService.Post("/Account/Logout");
   }
 
-  //Todo: Define return type
-  static async Register(RegisterData: FormData): Promise<any> {
+  static async Register(RegisterData: FormData): Promise<ResponseObject> {
     return BaseService.Post("/Account/Register", null, RegisterData);
   }
 }

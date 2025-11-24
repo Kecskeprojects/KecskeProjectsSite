@@ -1,5 +1,10 @@
-import axios, { AxiosHeaders, type AxiosProgressEvent } from "axios";
+import axios, {
+  AxiosError,
+  AxiosHeaders,
+  type AxiosProgressEvent,
+} from "axios";
 import Constants from "../enum/Constants";
+import type ResponseObject from "../models/ResponseObject";
 import BackendServiceTools from "../tools/BackendServiceTools";
 import EnvironmentTools from "../tools/EnvironmentTools";
 
@@ -8,7 +13,7 @@ export default class BaseService {
     route: string,
     queryItems?: any,
     additionalHeaders?: AxiosHeaders
-  ): Promise<any> {
+  ): Promise<ResponseObject> {
     return BaseService.BaseFetch(
       "GET",
       route,
@@ -27,7 +32,7 @@ export default class BaseService {
     onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
     onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void,
     additionalHeaders?: AxiosHeaders
-  ): Promise<any> {
+  ): Promise<ResponseObject> {
     return BaseService.BaseFetch(
       "POST",
       route,
@@ -44,7 +49,7 @@ export default class BaseService {
     queryItems?: any,
     body?: FormData,
     additionalHeaders?: AxiosHeaders
-  ): Promise<any> {
+  ): Promise<ResponseObject> {
     return BaseService.BaseFetch(
       "PUT",
       route,
@@ -61,7 +66,7 @@ export default class BaseService {
     queryItems?: any,
     body?: FormData,
     additionalHeaders?: AxiosHeaders
-  ): Promise<any> {
+  ): Promise<ResponseObject> {
     return BaseService.BaseFetch(
       "DELETE",
       route,
@@ -81,15 +86,15 @@ export default class BaseService {
     onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
     onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void,
     additionalHeaders?: AxiosHeaders
-  ): Promise<any> {
+  ): Promise<ResponseObject> {
     if (!route.startsWith("/") && !route.startsWith("\\")) {
       route = "/" + route;
     }
 
     const query = BackendServiceTools.BuildQuery(queryItems);
-    let response;
+    let responseBody;
     try {
-      response = await axios(
+      const response = await axios(
         `${EnvironmentTools.getBackendRoute()}${route}${query}`,
         {
           method: method,
@@ -101,11 +106,23 @@ export default class BaseService {
           onUploadProgress: onUploadProgress,
         }
       );
-    } catch (error) {
-      BaseService.ErrorHandling(route, error);
-    }
 
-    const responseBody = response?.data;
+      responseBody = response?.data as ResponseObject;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        BaseService.ErrorHandling(route, error);
+
+        responseBody = error.response?.data as ResponseObject;
+      } else {
+        //Todo: Proper user friendly error handling using floating popups or something
+        console.log("Non Axios Error!");
+        console.log(error);
+
+        responseBody = {
+          error: "Unexpected error before request!",
+        } as ResponseObject;
+      }
+    }
 
     if (!EnvironmentTools.IsProduction() && responseBody) {
       console.log(responseBody);
@@ -114,7 +131,7 @@ export default class BaseService {
     return responseBody;
   }
 
-  static ErrorHandling(route: string, errorData: any): void {
+  static ErrorHandling(route: string, errorData: AxiosError<any, any>): void {
     if (!EnvironmentTools.IsProduction()) {
       //console.log(errorData.toJSON());
       //console.log(errorData.config);
@@ -139,9 +156,9 @@ export default class BaseService {
     const status = errorData?.response?.status
       ? errorData?.response?.status
       : errorData?.request?.status;
-    const errorMessage = errorData?.response?.data?.error;
-    if (errorMessage) {
-      console.log(`Status Code: ${status}\nError: ${errorMessage}`);
+    const response = errorData?.response?.data as ResponseObject;
+    if (response?.error) {
+      console.log(`Status Code: ${status}\nError: ${response.error}`);
     }
 
     if (

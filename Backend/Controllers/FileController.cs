@@ -31,7 +31,7 @@ public class FileController(
         string[] files = Directory.GetFiles(fullPath);
         fileDataList.AddRange(fileStorageService.GetFileData(baseFolder, files));
 
-        return Ok(fileDataList);
+        return ContentResult(fileDataList);
     }
 
     [Authorize]
@@ -65,17 +65,17 @@ public class FileController(
 
         if (!Request.ContentType?.StartsWith("multipart/form-data") ?? true)
         {
-            return BadRequest("The request does not contain valid multipart form data.");
+            return ErrorResult(StatusCodes.Status400BadRequest, "The request does not contain valid multipart form data.");
         }
 
         string? boundary = HeaderUtilities.RemoveQuotes(MediaTypeHeaderValue.Parse(Request.ContentType).Boundary).Value;
         if (string.IsNullOrWhiteSpace(boundary))
         {
-            return BadRequest("Missing boundary in multipart form data.");
+            return ErrorResult(StatusCodes.Status400BadRequest, "Missing boundary in multipart form data.");
         }
 
         CancellationToken cancellationToken = HttpContext.RequestAborted;
         string response = await fileStorageService.SaveViaMultipartReaderAsync(fullPath, newFile, boundary, Request.Body, cancellationToken);
-        return Ok(response);
+        return ContentResult(response);
     }
 }

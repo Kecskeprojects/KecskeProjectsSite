@@ -15,9 +15,15 @@ public class ApiControllerBase(ILogger logger) : ControllerBase
     }
 
     [NonAction]
+    protected IActionResult ContentResult<T>(T content)
+    {
+        return Ok(new GenericResponse<T>(content));
+    }
+
+    [NonAction]
     protected IActionResult MessageResult(string message)
     {
-        return Ok(new MessageActionResult(message));
+        return Ok(new GenericResponse(message));
     }
 
     [NonAction]
@@ -28,6 +34,6 @@ public class ApiControllerBase(ILogger logger) : ControllerBase
             error,
             statusCode,
             HttpContext.Request.Path);
-        return StatusCode(statusCode, new ErrorActionResult(error));
+        return StatusCode(statusCode, new GenericResponse(error, isError: true));
     }
 }

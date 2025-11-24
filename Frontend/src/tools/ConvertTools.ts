@@ -3,7 +3,7 @@ export default class ConvertTools {
     constructor: new (...args: any[]) => T,
     rawList: any
   ): Array<T> {
-    if (Array.isArray(rawList)) {
+    if (rawList && Array.isArray(rawList)) {
       const newList = rawList.map((x) => new constructor(x));
       return newList;
     }

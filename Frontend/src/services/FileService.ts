@@ -20,7 +20,7 @@ export default class FileService {
     };
 
     const rawDataList = await BaseService.Get("/File/GetList", queryItems);
-    return ConvertTools.ConvertListToType(FileData, rawDataList);
+    return ConvertTools.ConvertListToType(FileData, rawDataList?.content);
   }
 
   static async Upload(
@@ -53,7 +53,7 @@ export default class FileService {
           onUploadProgress
         );
 
-        if (response != "Success!") {
+        if (response.message != "Success!") {
           return "Error during file upload!";
         }
 

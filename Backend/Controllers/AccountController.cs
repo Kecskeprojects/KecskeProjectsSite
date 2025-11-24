@@ -4,9 +4,11 @@ using Backend.Communication.Internal;
 using Backend.Communication.Outgoing;
 using Backend.Controllers.Base;
 using Backend.CustomAttributes;
+using Backend.Database.Model;
 using Backend.Database.Service;
 using Backend.Enums;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
@@ -28,7 +30,7 @@ public class AccountController(
     {
         LoggedInAccount? account = GetLoggedInUserFromCookie();
         return account != null
-            ? Ok(account)
+            ? ContentResult(account)
             : ErrorResult(StatusCodes.Status401Unauthorized, "You are not logged in!");
     }
 
@@ -39,7 +41,7 @@ public class AccountController(
 
         return result.Status switch
         {
-            DatabaseActionResultEnum.Success => Ok(result.Data),
+            DatabaseActionResultEnum.Success => ContentResult(result.Data),
             DatabaseActionResultEnum.AlreadyExists => ErrorResult(StatusCodes.Status409Conflict, "Username already exists."),
             _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while registering.")
         };
@@ -54,7 +56,7 @@ public class AccountController(
             _ = await accountService.UpdateLastLoginAsync(account.AccountId);
 
             Logger.LogInformation($"User {account.UserName} logged in successfully.");
-            return Ok(account);
+            return ContentResult(account);
         }
 
         return ErrorResult(StatusCodes.Status401Unauthorized, "Username or Password incorrect!");
@@ -78,7 +80,7 @@ public class AccountController(
 
         return result.Status switch
         {
-            DatabaseActionResultEnum.Success => Ok("Your password has been reset!"),
+            DatabaseActionResultEnum.Success => MessageResult("Your password has been reset!"),
             DatabaseActionResultEnum.NotFound => ErrorResult(StatusCodes.Status428PreconditionRequired, "User with that name doesn't exist."),
             DatabaseActionResultEnum.DifferingHash => ErrorResult(StatusCodes.Status401Unauthorized, "Key is incorrect."),
             _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while resetting password.")
