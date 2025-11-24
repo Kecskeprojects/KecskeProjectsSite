@@ -1,4 +1,4 @@
-import type { IWindowDescription } from "./IWindowDescription";
+import type IWindowDescription from "./IWindowDescription";
 
 export default interface EditWindowBaseProps<
   windowDescriptionType extends IWindowDescription

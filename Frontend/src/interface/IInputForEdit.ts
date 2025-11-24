@@ -1,4 +1,4 @@
-export default interface IWindowInput {
+export default interface IInputForEdit {
   label: string;
   name: string;
   inputType: string;

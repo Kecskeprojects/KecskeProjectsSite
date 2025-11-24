@@ -1,5 +1,5 @@
 import InputTypesEnum from "../../../enum/InputTypesEnum";
-import type IInputDefinition from "../../../interface/IInputDefinition";
+import type IInputDefinition from "../../../interface/IInputTypeDefinition";
 
 export default class MultiFileInput implements IInputDefinition {
   name: string;

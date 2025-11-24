@@ -1,12 +1,12 @@
 import InputTypesEnum from "../../../enum/InputTypesEnum";
+import type IInputForEdit from "../../../interface/IInputForEdit";
 import type IWindowDescription from "../../../interface/IWindowDescription";
-import type IWindowInput from "../../../interface/IWindowInput";
 import AccountService from "../../../services/AccountService";
 
 export default class LoginWindowDescription implements IWindowDescription {
   title: string;
   serviceFunction: (data: FormData) => Promise<any>;
-  inputArray: IWindowInput[];
+  inputArray: IInputForEdit[];
   className?: string | undefined;
   buttonText?: string | undefined;
   hasCloseFunctionality?: boolean | undefined;

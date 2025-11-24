@@ -1,4 +1,4 @@
-export default interface IInputDefinition {
+export default interface IInputTypeDefinition {
   name: string;
   typeText: string;
   disabled?: boolean;

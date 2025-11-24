@@ -1,4 +1,4 @@
-import type IInputDefinition from "../../interface/IInputDefinition";
+import type IInputTypeDefinition from "../../interface/IInputTypeDefinition";
 import DisabledInput from "./InputDefinitions/DisabledInput";
 import FileInput from "./InputDefinitions/FileInput";
 import MultiFileInput from "./InputDefinitions/MultiFileInput";
@@ -10,7 +10,7 @@ export default class InputTypeDefinitions {
     return InputTypeDefinitions.Types.find((x) => x.name === typeName);
   }
 
-  static Types = new Array<IInputDefinition>(
+  static Types = new Array<IInputTypeDefinition>(
     new TextInput(),
     new PasswordInput(),
     new FileInput(),

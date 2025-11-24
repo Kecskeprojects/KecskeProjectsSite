@@ -1,8 +1,8 @@
 import type { JSX } from "react";
 import React from "react";
 import type EditWindowBaseProps from "../../interface/IEditWIndowBaseProps";
+import type IInputForEdit from "../../interface/IInputForEdit";
 import type IWindowDescription from "../../interface/IWindowDescription";
-import type IWindowInput from "../../interface/IWindowInput";
 import ResponseObject from "../../models/ResponseObject";
 import InputBase from "../input/InputBase";
 
@@ -49,7 +49,7 @@ export default function EditWindowBase<
     editedItem[key] = value;
   }
 
-  function renderInput(input: IWindowInput, ind: number): JSX.Element {
+  function renderInput(input: IInputForEdit, ind: number): JSX.Element {
     return (
       <InputBase
         {...input}
