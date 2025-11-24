@@ -7,6 +7,7 @@ import Constants from "../enum/Constants";
 import type ResponseObject from "../models/ResponseObject";
 import BackendServiceTools from "../tools/BackendServiceTools";
 import EnvironmentTools from "../tools/EnvironmentTools";
+import LogTools from "../tools/LogTools";
 
 export default class BaseService {
   static async Get(
@@ -92,6 +93,7 @@ export default class BaseService {
     }
 
     const query = BackendServiceTools.BuildQuery(queryItems);
+
     let responseBody;
     try {
       const response = await axios(
@@ -125,7 +127,7 @@ export default class BaseService {
     }
 
     if (!EnvironmentTools.IsProduction() && responseBody) {
-      console.log(responseBody);
+      LogTools.DebugLog("Response Body:", responseBody);
     }
 
     return responseBody;

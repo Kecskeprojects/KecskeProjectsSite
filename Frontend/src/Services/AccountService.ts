@@ -15,7 +15,7 @@ export default class AccountService {
       null,
       LoginData
     );
-    return new UserData(data);
+    return new UserData(data?.content);
   }
 
   static async Logout(): Promise<ResponseObject> {

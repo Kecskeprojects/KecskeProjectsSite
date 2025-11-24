@@ -32,7 +32,7 @@ export default function Home(): JSX.Element {
             label="Add File:"
             name="file"
             editedItem={{}}
-            updated={(e) => {
+            updatedHandler={(e) => {
               e.preventDefault();
             }}
           />

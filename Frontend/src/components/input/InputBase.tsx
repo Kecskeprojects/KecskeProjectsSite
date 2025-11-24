@@ -18,6 +18,10 @@ export default function InputBase(props: IInputBaseProps): JSX.Element {
     return renderInput(InputTypesEnum.Disabled);
   }
 
+  const validationMessage = props.validation
+    ? props.validation(props.name, props.editedItem)
+    : undefined;
+
   function renderInput(overrideType?: string): JSX.Element {
     const type = InputTypeDefinitions.getType(overrideType ?? props.inputType);
 
@@ -27,7 +31,7 @@ export default function InputBase(props: IInputBaseProps): JSX.Element {
 
     return (
       <input
-        onInput={props.updated}
+        onInput={props.updatedHandler}
         name={props.name}
         type={type.typeText}
         disabled={type.disabled}
@@ -36,14 +40,8 @@ export default function InputBase(props: IInputBaseProps): JSX.Element {
     );
   }
 
-  const validationMessage = props.validation
-    ? props.validation(props.name, props.editedItem)
-    : undefined;
-
-  const additionalClassName = props.className ? ` ${props.className}` : "";
-
   return (
-    <div className={"" + additionalClassName}>
+    <div className={"" + (props.className ? ` ${props.className}` : "")}>
       <label htmlFor={props.name}>{props.label}</label>
       {renderInput()}
       {validationMessage ? <span>{validationMessage}</span> : <></>}

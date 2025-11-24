@@ -4,10 +4,10 @@ export default class UserData {
   Roles?: Array<string>;
 
   constructor(userDataJson: any) {
-    if (userDataJson?.content) {
-      this.AccountId = userDataJson.content.accountId;
-      this.UserName = userDataJson.content.userName;
-      this.Roles = userDataJson.content.roles;
+    if (userDataJson) {
+      this.AccountId = userDataJson.accountId;
+      this.UserName = userDataJson.userName;
+      this.Roles = userDataJson.roles;
     }
   }
 
