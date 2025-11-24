@@ -9,7 +9,7 @@ public class ErrorLoggingFilterAttribute : ExceptionFilterAttribute
 {
     public override void OnException(ExceptionContext context)
     {
-        ErrorActionResult error = new(context.Exception.Message);
+        GenericResponse error = new(context.Exception.Message, isError: true);
 
         context.HttpContext.RequestServices
             .GetService<ILogger<ErrorLoggingFilterAttribute>>()?

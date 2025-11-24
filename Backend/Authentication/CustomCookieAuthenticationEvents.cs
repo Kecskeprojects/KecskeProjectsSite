@@ -18,7 +18,7 @@ public sealed class CustomCookieAuthenticationEvents : CookieAuthenticationEvent
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        ErrorActionResult error = new("You do not have the right roles for this page!");
+        GenericResponse error = new("You do not have the right roles for this page!", isError: true);
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = StatusCodes.Status403Forbidden;
 
@@ -29,7 +29,7 @@ public sealed class CustomCookieAuthenticationEvents : CookieAuthenticationEvent
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        ErrorActionResult error = new("You are not logged in!");
+        GenericResponse error = new("You are not logged in!", isError: true);
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
