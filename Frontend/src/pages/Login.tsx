@@ -31,13 +31,11 @@ export default function Login(): JSX.Element {
       <div className="login">
         <h1>Login</h1>
         <form onSubmit={PerformLogin}>
-          <input className="login-input" type="text" name="username" />
+          <input type="text" name="username" />
           <br />
-          <input className="login-input" type="password" name="password" />
+          <input type="password" name="password" />
           <br />
-          <button className="login-button" type="submit">
-            Login
-          </button>
+          <button type="submit">Login</button>
         </form>
       </div>
     </div>

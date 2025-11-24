@@ -1,21 +1,22 @@
 import type { JSX } from "react";
 import React from "react";
-import type { IWindowDescription } from "../../interface/IWindowDescription";
+import type EditWindowBaseProps from "../../interface/IEditWIndowBaseProps";
+import type IWindowDescription from "../../interface/IWindowDescription";
+import type IWindowInput from "../../interface/IWindowInput";
 import ResponseObject from "../../models/ResponseObject";
+import InputBase from "../input/InputBase";
 
-export type EditWindowBaseProps = {
-  windowDescription: IWindowDescription;
-  responseHandler: (content?: any) => void;
-};
+export default function EditWindowBase<
+  windowDescriptionType extends IWindowDescription
+>(props: EditWindowBaseProps<windowDescriptionType>): JSX.Element {
+  const windowDescription = new props.windowDescriptionClass();
+  const editedItem = {} as any;
 
-export default function EditWindowBase(
-  props: EditWindowBaseProps
-): JSX.Element {
   function submitHandler(e: React.FormEvent<HTMLFormElement>): void {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    props.windowDescription
+    windowDescription
       .serviceFunction(formData)
       .then((res) => {
         if (res instanceof ResponseObject) {
@@ -30,9 +31,9 @@ export default function EditWindowBase(
           } else {
             console.log("No response content!");
           }
-
-          props.responseHandler();
         }
+
+        props.responseHandler();
       })
       .catch((error) => {
         //Todo: Proper user friendly error handling using floating popups or something
@@ -41,10 +42,35 @@ export default function EditWindowBase(
       });
   }
 
+  function inputUpdated(e: React.FormEvent<HTMLInputElement>): void {
+    const key = e.currentTarget.name;
+    const value = e.currentTarget.value;
+
+    editedItem[key] = value;
+  }
+
+  function renderInput(input: IWindowInput, ind: number): JSX.Element {
+    return (
+      <InputBase
+        {...input}
+        updated={inputUpdated}
+        editedItem={editedItem}
+        key={ind}
+      />
+    );
+  }
+
   return (
-    <div>
-      <h1>{props.windowDescription.title}</h1>
-      <form onSubmit={submitHandler}></form>
+    <div className={windowDescription.className}>
+      <h1>{windowDescription.title}</h1>
+      <form id={windowDescription.title} onSubmit={submitHandler}>
+        {windowDescription.inputArray.map((input, ind) => {
+          return renderInput(input, ind);
+        })}
+        <button type="submit">
+          {windowDescription.buttonText ?? "Submit"}
+        </button>
+      </form>
     </div>
   );
 }

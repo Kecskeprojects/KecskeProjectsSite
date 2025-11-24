@@ -1,7 +1,3 @@
-export type InputTypeParameters = {
-  type: string;
-};
-
 const InputTypesEnum = {
   Text: "text",
   Password: "password",
