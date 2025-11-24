@@ -133,8 +133,6 @@ export default class BaseService {
 
   static ErrorHandling(route: string, errorData: AxiosError<any, any>): void {
     if (!EnvironmentTools.IsProduction()) {
-      //console.log(errorData.toJSON());
-      //console.log(errorData.config);
       if (errorData.response) {
         // The request was made and the server responded with a status code
         console.log("[Error] Response From Backend:");

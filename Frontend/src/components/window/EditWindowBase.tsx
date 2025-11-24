@@ -26,14 +26,12 @@ export default function EditWindowBase<
           } else if (res.error) {
             console.log("Error Response!");
             console.log(res.message);
-          } else if (res.content) {
-            props.responseHandler(res.content);
-          } else {
+          } else if (!res.content) {
             console.log("No response content!");
           }
         }
 
-        props.responseHandler();
+        props.responseHandler(res);
       })
       .catch((error) => {
         //Todo: Proper user friendly error handling using floating popups or something
@@ -59,6 +57,8 @@ export default function EditWindowBase<
       />
     );
   }
+
+  //Todo: hasCloseFunctionality is not implemented, as well as the close functionality itself
 
   return (
     <div className={windowDescription.className}>

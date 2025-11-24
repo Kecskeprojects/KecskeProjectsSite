@@ -27,6 +27,7 @@ export default function App(): JSX.Element {
         setUser(data);
         setLoading(false);
       })
+      //Todo: Proper user friendly response handling using floating popups or something
       .catch((error) => console.log(error));
   }, []);
 

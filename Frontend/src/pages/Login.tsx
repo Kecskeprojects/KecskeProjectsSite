@@ -1,23 +1,18 @@
-import React, { useContext, type JSX } from "react";
+import { useContext, type JSX } from "react";
 import { Navigate } from "react-router-dom";
+import EditWindowBase from "../components/window/EditWindowBase";
+import LoginWindowDescription from "../components/window/WindowDescriptions/LoginWindowDescription";
 import "../css/Login.css";
-import AccountService from "../services/AccountService";
+import UserData from "../models/UserData";
 import { UserContext } from "../utilities/Contexts";
 
 export default function Login(): JSX.Element {
   const context = useContext(UserContext);
 
-  function PerformLogin(e: React.SyntheticEvent<HTMLFormElement>): void {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    AccountService.Login(formData)
-      .then((data) => {
-        if (context.setUser) {
-          context.setUser(data);
-        }
-      })
-      .catch((error) => console.log(error));
+  function handleLoginResponse(content: any): void {
+    if (content instanceof UserData && context.setUser) {
+      context.setUser(content);
+    }
   }
 
   if (context.user?.AccountId) {
@@ -28,16 +23,11 @@ export default function Login(): JSX.Element {
     <div>
       <div className="tear"></div>
       <div className="ripple"></div>
-      <div className="login">
-        <h1>Login</h1>
-        <form onSubmit={PerformLogin}>
-          <input type="text" name="username" />
-          <br />
-          <input type="password" name="password" />
-          <br />
-          <button type="submit">Login</button>
-        </form>
-      </div>
+      <EditWindowBase
+        responseHandler={handleLoginResponse}
+        windowDescriptionClass={LoginWindowDescription}
+        key={"loginWindow"}
+      />
     </div>
   );
 }
