@@ -4,6 +4,7 @@ import InputBase from "../components/input/InputBase";
 import InputTypesEnum from "../enum/InputTypesEnum";
 import RoleEnum from "../enum/RoleEnum";
 import FileService from "../services/FileService";
+import LogTools from "../tools/LogTools";
 import { UserContext } from "../utilities/Contexts";
 
 export default function Home(): JSX.Element {
@@ -15,7 +16,7 @@ export default function Home(): JSX.Element {
 
     FileService.Upload(formData, "", () => {})
       .then(() => {})
-      .catch((error) => console.log(error));
+      .catch((error) => LogTools.setErrorNotification(error?.message ?? error));
   }
 
   return (
