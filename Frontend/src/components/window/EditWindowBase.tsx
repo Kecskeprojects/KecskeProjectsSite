@@ -26,23 +26,19 @@ export default function EditWindowBase<
       .serviceFunction(formData)
       .then((res) => {
         if (res instanceof ResponseObject) {
-          //Todo: Proper user friendly response handling using floating popups or something
           if (res.message) {
-            console.log(res.message);
+            LogTools.setSuccessNotification(res.message);
           } else if (res.error) {
-            console.log("Error Response!");
-            console.log(res.message);
+            LogTools.setErrorNotification(res.error);
           } else if (!res.content) {
-            console.log("No response content!");
+            LogTools.setErrorNotification("Server error!");
           }
         }
 
         props.responseHandler(res);
       })
       .catch((error) => {
-        //Todo: Proper user friendly error handling using floating popups or something
-        console.log("Edit Window Error!");
-        console.log(error);
+        LogTools.setErrorNotification(error?.message ?? error);
       });
   }
 
@@ -66,13 +62,11 @@ export default function EditWindowBase<
 
   //Todo: hasCloseFunctionality is not implemented, as well as the close functionality itself
 
+  const classNames =
+    "" + (windowDescription.className ? ` ${windowDescription.className}` : "");
+
   return (
-    <div
-      className={
-        "" +
-        (windowDescription.className ? ` ${windowDescription.className}` : "")
-      }
-    >
+    <div className={classNames}>
       <h1>{windowDescription.title}</h1>
       <form id={windowDescription.title} onSubmit={submitHandler}>
         {windowDescription.inputArray.map((input, ind) => {

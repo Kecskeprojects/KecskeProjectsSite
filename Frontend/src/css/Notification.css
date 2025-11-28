@@ -1,0 +1,47 @@
+.notification-base {
+  position: absolute;
+  width: 30vw;
+  top: -10vh;
+  left: 35vw;
+  right: 35vw;
+  border-radius: 30px;
+  z-index: 5;
+}
+
+.notification-animation {
+  animation-name: moveDown;
+  animation-timing-function: ease-in-out;
+  animation-duration: 3s;
+  animation-fill-mode: forwards;
+  animation-delay: 1s;
+}
+
+.error-notification {
+  background-color: red;
+}
+
+.success-notification {
+  background-color: greenyellow;
+}
+
+.info-notification {
+  background-color: lightskyblue;
+}
+
+@keyframes moveDown {
+  0% {
+    top: -10vh;
+  }
+  10% {
+    top: 2vh;
+  }
+  50% {
+    top: 2vh;
+  }
+  90% {
+    top: 2vh;
+  }
+  100% {
+    top: -10vh;
+  }
+}

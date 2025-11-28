@@ -1,8 +1,4 @@
-import axios, {
-  AxiosError,
-  AxiosHeaders,
-  type AxiosProgressEvent,
-} from "axios";
+import axios, { AxiosHeaders, type AxiosProgressEvent } from "axios";
 import Constants from "../enum/Constants";
 import type ResponseObject from "../models/ResponseObject";
 import BackendServiceTools from "../tools/BackendServiceTools";
@@ -116,9 +112,7 @@ export default class BaseService {
 
         responseBody = error.response?.data as ResponseObject;
       } else {
-        //Todo: Proper user friendly error handling using floating popups or something
-        console.log("Non Axios Error!");
-        console.log(error);
+        LogTools.setErrorNotification("Unexpected error before request!");
 
         responseBody = {
           error: "Unexpected error before request!",
@@ -133,7 +127,7 @@ export default class BaseService {
     return responseBody;
   }
 
-  static ErrorHandling(route: string, errorData: AxiosError<any, any>): void {
+  static ErrorHandling(route: string, errorData: any): void {
     if (!EnvironmentTools.IsProduction()) {
       if (errorData.response) {
         // The request was made and the server responded with a status code
@@ -152,13 +146,12 @@ export default class BaseService {
       }
     }
 
-    //Todo: Proper user friendly error handling using floating popups or something
     const status = errorData?.response?.status
       ? errorData?.response?.status
       : errorData?.request?.status;
     const response = errorData?.response?.data as ResponseObject;
-    if (response?.error) {
-      console.log(`Status Code: ${status}\nError: ${response.error}`);
+    if (response?.error && !route.startsWith(Constants.GetUserStateEndpoint)) {
+      LogTools.setErrorNotification(response.error);
     }
 
     if (
