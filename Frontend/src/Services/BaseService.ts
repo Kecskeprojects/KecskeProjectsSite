@@ -121,7 +121,7 @@ export default class BaseService {
     }
 
     if (!EnvironmentTools.IsProduction() && responseBody) {
-      LogTools.DebugLog("Response Body:", responseBody);
+      LogTools.DebugLog("[Success] Response From Backend:", responseBody);
     }
 
     return responseBody;
@@ -131,18 +131,23 @@ export default class BaseService {
     if (!EnvironmentTools.IsProduction()) {
       if (errorData.response) {
         // The request was made and the server responded with a status code
-        console.log("[Error] Response From Backend:");
-        console.log(errorData.response.data);
-        console.log(errorData.response.status);
+        LogTools.DebugLog(
+          "[Error] Response From Backend:",
+          `${errorData.response.data}\n${errorData.response.status}`
+        );
       } else if (errorData.request) {
         // The request was made but no response was received
         // `error.request` is an instance of XMLHttpRequest
-        console.log("[Error] No Response From Backend:");
-        console.log(errorData.request);
+        LogTools.DebugLog(
+          "[Error] No Response From Backend:",
+          `${errorData.request}`
+        );
       } else {
         // Something happened in setting up the request that triggered an Error
-        console.log("[Error] Pre-Request Configuration Issue:");
-        console.log(errorData.message);
+        LogTools.DebugLog(
+          "[Error] Pre-Request Configuration Issue:",
+          `${errorData.message}`
+        );
       }
     }
 
