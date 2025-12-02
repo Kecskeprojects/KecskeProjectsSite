@@ -104,5 +104,6 @@
     left: calc(50vw - 100px);
     right: calc(50vw - 100px);
     opacity: 1;
+    overflow-y: auto;
   }
 }

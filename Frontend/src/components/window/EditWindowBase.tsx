@@ -63,7 +63,8 @@ export default function EditWindowBase<
   //Todo: hasCloseFunctionality is not implemented, as well as the close functionality itself
 
   const classNames =
-    "" + (windowDescription.className ? ` ${windowDescription.className}` : "");
+    "editwindow-base" +
+    (windowDescription.className ? ` ${windowDescription.className}` : "");
 
   return (
     <div className={classNames}>
@@ -72,10 +73,10 @@ export default function EditWindowBase<
         {windowDescription.inputArray.map((input, ind) => {
           return renderInput(input, ind);
         })}
-        <button type="submit">
-          {windowDescription.buttonText ?? "Submit"}
-        </button>
       </form>
+      <button type="submit" form={windowDescription.title}>
+        {windowDescription.buttonText ?? "Submit"}
+      </button>
     </div>
   );
 }
