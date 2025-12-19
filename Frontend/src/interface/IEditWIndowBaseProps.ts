@@ -1,6 +1,6 @@
 import type IWindowDescription from "./IWindowDescription";
 
-export default interface EditWindowBaseProps<
+export default interface IEditWindowBaseProps<
   windowDescriptionType extends IWindowDescription
 > {
   windowDescriptionClass: { new (): windowDescriptionType };

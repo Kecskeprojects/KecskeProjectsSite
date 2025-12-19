@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import React from "react";
-import type EditWindowBaseProps from "../../interface/IEditWIndowBaseProps";
+import type IEditWindowBaseProps from "../../interface/IEditWIndowBaseProps";
 import type IInputForEdit from "../../interface/IInputForEdit";
 import type IWindowDescription from "../../interface/IWindowDescription";
 import ResponseObject from "../../models/ResponseObject";
@@ -10,7 +10,7 @@ import InputBase from "../input/InputBase";
 
 export default function EditWindowBase<
   windowDescriptionType extends IWindowDescription
->(props: EditWindowBaseProps<windowDescriptionType>): JSX.Element {
+>(props: IEditWindowBaseProps<windowDescriptionType>): JSX.Element {
   const windowDescription = new props.windowDescriptionClass();
   const editedItem = {} as any;
 

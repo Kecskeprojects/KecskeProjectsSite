@@ -4,11 +4,9 @@ using Backend.Communication.Internal;
 using Backend.Communication.Outgoing;
 using Backend.Controllers.Base;
 using Backend.CustomAttributes;
-using Backend.Database.Model;
 using Backend.Database.Service;
 using Backend.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;

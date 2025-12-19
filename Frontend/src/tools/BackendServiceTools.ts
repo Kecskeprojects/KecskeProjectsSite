@@ -21,6 +21,10 @@ export default class BackendServiceTools {
       }
     });
 
+    if (query === "?") {
+      return "";
+    }
+
     return query;
   }
 

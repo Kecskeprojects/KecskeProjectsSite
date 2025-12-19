@@ -1,15 +1,11 @@
-import { useContext, type JSX } from "react";
+import { type JSX } from "react";
 import { Link } from "react-router-dom";
 import InputBase from "../components/input/InputBase";
 import InputTypesEnum from "../enum/InputTypesEnum";
-import RoleEnum from "../enum/RoleEnum";
 import FileService from "../services/FileService";
 import LogTools from "../tools/LogTools";
-import { UserContext } from "../utilities/Contexts";
 
 export default function Home(): JSX.Element {
-  const context = useContext(UserContext);
-
   function PerformUpload(e: React.SyntheticEvent<HTMLFormElement>): void {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -25,7 +21,6 @@ export default function Home(): JSX.Element {
       <div>
         <Link to="example">Example Page</Link>
         <br />
-        {context.user?.hasRole(RoleEnum.Admin) ? "IsAdmin" : "IsNotAdmin"}
 
         <form onSubmit={PerformUpload}>
           <InputBase

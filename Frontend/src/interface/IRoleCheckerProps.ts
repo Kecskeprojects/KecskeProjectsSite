@@ -1,3 +1,3 @@
-export default interface RoleCheckerProps {
+export default interface IRoleCheckerProps {
   roles?: Array<string>;
 }

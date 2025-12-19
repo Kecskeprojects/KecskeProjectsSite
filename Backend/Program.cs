@@ -7,9 +7,11 @@ using Backend.Services;
 using Backend.Tools.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.Versioning;
 
 namespace Backend;
 
+[SupportedOSPlatform("windows")]
 public class Program
 {
     public static void Main(string[] args)
@@ -94,5 +96,6 @@ public class Program
         services.AddScoped(typeof(GenericService<>));
         services.AddScoped<AccountService>();
         services.AddScoped<FileStorageService>();
+        services.AddScoped<FirewallApiService>();
     }
 }

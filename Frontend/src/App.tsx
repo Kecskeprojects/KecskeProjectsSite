@@ -11,6 +11,7 @@ import UserData from "./models/UserData";
 import ExampleComponent from "./pages/ExampleComponent";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Security from "./pages/Security";
 import AccountService from "./services/AccountService";
 import LogTools from "./tools/LogTools";
 import { UserContext } from "./utilities/Contexts";
@@ -51,6 +52,7 @@ export default function App(): JSX.Element {
                   <Route path="example" element={<ExampleComponent />}>
                     <Route path=":id" element={<ExampleComponent />} />
                   </Route>
+                  <Route path="security" element={<Security />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
