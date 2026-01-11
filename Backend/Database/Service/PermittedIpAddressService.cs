@@ -7,17 +7,26 @@ namespace Backend.Database.Service;
 
 public class PermittedIpAddressService(IConfiguration configuration, GenericRepository<PermittedIpAddress> repository) : GenericService<PermittedIpAddress>(repository)
 {
-    public Task<DatabaseActionResult<int>> AddAsync(int accountId, string ipAddress)
+    public async Task<DatabaseActionResult<int>> AddAsync(int accountId, string ipAddress)
     {
         int expirationMinutes = configuration.GetValue<int>("RDPAccessExpirationMinutes");
-        PermittedIpAddress newEntry = new()
+
+        PermittedIpAddress? entry = await repository.FirstOrDefaultAsync(entry => entry.IpAddress == ipAddress);
+
+        entry ??= new()
         {
             IpAddress = ipAddress,
             AccountId = accountId,
             ExpiresOnUtc = DateTime.UtcNow.AddMinutes(expirationMinutes),
         };
 
-        return AddAsync(newEntry);
+        entry.ExpiresOnUtc = DateTime.UtcNow.AddMinutes(expirationMinutes);
+
+        if(entry.PermittedIpAddressId > 0)
+        {
+            return await UpdateAsync(entry);
+        }
+        return await AddAsync(entry);
     }
 
     public async Task<DatabaseActionResult<List<string>?>> GetExpiredIPAddressesAsync()
