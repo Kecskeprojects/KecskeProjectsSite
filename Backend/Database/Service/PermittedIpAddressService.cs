@@ -17,7 +17,6 @@ public class PermittedIpAddressService(IConfiguration configuration, GenericRepo
         {
             IpAddress = ipAddress,
             AccountId = accountId,
-            ExpiresOnUtc = DateTime.UtcNow.AddMinutes(expirationMinutes),
         };
 
         entry.ExpiresOnUtc = DateTime.UtcNow.AddMinutes(expirationMinutes);
