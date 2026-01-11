@@ -65,6 +65,8 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
 
             firewallRuleTCP.RemoteAddresses = $"{firewallRuleTCP.RemoteAddresses.Replace("*", "")},{ip}";
             firewallRuleUDP.RemoteAddresses = $"{firewallRuleUDP.RemoteAddresses.Replace("*", "")},{ip}";
+
+            logger.LogInformation($"Added the following IP address to the whitelist: {ip}");
         }
 
         return true;
@@ -107,14 +109,16 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
 
         foreach (string ip in expiredIPs.Data!)
         {
-            tcpAddresses = tcpAddresses.Where(x => x.Contains(ip));
-            udpAddresses = udpAddresses.Where(x => x.Contains(ip));
+            tcpAddresses = tcpAddresses.Where(x => !x.Contains(ip));
+            udpAddresses = udpAddresses.Where(x => !x.Contains(ip));
         }
 
         firewallRuleTCP.RemoteAddresses = tcpAddresses.Any() ? string.Join(',', tcpAddresses) : "127.0.0.1";
         firewallRuleUDP.RemoteAddresses = udpAddresses.Any() ? string.Join(',', udpAddresses) : "127.0.0.1";
 
         DatabaseActionResult<int> result = await permittedIpAddressService.RemoveIPAddressesAsync(expiredIPs.Data);
+
+        logger.LogInformation($"Removed the following IP addresses from the whitelist: {string.Join(", ", expiredIPs.Data)}");
 
         return result.Status == DatabaseActionResultEnum.Success;
     }

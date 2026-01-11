@@ -9,23 +9,27 @@ public class FirewallRuleExpirationWatcher(
     ILogger<FirewallRuleExpirationWatcher> logger
     ) : IHostedService, IDisposable
 {
-    private int executionCount = 0;
     private bool running = false;
     private bool disposed = false;
     private Timer? Timer { get; set; }
 
     public Task StartAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Timed Hosted Service running.");
+        logger.LogInformation("Timed Hosted Service is starting.");
 
-        Timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+#if DEBUG
+        TimeSpan interval = TimeSpan.FromMinutes(1);
+#else
+        TimeSpan interval = TimeSpan.FromMinutes(5);
+#endif
+
+        Timer = new Timer(DoWork, null, TimeSpan.Zero, interval);
 
         return Task.CompletedTask;
     }
 
     private void DoWork(object? state)
     {
-        int count = Interlocked.Increment(ref executionCount);
 
         if (running)
         {
@@ -34,14 +38,14 @@ public class FirewallRuleExpirationWatcher(
         }
 
         running = true;
-        logger.LogInformation($"Timed Hosted Service is working. Count: {count}");
+        logger.LogInformation($"Timed Hosted Service is working.");
 
         try
         {
             using (IServiceScope scope = serviceProvider.CreateScope())
             {
                 FirewallApiService firewallService = scope.ServiceProvider.GetRequiredService<FirewallApiService>();
-                firewallService.RemoveExpiredRDPRules().GetAwaiter().GetResult();
+                bool _ = firewallService.RemoveExpiredRDPRules().GetAwaiter().GetResult();
             }
         }
         catch (Exception ex)

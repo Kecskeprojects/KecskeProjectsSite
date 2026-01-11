@@ -5,15 +5,16 @@ using Backend.Enums;
 
 namespace Backend.Database.Service;
 
-public class PermittedIpAddressService(GenericRepository<PermittedIpAddress> repository) : GenericService<PermittedIpAddress>(repository)
+public class PermittedIpAddressService(IConfiguration configuration, GenericRepository<PermittedIpAddress> repository) : GenericService<PermittedIpAddress>(repository)
 {
     public Task<DatabaseActionResult<int>> AddAsync(int accountId, string ipAddress)
     {
+        int expirationMinutes = configuration.GetValue<int>("RDPAccessExpirationMinutes");
         PermittedIpAddress newEntry = new()
         {
             IpAddress = ipAddress,
             AccountId = accountId,
-            ExpiresOnUtc = DateTime.UtcNow.AddHours(6),
+            ExpiresOnUtc = DateTime.UtcNow.AddMinutes(expirationMinutes),
         };
 
         return AddAsync(newEntry);
