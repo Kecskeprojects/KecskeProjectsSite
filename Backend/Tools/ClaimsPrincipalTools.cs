@@ -26,7 +26,7 @@ public class ClaimsPrincipalTools
         return principal;
     }
 
-    public static LoggedInAccount? GetLoggedInUser(ClaimsPrincipal principal)
+    public static LoggedInAccount? GetLoggedInAccount(ClaimsPrincipal principal)
     {
         if (principal.Identity is not ClaimsIdentity identity || !identity.IsAuthenticated)
         {

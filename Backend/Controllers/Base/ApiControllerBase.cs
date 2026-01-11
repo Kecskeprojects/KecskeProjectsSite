@@ -9,9 +9,9 @@ public class ApiControllerBase(ILogger logger) : ControllerBase
     protected ILogger Logger { get; } = logger;
 
     [NonAction]
-    protected LoggedInAccount? GetLoggedInUserFromCookie()
+    protected LoggedInAccount? GetLoggedInAccountFromCookie()
     {
-        return ClaimsPrincipalTools.GetLoggedInUser(HttpContext.User);
+        return ClaimsPrincipalTools.GetLoggedInAccount(HttpContext.User);
     }
 
     [NonAction]

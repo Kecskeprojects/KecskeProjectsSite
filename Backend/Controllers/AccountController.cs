@@ -16,7 +16,7 @@ namespace Backend.Controllers;
 [Route("api/[controller]/[action]")]
 public class AccountController(
     AccountService accountService,
-    AuthorizationCookieManager userManager,
+    AuthorizationCookieManager AccountManager,
     ILogger<AccountController> logger
     ) : ApiControllerBase(logger)
 {
@@ -24,9 +24,9 @@ public class AccountController(
 
     [Authorize]
     [HttpGet]
-    public IActionResult GetLoggedInUser()
+    public IActionResult GetLoggedInAccount()
     {
-        LoggedInAccount? account = GetLoggedInUserFromCookie();
+        LoggedInAccount? account = GetLoggedInAccountFromCookie();
         return account != null
             ? ContentResult(account)
             : ErrorResult(StatusCodes.Status401Unauthorized, "You are not logged in!");
@@ -48,12 +48,12 @@ public class AccountController(
     [HttpPost]
     public async Task<IActionResult> Login([FromForm] LoginData form)
     {
-        LoggedInAccount? account = await userManager.SignIn(HttpContext, form.UserName, form.Password);
+        LoggedInAccount? account = await AccountManager.SignIn(HttpContext, form.UserName, form.Password);
         if (account != null)
         {
             _ = await accountService.UpdateLastLoginAsync(account.AccountId);
 
-            Logger.LogInformation($"User {account.UserName} logged in successfully.");
+            Logger.LogInformation($"Account {account.UserName} logged in successfully.");
             return ContentResult(account);
         }
 
@@ -63,10 +63,10 @@ public class AccountController(
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
-        LoggedInAccount? user = GetLoggedInUserFromCookie();
+        LoggedInAccount? user = GetLoggedInAccountFromCookie();
 
-        Logger.LogInformation("User {UserName} is logging out.", user?.UserName);
-        await userManager.SignOut(HttpContext);
+        Logger.LogInformation($"Acount {user?.UserName} is logging out.");
+        await AccountManager.SignOut(HttpContext);
 
         return MessageResult("You have been logged out!");
     }
@@ -79,7 +79,7 @@ public class AccountController(
         return result.Status switch
         {
             DatabaseActionResultEnum.Success => MessageResult("Your password has been reset!"),
-            DatabaseActionResultEnum.NotFound => ErrorResult(StatusCodes.Status428PreconditionRequired, "User with that name doesn't exist."),
+            DatabaseActionResultEnum.NotFound => ErrorResult(StatusCodes.Status428PreconditionRequired, "Account with that name doesn't exist."),
             DatabaseActionResultEnum.DifferingHash => ErrorResult(StatusCodes.Status401Unauthorized, "Key is incorrect."),
             _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while resetting password.")
         };

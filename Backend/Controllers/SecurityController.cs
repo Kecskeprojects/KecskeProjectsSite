@@ -1,4 +1,5 @@
-﻿using Backend.Controllers.Base;
+﻿using Backend.Communication.Outgoing;
+using Backend.Controllers.Base;
 using Backend.CustomAttributes;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -29,7 +30,9 @@ public class SecurityController(
             return ErrorResult(StatusCodes.Status400BadRequest, "IP address is required.");
         }
 
-        bool success = firewallApiService.ModifyRDPRule(address);
+        LoggedInAccount? loggedInAccount = GetLoggedInAccountFromCookie();
+
+        bool success = await firewallApiService.AddRDPRule(loggedInAccount!.AccountId, address);
 
         return success
             ? MessageResult("Firewall rule updated successfully.")

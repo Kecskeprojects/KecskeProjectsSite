@@ -14,6 +14,8 @@ public partial class KecskeDatabaseContext : DbContext
 
     public virtual DbSet<Account> Accounts { get; set; }
 
+    public virtual DbSet<PermittedIpAddress> PermittedIpAddresses { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,6 +40,29 @@ public partial class KecskeDatabaseContext : DbContext
             entity.Property(e => e.Password).HasMaxLength(84);
             entity.Property(e => e.SecretKey).HasMaxLength(84);
             entity.Property(e => e.UserName).HasMaxLength(200);
+        });
+
+        modelBuilder.Entity<PermittedIpAddress>(entity =>
+        {
+            entity.HasKey(e => e.PermittedIpAddressId).HasName("PK_PermittedIpAddress_PermittedIpAddressId");
+
+            entity.ToTable("PermittedIpAddress");
+
+            entity.Property(e => e.CreatedOnUtc)
+                .HasDefaultValueSql("(getutcdate())", "DF_PermittedIpAddress_CreatedOnUtc")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ExpiresOnUtc).HasColumnType("datetime");
+            entity.Property(e => e.IpAddress)
+                .HasMaxLength(15)
+                .IsUnicode(false);
+            entity.Property(e => e.ModifiedOnUtc)
+                .HasDefaultValueSql("(getutcdate())", "DF_PermittedIpAddress_ModifiedOnUtc")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Account).WithMany(p => p.PermittedIpAddresses)
+                .HasForeignKey(d => d.AccountId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PermittedIpAddress_AccountId");
         });
 
         modelBuilder.Entity<Role>(entity =>

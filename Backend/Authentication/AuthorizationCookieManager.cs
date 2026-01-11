@@ -32,7 +32,7 @@ public class AuthorizationCookieManager(AccountService accountService)
 
         await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-        return ClaimsPrincipalTools.GetLoggedInUser(principal);
+        return ClaimsPrincipalTools.GetLoggedInAccount(principal);
     }
 
     public async Task SignOut(HttpContext httpContext)

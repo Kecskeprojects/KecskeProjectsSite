@@ -3,6 +3,7 @@ using Backend.BackgroundServices;
 using Backend.Database;
 using Backend.Database.Repository;
 using Backend.Database.Service;
+using Backend.HostedServices;
 using Backend.Services;
 using Backend.Tools.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -92,10 +93,14 @@ public class Program
         //Database
         services.AddDbContext<KecskeDatabaseContext>(options => options.UseSqlServer(configuration.GetConnectionString("DatabaseConnection")));
 
+        services.AddHostedService<FirewallRuleExpirationWatcher>();
+
+        services.AddScoped<FileStorageService>();
+        services.AddScoped<FirewallApiService>();
+
         services.AddScoped(typeof(GenericRepository<>));
         services.AddScoped(typeof(GenericService<>));
         services.AddScoped<AccountService>();
-        services.AddScoped<FileStorageService>();
-        services.AddScoped<FirewallApiService>();
+        services.AddScoped<PermittedIpAddressService>();
     }
 }
