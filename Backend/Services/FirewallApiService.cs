@@ -14,8 +14,8 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
     const string FWRuleProgID = "HNetCfg.FWRule";
 
 #if DEBUG
-    const string ruleNameTCP = "RDP Whitelist TCP Debug";
-    const string ruleNameUDP = "RDP Whitelist UDP Debug";
+    const string ruleNameTCP = "[DEBUG] RDP Whitelist TCP";
+    const string ruleNameUDP = "[DEBUG] RDP Whitelist UDP";
 #else
     const string ruleNameTCP = "RDP Whitelist TCP";
     const string ruleNameUDP = "RDP Whitelist UDP";
@@ -30,34 +30,16 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
             return false;
         }
 
-        Type? fwPolicy = Type.GetTypeFromProgID(FWPolicyProgID);
-        if (fwPolicy is null)
+        return await ProcessFirewallRuleChange(async (firewallRuleTCP, firewallRuleUDP) =>
         {
-            logger.LogError("Failed to get type for firewall list.");
-            return false;
-        }
+            if (firewallRuleTCP.RemoteAddresses.Contains(ip) && firewallRuleUDP.RemoteAddresses.Contains(ip))
+            {
+                return true;
+            }
 
-        INetFwPolicy2? firewallPolicy = (INetFwPolicy2?) Activator.CreateInstance(fwPolicy);
-
-        if (firewallPolicy is null)
-        {
-            logger.LogError("Failed to create firewall policy instance.");
-            return false;
-        }
-
-        INetFwRule? firewallRuleTCP = GetOrCreateRule(firewallPolicy, ruleNameTCP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_TCP);
-        INetFwRule? firewallRuleUDP = GetOrCreateRule(firewallPolicy, ruleNameUDP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_UDP);
-
-        if (firewallRuleTCP is null || firewallRuleUDP is null)
-        {
-            return false;
-        }
-
-        if (!firewallRuleTCP.RemoteAddresses.Contains(ip) || !firewallRuleUDP.RemoteAddresses.Contains(ip))
-        {
             DatabaseActionResult<int> dbResult = await permittedIpAddressService.AddAsync(accountId, ip);
 
-            if(dbResult.Status != DatabaseActionResultEnum.Success)
+            if (dbResult.Status != DatabaseActionResultEnum.Success)
             {
                 logger.LogError($"Failed to add IP address {ip} to the database for account {accountId}.");
                 return false;
@@ -67,12 +49,42 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
             firewallRuleUDP.RemoteAddresses = $"{firewallRuleUDP.RemoteAddresses.Replace("*", "")},{ip}";
 
             logger.LogInformation($"Added the following IP address to the whitelist: {ip}");
-        }
-
-        return true;
+            return true;
+        });
     }
 
     public async Task<bool> RemoveExpiredRDPRules()
+    {
+        return await ProcessFirewallRuleChange(async (firewallRuleTCP, firewallRuleUDP) =>
+        {
+            DatabaseActionResult<List<string>?> expiredIPs = await permittedIpAddressService.GetExpiredIPAddressesAsync();
+
+            if (CollectionTools.IsNullOrEmpty(expiredIPs.Data))
+            {
+                return true;
+            }
+
+            IEnumerable<string> tcpAddresses = firewallRuleTCP.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+            IEnumerable<string> udpAddresses = firewallRuleUDP.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+            foreach (string ip in expiredIPs.Data!)
+            {
+                tcpAddresses = tcpAddresses.Where(x => !x.Contains(ip));
+                udpAddresses = udpAddresses.Where(x => !x.Contains(ip));
+            }
+
+            firewallRuleTCP.RemoteAddresses = tcpAddresses.Any() ? string.Join(',', tcpAddresses) : "127.0.0.1";
+            firewallRuleUDP.RemoteAddresses = udpAddresses.Any() ? string.Join(',', udpAddresses) : "127.0.0.1";
+
+            DatabaseActionResult<int> result = await permittedIpAddressService.RemoveIPAddressesAsync(expiredIPs.Data);
+
+            logger.LogInformation($"Removed the following IP addresses from the whitelist: {string.Join(", ", expiredIPs.Data)}");
+
+            return result.Status == DatabaseActionResultEnum.Success;
+        });
+    }
+
+    private async Task<bool> ProcessFirewallRuleChange(Func<INetFwRule, INetFwRule, Task<bool>> changeLogic)
     {
         Type? fwPolicy = Type.GetTypeFromProgID(FWPolicyProgID);
         if (fwPolicy is null)
@@ -97,30 +109,7 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
             return false;
         }
 
-        DatabaseActionResult<List<string>?> expiredIPs = await permittedIpAddressService.GetExpiredIPAddressesAsync();
-
-        if(CollectionTools.IsNullOrEmpty(expiredIPs.Data))
-        {
-            return true;
-        }
-
-        IEnumerable<string> tcpAddresses = firewallRuleTCP.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
-        IEnumerable<string> udpAddresses = firewallRuleUDP.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
-
-        foreach (string ip in expiredIPs.Data!)
-        {
-            tcpAddresses = tcpAddresses.Where(x => !x.Contains(ip));
-            udpAddresses = udpAddresses.Where(x => !x.Contains(ip));
-        }
-
-        firewallRuleTCP.RemoteAddresses = tcpAddresses.Any() ? string.Join(',', tcpAddresses) : "127.0.0.1";
-        firewallRuleUDP.RemoteAddresses = udpAddresses.Any() ? string.Join(',', udpAddresses) : "127.0.0.1";
-
-        DatabaseActionResult<int> result = await permittedIpAddressService.RemoveIPAddressesAsync(expiredIPs.Data);
-
-        logger.LogInformation($"Removed the following IP addresses from the whitelist: {string.Join(", ", expiredIPs.Data)}");
-
-        return result.Status == DatabaseActionResultEnum.Success;
+        return await changeLogic(firewallRuleTCP, firewallRuleUDP);
     }
 
     private INetFwRule? GetOrCreateRule(INetFwPolicy2 firewallPolicy, string ruleName, NET_FW_IP_PROTOCOL_ protocol)

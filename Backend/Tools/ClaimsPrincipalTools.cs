@@ -37,8 +37,8 @@ public class ClaimsPrincipalTools
         return new LoggedInAccount
         {
             AccountId = accountId,
-            UserName = identity.FindFirst(ClaimTypes.Name)?.Value,
-            Roles = [.. identity.FindAll(ClaimTypes.Role).Select(x => x?.Value)]
+            UserName = identity.FindFirst(ClaimTypes.Name)?.Value ?? "Voldemort",
+            Roles = identity.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList()
         };
     }
 }

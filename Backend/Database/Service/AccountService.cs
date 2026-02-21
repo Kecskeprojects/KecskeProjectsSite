@@ -15,7 +15,7 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
         bool usernameAlreadyRegistered = await repository.ExistsAsync(a => a.UserName.Contains(username));
         if (usernameAlreadyRegistered)
         {
-            return CreateResult(DatabaseActionResultEnum.AlreadyExists, (string?) null);
+            return CreateResult(DatabaseActionResultEnum.AlreadyExists, "Username is taken.");
         }
 
         Account account = new()

@@ -16,6 +16,6 @@ public static class StringTools
         }
 
 
-        return splitValues.All(r => byte.TryParse(r, out byte tempForParsing));
+        return splitValues.All(r => byte.TryParse(r, out byte _));
     }
 }

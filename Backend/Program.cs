@@ -19,12 +19,12 @@ public class Program
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        _ = builder.Services.AddHostedService<FileLoggerBackgroundService>();
-        _ = builder.Logging.ClearProviders();
-        _ = builder.Logging.AddFileLogger();
-
         // Add services to the container.
         ConfigureServices(builder.Configuration, builder.Services);
+
+        //Setting custom file logging configuration
+        _ = builder.Logging.ClearProviders();
+        _ = builder.Logging.AddFileLogger();
 
         _ = builder.Services.AddControllers();
 
@@ -32,6 +32,7 @@ public class Program
 
         WebApplication app = builder.Build();
 
+        //Swagger is only available during development
         if (app.Environment.IsDevelopment())
         {
             _ = app.MapOpenApi();
@@ -45,6 +46,7 @@ public class Program
             _ = app.MapGet("/", () => "The backend is running, now shoo!");
         }
 
+        //Todo: Add proper frontend endpoint for origin, and make localhost only available during development
         _ = app.UseCors(options => options
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -64,8 +66,17 @@ public class Program
 
     private static void ConfigureServices(ConfigurationManager configuration, IServiceCollection services)
     {
-        //Authorization
+        //Background service responsible for transferring ILogger entries into permanent file logs
+        services.AddHostedService<FileLoggerBackgroundService>();
+
+        //Background service for custom RDP connection solution using temporary firewall rules
+        //this service is responsible for removing expired firewall rules from the system
+        services.AddHostedService<FirewallRuleExpirationWatcher>();
+
+        //Custom authorization overriding built in microsoft cookie authentication
         services.AddTransient<AuthorizationCookieManager>();
+
+        //Custom handler for endpoints that require authentication
         services.AddSingleton<CustomCookieAuthenticationEvents>();
 
         services
@@ -92,8 +103,6 @@ public class Program
 
         //Database
         services.AddDbContext<KecskeDatabaseContext>(options => options.UseSqlServer(configuration.GetConnectionString("DatabaseConnection")));
-
-        services.AddHostedService<FirewallRuleExpirationWatcher>();
 
         services.AddScoped<FileStorageService>();
         services.AddScoped<FirewallApiService>();

@@ -22,8 +22,8 @@ public class AuthorizationCookieManager(AccountService accountService)
                 a => a.Roles);
 
         if (result.Data is null
-            || !EncryptionTools.VerifyPassword(result.Data, password, result.Data.Password)
-            || !result.Data.IsRegistrationApproved)
+            || !result.Data.IsRegistrationApproved
+            || !EncryptionTools.VerifyPassword(result.Data, password, result.Data.Password))
         {
             return null;
         }

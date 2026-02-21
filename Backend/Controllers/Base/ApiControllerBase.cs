@@ -29,11 +29,7 @@ public class ApiControllerBase(ILogger logger) : ControllerBase
     [NonAction]
     protected IActionResult ErrorResult(int statusCode, string error)
     {
-        Logger.LogError(
-            "An error occurred: {error}\nWith status code: {statusCode}\nWith request path: {Path}",
-            error,
-            statusCode,
-            HttpContext.Request.Path);
+        Logger.LogError($"An error occurred: {error}\nWith status code: {statusCode}\nWith request path: {HttpContext.Request.Path}");
         return StatusCode(statusCode, new GenericResponse(error, isError: true));
     }
 }

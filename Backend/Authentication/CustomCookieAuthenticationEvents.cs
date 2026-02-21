@@ -13,8 +13,7 @@ public sealed class CustomCookieAuthenticationEvents : CookieAuthenticationEvent
         WriteIndented = true
     };
 
-    public override async Task RedirectToAccessDenied(
-              RedirectContext<CookieAuthenticationOptions> context)
+    public override async Task RedirectToAccessDenied(RedirectContext<CookieAuthenticationOptions> context)
     {
         ArgumentNullException.ThrowIfNull(context);
 

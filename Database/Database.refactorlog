@@ -42,4 +42,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="AccountId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="fa0ca10b-0baa-406e-9e0c-47a85e76fdf7" ChangeDateTime="02/21/2026 18:56:39">
+    <Property Name="ElementName" Value="[dbo].[Folder].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Folder]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="FolderId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6fcfaa58-d730-4dc3-88d1-6c7559b43ba9" ChangeDateTime="02/21/2026 19:00:35">
+    <Property Name="ElementName" Value="[dbo].[FileFolderRole].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[FileFolderRole]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="FileFolder" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9a7c8190-11b0-4a84-b766-9508188ed4dd" ChangeDateTime="02/21/2026 19:00:41">
+    <Property Name="ElementName" Value="[dbo].[FileFolderRole].[FileFolder]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[FileFolderRole]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="FileFolderId" />
+  </Operation>
 </Operations>

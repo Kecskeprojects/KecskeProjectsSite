@@ -14,4 +14,6 @@ public partial class Role
     public DateTime ModifiedOnUtc { get; set; }
 
     public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
+
+    public virtual ICollection<FileFolder> FileFolders { get; set; } = new List<FileFolder>();
 }
