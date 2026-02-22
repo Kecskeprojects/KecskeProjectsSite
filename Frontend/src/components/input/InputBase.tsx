@@ -22,6 +22,15 @@ export default function InputBase(props: IInputBaseProps): JSX.Element {
     ? props.validation(props.name, props.editedItem)
     : undefined;
 
+  function innerUpdatedHandler(e: React.InputEvent<HTMLInputElement>) {
+    e.preventDefault();
+
+    const key = e.currentTarget.name;
+    const value = e.currentTarget.value;
+
+    props.updatedHandler(key, value);
+  }
+
   function renderInput(overrideType?: string): JSX.Element {
     const type = InputTypeDefinitions.getType(overrideType ?? props.inputType);
 
@@ -31,7 +40,7 @@ export default function InputBase(props: IInputBaseProps): JSX.Element {
 
     return (
       <input
-        onInput={props.updatedHandler}
+        onInput={innerUpdatedHandler}
         name={props.name}
         type={type.typeText}
         disabled={type.disabled}

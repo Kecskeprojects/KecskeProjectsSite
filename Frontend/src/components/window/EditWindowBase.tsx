@@ -9,12 +9,12 @@ import LogTools from "../../tools/LogTools";
 import InputBase from "../input/InputBase";
 
 export default function EditWindowBase<
-  windowDescriptionType extends IWindowDescription
+  windowDescriptionType extends IWindowDescription,
 >(props: IEditWindowBaseProps<windowDescriptionType>): JSX.Element {
   const windowDescription = new props.windowDescriptionClass();
   const editedItem = {} as any;
 
-  function submitHandler(e: React.FormEvent<HTMLFormElement>): void {
+  function submitHandler(e: React.SubmitEvent<HTMLFormElement>): void {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
@@ -42,10 +42,7 @@ export default function EditWindowBase<
       });
   }
 
-  function inputUpdatedHandler(e: React.FormEvent<HTMLInputElement>): void {
-    const key = e.currentTarget.name;
-    const value = e.currentTarget.value;
-
+  function inputUpdatedHandler(key: string, value: string): void {
     editedItem[key] = value;
   }
 

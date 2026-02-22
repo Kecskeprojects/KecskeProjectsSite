@@ -7,7 +7,7 @@ import LogTools from "../tools/LogTools";
 export default function Security(): JSX.Element {
   function submitIP(
     e: React.SyntheticEvent<HTMLButtonElement>,
-    checkInput?: boolean
+    checkInput?: boolean,
   ) {
     e.preventDefault();
 
@@ -35,9 +35,7 @@ export default function Security(): JSX.Element {
         label="IP Address:"
         name="ipaddress"
         editedItem={{}}
-        updatedHandler={(e) => {
-          e.preventDefault();
-        }}
+        updatedHandler={() => {}}
       />
       <br />
       <button type="button" onClick={(e) => submitIP(e, true)}>

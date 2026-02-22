@@ -1,5 +1,6 @@
 import { useEffect, useState, type JSX } from "react";
 import { Link, useParams } from "react-router-dom";
+import Constants from "../enum/Constants";
 import FileTypeEnum from "../enum/FileTypeEnum";
 import type DirectoryData from "../models/DirectoryData";
 import FileData from "../models/FileData";
@@ -20,7 +21,7 @@ export default function ExampleComponent(): JSX.Element {
   }, [category, subPath]);
 
   const backPath =
-    "/files" +
+    Constants.FileBaseRoute +
     `/${category}` +
     (!subPath || subPath?.lastIndexOf(">") === -1
       ? ""

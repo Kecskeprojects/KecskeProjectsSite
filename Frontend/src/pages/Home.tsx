@@ -1,6 +1,7 @@
 import { type JSX } from "react";
 import { Link } from "react-router-dom";
 import InputBase from "../components/input/InputBase";
+import Constants from "../enum/Constants";
 import InputTypesEnum from "../enum/InputTypesEnum";
 import FileService from "../services/FileService";
 import LogTools from "../tools/LogTools";
@@ -19,7 +20,7 @@ export default function Home(): JSX.Element {
     <div>
       Home Page
       <div>
-        <Link to="files/testFolder">Example Page</Link>
+        <Link to={`${Constants.FileBaseRoute}/testFolder`}>Example Page</Link>
         <br />
 
         <form onSubmit={PerformUpload}>
@@ -28,9 +29,7 @@ export default function Home(): JSX.Element {
             label="Add File:"
             name="file"
             editedItem={{}}
-            updatedHandler={(e) => {
-              e.preventDefault();
-            }}
+            updatedHandler={() => {}}
           />
           <br />
           <button type="submit">Upload</button>
