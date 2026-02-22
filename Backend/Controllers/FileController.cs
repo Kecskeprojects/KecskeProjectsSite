@@ -18,6 +18,9 @@ public class FileController(
     IConfiguration configuration
     ) : ApiControllerBase(logger)
 {
+    //Todo:Rewrite logic to consider the FileFolder and FileFolderRole tables, these folders are only Top level folders, categories if you will
+    //Perhaps top level folders should be part of the parameters of the endpoints, followed by a parameter for the relative path within that folder, if the file isn't top level within it
+
     [Authorize]
     [HttpGet]
     public IActionResult GetList([FromQuery] string? folder)
