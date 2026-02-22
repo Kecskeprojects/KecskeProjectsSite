@@ -1,16 +1,64 @@
-﻿using Backend.Communication.Outgoing;
+﻿using Backend.Communication.Internal;
+using Backend.Communication.Outgoing;
+using Backend.Constants;
+using Backend.Database.Service;
 using Backend.Tools;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 
 namespace Backend.Services;
 
-public class FileStorageService(ILogger<FileStorageService> logger)
+public class FileStorageService(
+    ILogger<FileStorageService> logger,
+    IConfiguration configuration,
+    FileDirectoryService fileDirectoryService)
 {
-    public List<FileData> GetDirectoryData(string? baseFolder, string[] directoryRoutes)
+    public async Task<List<FileData>> GetFilesInDirectory(LoggedInAccount loggedInAccount, string categoryDirectory, string? subPath)
     {
+        string fullTargetDirectoryPath = await GetFullPath(loggedInAccount, categoryDirectory, subPath);
+
+        string[] fileRoutes = Directory.GetFiles(fullTargetDirectoryPath);
+
         List<FileData> fileDataList = [];
 
+        string? baseDirectory = configuration.GetValue<string>(ConfigurationConstants.BaseFileDirectoryKey);
+        foreach (string fileRoute in fileRoutes)
+        {
+            FileInfo fileInfo = new(fileRoute);
+            if (!fileInfo.Exists
+                || fileInfo.Attributes.HasFlag(FileAttributes.System)
+                || fileInfo.Attributes.HasFlag(FileAttributes.Hidden))
+            {
+                continue;
+            }
+
+            string relativePath = FileTools.GetPathRelativeToCategoryDirectory(baseDirectory, categoryDirectory, fileInfo.DirectoryName);
+            relativePath = relativePath.Replace(".", "");
+
+            fileDataList.Add(new FileData
+            {
+                Extension = fileInfo.Extension,
+                Name = fileInfo.Name,
+                SizeInMb = Math.Round(fileInfo.Length / (1024.0m * 1024.0m), 3),
+                SizeInGb = Math.Round(fileInfo.Length / (1024.0m * 1024.0m * 1024.0m), 3),
+                CreatedAtUtc = fileInfo.CreationTime.ToUniversalTime(),
+                Identifier = EncryptionTools.GetMD5HashHexString(fileInfo.FullName),
+                SubPath = relativePath
+            });
+        }
+
+        return fileDataList;
+    }
+
+    public async Task<List<DirectoryData>> GetDirectoriesInDirectory(LoggedInAccount loggedInAccount, string categoryDirectory, string? subPath)
+    {
+        string fullTargetDirectoryPath = await GetFullPath(loggedInAccount, categoryDirectory, subPath);
+
+        string[] directoryRoutes = Directory.GetDirectories(fullTargetDirectoryPath);
+
+        List<DirectoryData> directoryDataList = [];
+
+        string? baseDirectory = configuration.GetValue<string>(ConfigurationConstants.BaseFileDirectoryKey);
         foreach (string directoryRoute in directoryRoutes)
         {
             DirectoryInfo directoryInfo = new(directoryRoute);
@@ -21,55 +69,49 @@ public class FileStorageService(ILogger<FileStorageService> logger)
                 continue;
             }
 
-            fileDataList.Add(new FileData
+            string relativePath = FileTools.GetPathRelativeToCategoryDirectory(baseDirectory, categoryDirectory, directoryInfo.FullName);
+            relativePath = relativePath.Replace(".", "");
+
+            directoryDataList.Add(new DirectoryData
             {
-                Extension = null,
                 Name = directoryInfo.Name,
-                SizeInMb = 0,
-                SizeInGb = 0,
-                IsFolder = true,
                 CreatedAtUtc = directoryInfo.CreationTime.ToUniversalTime(),
-                Identifier = EncryptionTools.GetMD5HashHexString(directoryInfo.FullName),
-                Folder = FileTools.GetPathRelativeToBaseFolder(baseFolder, directoryInfo.Parent?.FullName)
+                SubPath = relativePath
             });
         }
 
-        return fileDataList;
+        return directoryDataList;
     }
 
-    public List<FileData> GetFileData(string? baseFolder, string[] fileRoutes)
+    public async Task<string?> GetFileRoute(LoggedInAccount loggedInAccount, string categoryDirectory, string? subPath, string clientHash)
     {
-        List<FileData> fileDataList = [];
+        string fullTargetDirectoryPath = await GetFullPath(loggedInAccount, categoryDirectory, subPath);
+
+        string[] fileRoutes = Directory.GetFiles(fullTargetDirectoryPath);
 
         foreach (string fileRoute in fileRoutes)
         {
-            FileInfo fileInfo = new(fileRoute);
-
-            if (!fileInfo.Exists
-                || fileInfo.Attributes.HasFlag(FileAttributes.System)
-                || fileInfo.Attributes.HasFlag(FileAttributes.Hidden))
+            string fileHash = EncryptionTools.GetMD5HashHexString(fileRoute);
+            if (clientHash.Equals(fileHash, StringComparison.OrdinalIgnoreCase))
             {
-                continue;
+                return fileRoute;
             }
-
-            fileDataList.Add(new FileData
-            {
-                Extension = fileInfo.Extension,
-                Name = fileInfo.Name,
-                SizeInMb = Math.Round(fileInfo.Length / (1024.0m * 1024.0m), 3),
-                SizeInGb = Math.Round(fileInfo.Length / (1024.0m * 1024.0m * 1024.0m), 3),
-                IsFolder = false,
-                CreatedAtUtc = fileInfo.CreationTime.ToUniversalTime(),
-                Identifier = EncryptionTools.GetMD5HashHexString(fileInfo.FullName),
-                Folder = FileTools.GetPathRelativeToBaseFolder(baseFolder, fileInfo.DirectoryName)
-            });
         }
 
-        return fileDataList;
+        return null;
     }
 
-    public async Task<string> SaveViaMultipartReaderAsync(string fullPath, bool newFile, string boundary, Stream contentStream, CancellationToken cancellationToken)
+    public async Task<string> SaveViaMultipartReaderAsync(
+        LoggedInAccount loggedInAccount,
+        string categoryDirectory,
+        string? subPath,
+        bool isNewFile,
+        string boundary,
+        Stream contentStream,
+        CancellationToken cancellationToken)
     {
+        string fullTargetDirectoryPath = await GetFullPath(loggedInAccount, categoryDirectory, subPath);
+
         MultipartReader reader = new(boundary, contentStream);
         MultipartSection? section;
         long totalBytesRead = 0;
@@ -82,7 +124,7 @@ public class FileStorageService(ILogger<FileStorageService> logger)
             ContentDispositionHeaderValue? contentDisposition = section.GetContentDispositionHeader();
             if (contentDisposition != null && contentDisposition.IsFileDisposition())
             {
-                totalBytesRead = await HandleFileReadAsync(fullPath, newFile, section, totalBytesRead, fileName, contentDisposition!, cancellationToken);
+                totalBytesRead = await HandleFileReadAsync(fullTargetDirectoryPath, isNewFile, section, totalBytesRead, fileName, contentDisposition!, cancellationToken);
             }
             else if (contentDisposition != null && contentDisposition.IsFormDisposition())
             {
@@ -93,6 +135,16 @@ public class FileStorageService(ILogger<FileStorageService> logger)
 
         logger.LogInformation($"File upload completed (via multipart). Total bytes read: {totalBytesRead} bytes.");
         return "Success!";
+    }
+
+    private async Task<string> GetFullPath(LoggedInAccount loggedInAccount, string categoryDirectory, string? subPath)
+    {
+        string? baseDirectory = configuration.GetValue<string>(ConfigurationConstants.BaseFileDirectoryKey);
+        DatabaseActionResult<bool> directoryAccessAllowed =
+            await fileDirectoryService.AccountHasAccessToDirectoryAsync(loggedInAccount, categoryDirectory);
+
+        string fullPath = FileTools.GetFullPathIfValid(directoryAccessAllowed, baseDirectory, categoryDirectory, subPath);
+        return fullPath;
     }
 
     private async Task<long> HandleFileReadAsync(
@@ -111,7 +163,7 @@ public class FileStorageService(ILogger<FileStorageService> logger)
 
         if (newFile && File.Exists(Path.Combine(fullPath, fileName)))
         {
-            throw new IOException($"File '{fileName}' already exists in this folder.");
+            throw new IOException($"File '{fileName}' already exists in this directory.");
         }
 
         using FileStream outputFileStream = new(

@@ -49,8 +49,8 @@ export default function App(): JSX.Element {
               <Route path="/" element={<Layout />}>
                 <Route index element={<Home />} />
                 <Route element={<RoleChecker roles={["Admin"]} />}>
-                  <Route path="example" element={<ExampleComponent />}>
-                    <Route path=":id" element={<ExampleComponent />} />
+                  <Route path="files/:category" element={<ExampleComponent />}>
+                    <Route path=":subPath" element={<ExampleComponent />} />
                   </Route>
                   <Route path="security" element={<Security />} />
                 </Route>

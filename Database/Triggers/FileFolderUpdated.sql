@@ -1,12 +1,12 @@
-﻿CREATE TRIGGER [FileFolderUpdated]
-	ON [dbo].[FileFolder]
+﻿CREATE TRIGGER [FileDirectoryUpdated]
+	ON [dbo].[FileDirectory]
 	AFTER UPDATE
 	AS
 	BEGIN
 		SET NOCOUNT ON
 
-		UPDATE [dbo].[FileFolder]
+		UPDATE [dbo].[FileDirectory]
 		SET [ModifiedOnUtc] = GETUTCDATE()
 		FROM Inserted [i]
-		WHERE [dbo].[FileFolder].[FileFolderId] = [i].[FileFolderId]
+		WHERE [dbo].[FileDirectory].[FileDirectoryId] = [i].[FileDirectoryId]
 	END

@@ -75,8 +75,8 @@
     <None Include="PostDeployment\TestInserts\Role_Inserts.sql" />
     <Build Include="Triggers\RoleUpdated.sql" />
     <Build Include="Tables\PermittedIpAddress.sql" />
-    <Build Include="Tables\FileFolder.sql" />
-    <Build Include="Tables\FileFolderRole.sql" />
+    <Build Include="Tables\FileDirectory.sql" />
+    <Build Include="Tables\FileDirectoryRole.sql" />
     <Build Include="Triggers\FileFolderUpdated.sql" />
   </ItemGroup>
   <ItemGroup>

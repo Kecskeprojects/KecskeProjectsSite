@@ -1,4 +1,5 @@
-﻿using Backend.Communication.Incoming;
+﻿using AutoMapper;
+using Backend.Communication.Incoming;
 using Backend.Communication.Internal;
 using Backend.Database.Model;
 using Backend.Database.Repository;
@@ -7,7 +8,7 @@ using Backend.Tools;
 
 namespace Backend.Database.Service;
 
-public class AccountService(GenericRepository<Account> repository) : GenericService<Account>(repository)
+public class AccountService(GenericRepository<Account> repository, IMapper mapper) : GenericService<Account>(repository, mapper)
 {
     public async Task<DatabaseActionResult<string?>> RegisterAsync(RegisterData form)
     {

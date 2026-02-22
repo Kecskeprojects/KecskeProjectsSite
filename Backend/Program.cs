@@ -4,6 +4,7 @@ using Backend.Database;
 using Backend.Database.Repository;
 using Backend.Database.Service;
 using Backend.HostedServices;
+using Backend.Mapping.IMapperMapping;
 using Backend.Services;
 using Backend.Tools.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -46,7 +47,7 @@ public class Program
             _ = app.MapGet("/", () => "The backend is running, now shoo!");
         }
 
-        //Todo: Add proper frontend endpoint for origin, and make localhost only available during development
+        //Todo: Add proper frontend urls for origin, and make localhost only available during development
         _ = app.UseCors(options => options
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -101,6 +102,10 @@ public class Program
                     options.SlidingExpiration = true;
                 });
 
+        services.AddAutoMapper(cfg => {
+            cfg.AddProfile<MappingProfile>();
+        });
+
         //Database
         services.AddDbContext<KecskeDatabaseContext>(options => options.UseSqlServer(configuration.GetConnectionString("DatabaseConnection")));
 
@@ -110,6 +115,7 @@ public class Program
         services.AddScoped(typeof(GenericRepository<>));
         services.AddScoped(typeof(GenericService<>));
         services.AddScoped<AccountService>();
+        services.AddScoped<FileDirectoryService>();
         services.AddScoped<PermittedIpAddressService>();
     }
 }

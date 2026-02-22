@@ -15,5 +15,5 @@ public partial class Role
 
     public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
 
-    public virtual ICollection<FileFolder> FileFolders { get; set; } = new List<FileFolder>();
+    public virtual ICollection<FileDirectory> FileDirectories { get; set; } = new List<FileDirectory>();
 }

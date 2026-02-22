@@ -14,7 +14,7 @@ public partial class KecskeDatabaseContext : DbContext
 
     public virtual DbSet<Account> Accounts { get; set; }
 
-    public virtual DbSet<FileFolder> FileFolders { get; set; }
+    public virtual DbSet<FileDirectory> FileDirectories { get; set; }
 
     public virtual DbSet<PermittedIpAddress> PermittedIpAddresses { get; set; }
 
@@ -44,20 +44,20 @@ public partial class KecskeDatabaseContext : DbContext
             entity.Property(e => e.UserName).HasMaxLength(200);
         });
 
-        modelBuilder.Entity<FileFolder>(entity =>
+        modelBuilder.Entity<FileDirectory>(entity =>
         {
-            entity.HasKey(e => e.FileFolderId).HasName("PK_FileFolder_FileFolderId");
+            entity.HasKey(e => e.FileDirectoryId).HasName("PK_FileDirectory_FileDirectoryId");
 
-            entity.ToTable("FileFolder", tb => tb.HasTrigger("FileFolderUpdated"));
+            entity.ToTable("FileDirectory", tb => tb.HasTrigger("FileDirectoryUpdated"));
 
-            entity.HasIndex(e => e.RelativePath, "UQ_FileFolder_Name").IsUnique();
+            entity.HasIndex(e => e.RelativePath, "UQ_FileDirectory_Name").IsUnique();
 
             entity.Property(e => e.CreatedOnUtc)
-                .HasDefaultValueSql("(getutcdate())", "DF_Folder_CreatedOnUtc")
+                .HasDefaultValueSql("(getutcdate())", "DF_FileDirectory_CreatedOnUtc")
                 .HasColumnType("datetime");
             entity.Property(e => e.DisplayName).HasMaxLength(200);
             entity.Property(e => e.ModifiedOnUtc)
-                .HasDefaultValueSql("(getutcdate())", "DF_Folder_ModifiedOnUtc")
+                .HasDefaultValueSql("(getutcdate())", "DF_FileDirectory_ModifiedOnUtc")
                 .HasColumnType("datetime");
             entity.Property(e => e.RelativePath).HasMaxLength(200);
         });
@@ -118,21 +118,21 @@ public partial class KecskeDatabaseContext : DbContext
                         j.ToTable("AccountRole");
                     });
 
-            entity.HasMany(d => d.FileFolders).WithMany(p => p.Roles)
+            entity.HasMany(d => d.FileDirectories).WithMany(p => p.Roles)
                 .UsingEntity<Dictionary<string, object>>(
-                    "FileFolderRole",
-                    r => r.HasOne<FileFolder>().WithMany()
-                        .HasForeignKey("FileFolderId")
+                    "FileDirectoryRole",
+                    r => r.HasOne<FileDirectory>().WithMany()
+                        .HasForeignKey("FileDirectoryId")
                         .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_FileFolderRole_FileFolder"),
+                        .HasConstraintName("FK_FileDirectoryRole_FileDirectory"),
                     l => l.HasOne<Role>().WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_FileFolderRole_Role"),
+                        .HasConstraintName("FK_FileDirectoryRole_Role"),
                     j =>
                     {
-                        j.HasKey("RoleId", "FileFolderId").HasName("PK_FileFolderRole_RoleId_FileFolder");
-                        j.ToTable("FileFolderRole");
+                        j.HasKey("RoleId", "FileDirectoryId").HasName("PK_FileDirectoryRole_RoleId_FileDirectory");
+                        j.ToTable("FileDirectoryRole");
                     });
         });
 

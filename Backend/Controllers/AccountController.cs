@@ -26,9 +26,8 @@ public class AccountController(
     [HttpGet]
     public IActionResult GetLoggedInAccount()
     {
-        LoggedInAccount? account = GetLoggedInAccountFromCookie();
-        return account != null
-            ? ContentResult(account)
+        return LoggedInAccount != null
+            ? ContentResult(LoggedInAccount)
             : ErrorResult(StatusCodes.Status401Unauthorized, "You are not logged in!");
     }
 
@@ -63,9 +62,7 @@ public class AccountController(
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
-        LoggedInAccount? user = GetLoggedInAccountFromCookie();
-
-        Logger.LogInformation($"Acount {user?.UserName} is logging out.");
+        Logger.LogInformation($"Acount {LoggedInAccount?.UserName} is logging out.");
         await AccountManager.SignOut(HttpContext);
 
         return MessageResult("You have been logged out!");

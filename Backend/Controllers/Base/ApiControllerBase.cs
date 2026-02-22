@@ -7,12 +7,7 @@ namespace Backend.Controllers.Base;
 public class ApiControllerBase(ILogger logger) : ControllerBase
 {
     protected ILogger Logger { get; } = logger;
-
-    [NonAction]
-    protected LoggedInAccount? GetLoggedInAccountFromCookie()
-    {
-        return ClaimsPrincipalTools.GetLoggedInAccount(HttpContext.User);
-    }
+    protected LoggedInAccount? LoggedInAccount => ClaimsPrincipalTools.GetLoggedInAccount(HttpContext.User);
 
     [NonAction]
     protected IActionResult ContentResult<T>(T content)

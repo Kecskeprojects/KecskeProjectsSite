@@ -19,7 +19,7 @@ export default function Home(): JSX.Element {
     <div>
       Home Page
       <div>
-        <Link to="example">Example Page</Link>
+        <Link to="files/testFolder">Example Page</Link>
         <br />
 
         <form onSubmit={PerformUpload}>

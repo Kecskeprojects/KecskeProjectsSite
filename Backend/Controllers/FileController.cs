@@ -2,7 +2,6 @@
 using Backend.Controllers.Base;
 using Backend.CustomAttributes;
 using Backend.Services;
-using Backend.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
@@ -14,58 +13,43 @@ namespace Backend.Controllers;
 [Route("api/[controller]/[action]")]
 public class FileController(
     ILogger<AccountController> logger,
-    FileStorageService fileStorageService,
-    IConfiguration configuration
+    FileStorageService fileStorageService
     ) : ApiControllerBase(logger)
 {
-    //Todo:Rewrite logic to consider the FileFolder and FileFolderRole tables, these folders are only Top level folders, categories if you will
-    //Perhaps top level folders should be part of the parameters of the endpoints, followed by a parameter for the relative path within that folder, if the file isn't top level within it
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetFileList([FromQuery] string category, [FromQuery] string? subPath)
+    {
+        List<FileData> fileDataList = await fileStorageService.GetFilesInDirectory(LoggedInAccount!, category, subPath);
+
+        return ContentResult(fileDataList);
+    }
 
     [Authorize]
     [HttpGet]
-    public IActionResult GetList([FromQuery] string? folder)
+    public async Task<IActionResult> GetDirectoryList([FromQuery] string category, [FromQuery] string? subPath)
     {
-        string? baseFolder = configuration.GetValue<string>("BaseFileRoute");
-        string fullPath = FileTools.GetFullPath(baseFolder, folder);
-
-        string[] directories = Directory.GetDirectories(fullPath);
-        List<FileData> fileDataList = fileStorageService.GetDirectoryData(baseFolder, directories);
-
-        string[] files = Directory.GetFiles(fullPath);
-        fileDataList.AddRange(fileStorageService.GetFileData(baseFolder, files));
+        List<DirectoryData> fileDataList = await fileStorageService.GetDirectoriesInDirectory(LoggedInAccount!, category, subPath);
 
         return ContentResult(fileDataList);
     }
 
     [Authorize]
     [HttpGet("{clientHash}")]
-    public IActionResult GetSingle(string clientHash, [FromQuery] string? folder)
+    public async Task<IActionResult> GetSingle([FromRoute] string clientHash, [FromQuery] string category, [FromQuery] string? subPath)
     {
-        string? baseFolder = configuration.GetValue<string>("BaseFileRoute");
-        string fullPath = FileTools.GetFullPath(baseFolder, folder);
+        string? fileRoute = await fileStorageService.GetFileRoute(LoggedInAccount!, category, subPath, clientHash);
 
-        string[] files = Directory.GetFiles(fullPath);
-
-        foreach (string file in files)
-        {
-            string fileHash = EncryptionTools.GetMD5HashHexString(file);
-            if (clientHash.Equals(fileHash, StringComparison.OrdinalIgnoreCase))
-            {
-                return PhysicalFile(file, "application/octet-stream", enableRangeProcessing: true);
-            }
-        }
-
-        return ErrorResult(StatusCodes.Status500InternalServerError, "File not found");
+        return fileRoute is not null
+            ? PhysicalFile(fileRoute, "application/octet-stream", enableRangeProcessing: true)
+            : ErrorResult(StatusCodes.Status500InternalServerError, "File not found");
     }
 
     [Authorize]
     [HttpPost]
     [DisableFormValueModelBinding]
-    public async Task<IActionResult> Upload([FromQuery] string? folder, [FromQuery] bool newFile)
+    public async Task<IActionResult> Upload([FromQuery] bool isNewFile, [FromQuery] string category, [FromQuery] string? subPath)
     {
-        string? baseFolder = configuration.GetValue<string>("BaseFileRoute");
-        string fullPath = FileTools.GetFullPath(baseFolder, folder);
-
         if (!Request.ContentType?.StartsWith("multipart/form-data") ?? true)
         {
             return ErrorResult(StatusCodes.Status400BadRequest, "The request does not contain valid multipart form data.");
@@ -78,7 +62,7 @@ public class FileController(
         }
 
         CancellationToken cancellationToken = HttpContext.RequestAborted;
-        string response = await fileStorageService.SaveViaMultipartReaderAsync(fullPath, newFile, boundary, Request.Body, cancellationToken);
+        string response = await fileStorageService.SaveViaMultipartReaderAsync(LoggedInAccount!, category, subPath, isNewFile, boundary, Request.Body, cancellationToken);
         return ContentResult(response);
     }
 }

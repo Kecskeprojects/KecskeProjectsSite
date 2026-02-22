@@ -1,4 +1,5 @@
 ﻿using Backend.Communication.Internal;
+using Backend.Constants;
 using Backend.Logging;
 
 namespace Backend.BackgroundServices;
@@ -11,16 +12,16 @@ public class FileLoggerBackgroundService(IConfiguration configuration) : Backgro
     {
         await Task.Delay(5000, stoppingToken); // Initial delay to force ExecuteAsync to be async
 
-        string logFolderPath = configuration.GetValue<string>("LogPath") ?? "log";
+        string logDirectoryPath = configuration.GetValue<string>(ConfigurationConstants.LogPathKey) ?? "log";
 
-        if (!Path.IsPathFullyQualified(logFolderPath))
+        if (!Path.IsPathFullyQualified(logDirectoryPath))
         {
-            logFolderPath = Path.Combine(AppContext.BaseDirectory, logFolderPath);
+            logDirectoryPath = Path.Combine(AppContext.BaseDirectory, logDirectoryPath);
         }
 
-        if (!Directory.Exists(logFolderPath))
+        if (!Directory.Exists(logDirectoryPath))
         {
-            _ = Directory.CreateDirectory(logFolderPath);
+            _ = Directory.CreateDirectory(logDirectoryPath);
         }
 
         IEnumerable<Log> logs = FileLoggerLogStorage.GetConsumingEnumerable(stoppingToken);
@@ -31,7 +32,7 @@ public class FileLoggerBackgroundService(IConfiguration configuration) : Backgro
             {
                 try
                 {
-                    File.AppendAllText(Path.Combine(logFolderPath, $"Backend-Log-{DateTime.UtcNow:yyyy-MM-dd}.txt"), msg.Content + "\n");
+                    File.AppendAllText(Path.Combine(logDirectoryPath, $"Backend-Log-{DateTime.UtcNow:yyyy-MM-dd}.txt"), msg.Content + "\n");
                     break; // Exit the retry loop if successful
                 }
                 catch (Exception ex)

@@ -1,4 +1,5 @@
 import type { AxiosProgressEvent } from "axios";
+import DirectoryData from "../models/DirectoryData";
 import FileData from "../models/FileData";
 import BackendServiceTools from "../tools/BackendServiceTools";
 import ConvertTools from "../tools/ConvertTools";
@@ -7,26 +8,45 @@ import FileTools from "../tools/FileTools";
 import BaseService from "./BaseService";
 
 export default class FileService {
-  static GetSingleFileEndpoint(identifier?: string, folder?: string): string {
+  static GetSingleFileEndpoint(
+    category?: string,
+    subPath?: string,
+    identifier?: string,
+  ): string {
+    category = BackendServiceTools.SanitizeQueryParameter(category);
+    subPath = BackendServiceTools.SanitizeQueryParameter(subPath);
     identifier = BackendServiceTools.SanitizeQueryParameter(identifier);
-    folder = BackendServiceTools.SanitizeQueryParameter(folder);
 
-    return `${EnvironmentTools.getBackendRoute()}/File/GetSingle/${identifier}?folder=${folder}`;
+    return `${EnvironmentTools.getBackendRoute()}/File/GetSingle/${identifier}?category=${category}&subPath=${subPath}`;
   }
 
-  static async GetFileData(folder?: string): Promise<Array<FileData>> {
-    const queryItems = {
-      folder: folder,
-    };
+  static async GetFileData(
+    category?: string,
+    subpath?: string,
+  ): Promise<Array<FileData>> {
+    const queryItems = { category, subpath };
 
-    const rawDataList = await BaseService.Get("/File/GetList", queryItems);
+    const rawDataList = await BaseService.Get("/File/GetFileList", queryItems);
     return ConvertTools.ConvertListToType(FileData, rawDataList?.content);
+  }
+
+  static async GetDirectoryData(
+    category?: string,
+    subpath?: string,
+  ): Promise<Array<DirectoryData>> {
+    const queryItems = { category, subpath };
+
+    const rawDataList = await BaseService.Get(
+      "/File/GetDirectoryList",
+      queryItems,
+    );
+    return ConvertTools.ConvertListToType(DirectoryData, rawDataList?.content);
   }
 
   static async Upload(
     fileData: FormData,
     folder?: string,
-    onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
+    onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
   ): Promise<string | undefined> {
     const queryItems = {
       folder: folder,
@@ -50,7 +70,7 @@ export default class FileService {
           "/File/Upload",
           queryItems,
           partialFormData,
-          onUploadProgress
+          onUploadProgress,
         );
 
         if (response.message != "Success!") {

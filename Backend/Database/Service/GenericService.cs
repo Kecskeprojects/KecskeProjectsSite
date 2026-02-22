@@ -1,11 +1,12 @@
-﻿using Backend.Communication.Internal;
+﻿using AutoMapper;
+using Backend.Communication.Internal;
 using Backend.Database.Repository;
 using Backend.Enums;
 using System.Linq.Expressions;
 
 namespace Backend.Database.Service;
 
-public class GenericService<TEntity>(GenericRepository<TEntity> repository) where TEntity : class
+public class GenericService<TEntity>(GenericRepository<TEntity> repository, IMapper mapper) where TEntity : class
 {
     protected readonly GenericRepository<TEntity> repository = repository;
 
@@ -141,5 +142,11 @@ public class GenericService<TEntity>(GenericRepository<TEntity> repository) wher
     public DatabaseActionResult<TData?> CreateResult<TData>(DatabaseActionResultEnum result, TData? data = default, string? message = null)
     {
         return new DatabaseActionResult<TData?>(result, data, message);
+    }
+
+    public DatabaseActionResult<TResource?> CreateMappedResult<TData, TResource>(DatabaseActionResultEnum result, TData? data = default, string? message = null)
+    {
+        TResource? mappedData = data is not null ? mapper.Map<TData, TResource>(data) : default;
+        return new DatabaseActionResult<TResource?>(result, mappedData, message);
     }
 }

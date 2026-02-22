@@ -8,6 +8,5 @@ public class FileData
     public decimal SizeInGb { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public string Identifier { get; set; } = null!;
-    public bool IsFolder { get; set; }
-    public string? Folder { get; set; }
+    public string? SubPath { get; set; }
 }

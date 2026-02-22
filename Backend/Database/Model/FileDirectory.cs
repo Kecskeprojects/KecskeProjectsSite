@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Backend.Database.Model;
 
-public partial class FileFolder
+public partial class FileDirectory
 {
-    public int FileFolderId { get; set; }
+    public int FileDirectoryId { get; set; }
 
     public string RelativePath { get; set; } = null!;
 

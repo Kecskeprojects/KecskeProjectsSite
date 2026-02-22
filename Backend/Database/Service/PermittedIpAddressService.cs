@@ -1,15 +1,20 @@
-﻿using Backend.Communication.Internal;
+﻿using AutoMapper;
+using Backend.Communication.Internal;
+using Backend.Constants;
 using Backend.Database.Model;
 using Backend.Database.Repository;
 using Backend.Enums;
 
 namespace Backend.Database.Service;
 
-public class PermittedIpAddressService(IConfiguration configuration, GenericRepository<PermittedIpAddress> repository) : GenericService<PermittedIpAddress>(repository)
+public class PermittedIpAddressService(
+    GenericRepository<PermittedIpAddress> repository,
+    IConfiguration configuration,
+    IMapper mapper) : GenericService<PermittedIpAddress>(repository, mapper)
 {
     public async Task<DatabaseActionResult<int>> AddAsync(int accountId, string ipAddress)
     {
-        int expirationMinutes = configuration.GetValue<int>("RDPAccessExpirationMinutes");
+        int expirationMinutes = configuration.GetValue<int>(ConfigurationConstants.RDPAccessExpirationMinutesKey);
 
         PermittedIpAddress? entry = await repository.FirstOrDefaultAsync(entry => entry.IpAddress == ipAddress);
 

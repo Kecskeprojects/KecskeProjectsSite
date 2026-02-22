@@ -1,24 +1,40 @@
-﻿namespace Backend.Tools;
+﻿using Backend.Communication.Internal;
+using Backend.Enums;
+
+namespace Backend.Tools;
 
 public static class FileTools
 {
-    public static string GetFullPath(string? baseFolder, string? relativeRoute)
+    public static string GetFullPathIfValid(
+        DatabaseActionResult<bool> directoryAccessAllowed,
+        string? baseDirectory,
+        string categoryDirectory,
+        string? subPath)
     {
-        if (string.IsNullOrWhiteSpace(baseFolder) || !Directory.Exists(baseFolder))
+        if (directoryAccessAllowed.Status != DatabaseActionResultEnum.Success
+            || !directoryAccessAllowed.Data)
+        {
+            throw new UnauthorizedAccessException("You do not have permission to access this directory.");
+        }
+
+        if (string.IsNullOrWhiteSpace(baseDirectory) || !Directory.Exists(baseDirectory))
         {
             throw new InvalidOperationException("Base location for files is not configured.");
         }
 
-        string fullPath = Path.GetFullPath(Path.Combine(baseFolder, relativeRoute ?? ""));
-        string relativeToBaseFolder = GetPathRelativeToBaseFolder(baseFolder, fullPath);
+        subPath = (subPath ?? "").Replace(">", "\\");
+        string fullTargetDirectoryPath = Path.GetFullPath(Path.Combine(baseDirectory, categoryDirectory, subPath));
+        string relativePathToCategoryDirectory = GetPathRelativeToCategoryDirectory(baseDirectory, categoryDirectory, fullTargetDirectoryPath);
 
-        return relativeToBaseFolder.Contains("..") || !Directory.Exists(fullPath)
+        return relativePathToCategoryDirectory.Contains("..") || !Directory.Exists(fullTargetDirectoryPath)
             ? throw new DirectoryNotFoundException("This file or directory does not exist.")
-            : fullPath;
+            : fullTargetDirectoryPath;
     }
 
-    public static string GetPathRelativeToBaseFolder(string? baseFolder, string? comparedPath)
+    public static string GetPathRelativeToCategoryDirectory(string? baseDirectory, string categoryDirectory, string? comparedPath)
     {
-        return Path.GetRelativePath(baseFolder ?? "", comparedPath ?? comparedPath ?? "");
+        string fullCategoryDirectoryPath = Path.GetFullPath(Path.Combine(baseDirectory ?? "", categoryDirectory));
+        string relativePath = Path.GetRelativePath(fullCategoryDirectoryPath, comparedPath ?? comparedPath ?? "");
+        return relativePath.Replace("\\", ">");
     }
 }
