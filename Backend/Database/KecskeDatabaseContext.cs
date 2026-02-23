@@ -66,7 +66,7 @@ public partial class KecskeDatabaseContext : DbContext
         {
             entity.HasKey(e => e.PermittedIpAddressId).HasName("PK_PermittedIpAddress_PermittedIpAddressId");
 
-            entity.ToTable("PermittedIpAddress");
+            entity.ToTable("PermittedIpAddress", tb => tb.HasTrigger("PermittedIpAddressUpdated"));
 
             entity.Property(e => e.CreatedOnUtc)
                 .HasDefaultValueSql("(getutcdate())", "DF_PermittedIpAddress_CreatedOnUtc")
