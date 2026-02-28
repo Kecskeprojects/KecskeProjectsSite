@@ -38,7 +38,7 @@ public class ClaimsPrincipalTools
         {
             AccountId = accountId,
             UserName = identity.FindFirst(ClaimTypes.Name)?.Value ?? "Voldemort",
-            Roles = identity.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList()
+            Roles = [.. identity.FindAll(ClaimTypes.Role).Select(x => x.Value)]
         };
     }
 }

@@ -3,7 +3,6 @@ using Backend.Database;
 using Backend.Database.Repository;
 using Backend.Database.Service;
 using Backend.HostedServices;
-using Backend.Mapping.IMapperMapping;
 using Backend.Services;
 using Backend.Tools.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -100,10 +99,6 @@ public class Program
                     options.ExpireTimeSpan = TimeSpan.FromDays(1);
                     options.SlidingExpiration = true;
                 });
-
-        services.AddAutoMapper(cfg => {
-            cfg.AddProfile<MappingProfile>();
-        });
 
         //Database
         services.AddDbContext<KecskeDatabaseContext>(options =>

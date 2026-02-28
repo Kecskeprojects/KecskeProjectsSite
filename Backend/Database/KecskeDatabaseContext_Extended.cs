@@ -5,6 +5,7 @@ namespace Backend.Database;
 
 public partial class KecskeDatabaseContext
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "The other partial class is generated code")]
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Role>(entity =>

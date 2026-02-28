@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Backend.Communication.Internal;
+﻿using Backend.Communication.Internal;
 using Backend.Constants;
 using Backend.Database.Model;
 using Backend.Database.Repository;
@@ -9,8 +8,7 @@ namespace Backend.Database.Service;
 
 public class PermittedIpAddressService(
     GenericRepository<PermittedIpAddress> repository,
-    IConfiguration configuration,
-    IMapper mapper) : GenericService<PermittedIpAddress>(repository, mapper)
+    IConfiguration configuration) : GenericService<PermittedIpAddress>(repository)
 {
     public async Task<DatabaseActionResult<int>> AddAsync(int accountId, string ipAddress)
     {
@@ -26,11 +24,7 @@ public class PermittedIpAddressService(
 
         entry.ExpiresOnUtc = DateTime.UtcNow.AddMinutes(expirationMinutes);
 
-        if(entry.PermittedIpAddressId > 0)
-        {
-            return await UpdateAsync(entry);
-        }
-        return await AddAsync(entry);
+        return entry.PermittedIpAddressId > 0 ? await UpdateAsync(entry) : await AddAsync(entry);
     }
 
     public async Task<DatabaseActionResult<List<string>?>> GetExpiredIPAddressesAsync()

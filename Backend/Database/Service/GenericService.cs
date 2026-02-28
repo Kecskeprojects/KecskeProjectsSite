@@ -1,12 +1,12 @@
-﻿using AutoMapper;
-using Backend.Communication.Internal;
+﻿using Backend.Communication.Internal;
 using Backend.Database.Repository;
 using Backend.Enums;
+using Backend.Mapping;
 using System.Linq.Expressions;
 
 namespace Backend.Database.Service;
 
-public class GenericService<TEntity>(GenericRepository<TEntity> repository, IMapper mapper) where TEntity : class
+public class GenericService<TEntity>(GenericRepository<TEntity> repository) where TEntity : class
 {
     protected readonly GenericRepository<TEntity> repository = repository;
 
@@ -144,9 +144,15 @@ public class GenericService<TEntity>(GenericRepository<TEntity> repository, IMap
         return new DatabaseActionResult<TData?>(result, data, message);
     }
 
-    public DatabaseActionResult<TResource?> CreateMappedResult<TData, TResource>(DatabaseActionResultEnum result, TData? data = default, string? message = null)
+    public DatabaseActionResult<TResource?> CreateMappedResult<TMapper, TData, TResource>(DatabaseActionResultEnum result, TData? data = default, string? message = null) where TMapper : MapperUtilities, new()
     {
-        TResource? mappedData = data is not null ? mapper.Map<TData, TResource>(data) : default;
+        TResource? mappedData = data is not null ? new TMapper().Map<TData, TResource>(data) : default;
         return new DatabaseActionResult<TResource?>(result, mappedData, message);
+    }
+
+    public DatabaseActionResult<List<TResource>?> CreateMappedResult<TMapper, TData, TResource>(DatabaseActionResultEnum result, List<TData>? data = default, string? message = null) where TMapper : MapperUtilities, new()
+    {
+        ICollection<TResource>? mappedData = data is not null ? new TMapper().Map<TData, TResource>(data) : default;
+        return new DatabaseActionResult<List<TResource>?>(result, mappedData?.ToList(), message);
     }
 }
