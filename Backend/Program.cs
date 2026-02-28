@@ -45,11 +45,12 @@ public class Program
             _ = app.MapGet("/", () => "The backend is running, now shoo!");
         }
 
-        //Todo: Add proper frontend urls for origin, and make localhost only available during development
+        IConfiguration section = builder.Configuration.GetSection("FrontendDomains") ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
+        string[] frontendDomains = section.Get<string[]>() ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
         _ = app.UseCors(options => options
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .WithOrigins("http://localhost:5173", "http://localhost:4173")
+            .WithOrigins(frontendDomains)
             .AllowCredentials());
 
         _ = app.UseHttpsRedirection();
