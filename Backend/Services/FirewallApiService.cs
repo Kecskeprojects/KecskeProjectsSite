@@ -10,12 +10,12 @@ namespace Backend.Services;
 [SupportedOSPlatform("windows")]
 public class FirewallApiService(PermittedIpAddressService permittedIpAddressService, ILogger<FileStorageService> logger)
 {
-    const string FWPolicyProgID = "HNetCfg.FwPolicy2";
-    const string FWRuleProgID = "HNetCfg.FWRule";
+    private const string FWPolicyProgID = "HNetCfg.FwPolicy2";
+    private const string FWRuleProgID = "HNetCfg.FWRule";
 
 #if DEBUG
-    const string ruleNameTCP = "[DEBUG] RDP Whitelist TCP";
-    const string ruleNameUDP = "[DEBUG] RDP Whitelist UDP";
+    private const string ruleNameTCP = "[DEBUG] RDP Whitelist TCP";
+    private const string ruleNameUDP = "[DEBUG] RDP Whitelist UDP";
 #else
     const string ruleNameTCP = "RDP Whitelist TCP";
     const string ruleNameUDP = "RDP Whitelist UDP";
@@ -104,12 +104,9 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
         INetFwRule? firewallRuleTCP = GetOrCreateRule(firewallPolicy, ruleNameTCP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_TCP);
         INetFwRule? firewallRuleUDP = GetOrCreateRule(firewallPolicy, ruleNameUDP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_UDP);
 
-        if (firewallRuleTCP is null || firewallRuleUDP is null)
-        {
-            return false;
-        }
-
-        return await changeLogic(firewallRuleTCP, firewallRuleUDP);
+        return firewallRuleTCP is not null
+            && firewallRuleUDP is not null
+            && await changeLogic(firewallRuleTCP, firewallRuleUDP);
     }
 
     private INetFwRule? GetOrCreateRule(INetFwPolicy2 firewallPolicy, string ruleName, NET_FW_IP_PROTOCOL_ protocol)

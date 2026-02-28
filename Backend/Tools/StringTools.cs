@@ -10,12 +10,7 @@ public static class StringTools
         }
 
         string[] splitValues = ipString.Split('.');
-        if (splitValues.Length != 4)
-        {
-            return false;
-        }
-
-
-        return splitValues.All(r => byte.TryParse(r, out byte _));
+        return splitValues.Length == 4
+            && splitValues.All(r => byte.TryParse(r, out byte _));
     }
 }

@@ -8,10 +8,12 @@ public class MapperUtilities
     {
         return [.. sources.Select(Map<TSource, TTarget>)];
     }
+
     public IEnumerable<TTarget> Map<TSource, TTarget>(IEnumerable<TSource> sources)
     {
         return sources.Select(Map<TSource, TTarget>);
     }
+
     public TTarget[] Map<TSource, TTarget>(TSource[] sources)
     {
         return [.. sources.Select(Map<TSource, TTarget>)];
@@ -22,9 +24,7 @@ public class MapperUtilities
         MethodInfo method = GetMappingMethod<TSource, TTarget>();
 
         TTarget? result = (TTarget?) method.Invoke(this, [source]);
-        return result == null
-            ? throw new InvalidOperationException("Mapping method returned null.")
-            : result;
+        return result ?? throw new InvalidOperationException("Mapping method returned null.");
     }
 
     private MethodInfo GetMappingMethod<TSource, TTarget>()
@@ -40,8 +40,6 @@ public class MapperUtilities
                 m.GetParameters()[0].ParameterType == typeof(TSource) &&
                 m.Name != nameof(Map));
 
-        return foundMethod == null
-            ? throw new InvalidOperationException("No mapping method found for the given source and target types.")
-            : foundMethod;
+        return foundMethod ?? throw new InvalidOperationException("No mapping method found for the given source and target types.");
     }
 }
