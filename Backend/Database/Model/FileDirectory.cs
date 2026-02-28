@@ -15,5 +15,5 @@ public partial class FileDirectory
 
     public DateTime ModifiedOnUtc { get; set; }
 
-    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
+    public virtual ICollection<FileDirectoryRole> FileDirectoryRoles { get; set; } = new List<FileDirectoryRole>();
 }

@@ -13,7 +13,7 @@ public partial class Role
 
     public DateTime ModifiedOnUtc { get; set; }
 
-    public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
+    public virtual ICollection<AccountRole> AccountRoles { get; set; } = new List<AccountRole>();
 
-    public virtual ICollection<FileDirectory> FileDirectories { get; set; } = new List<FileDirectory>();
+    public virtual ICollection<FileDirectoryRole> FileDirectoryRoles { get; set; } = new List<FileDirectoryRole>();
 }

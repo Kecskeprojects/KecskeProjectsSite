@@ -14,7 +14,11 @@ public partial class KecskeDatabaseContext : DbContext
 
     public virtual DbSet<Account> Accounts { get; set; }
 
+    public virtual DbSet<AccountRole> AccountRoles { get; set; }
+
     public virtual DbSet<FileDirectory> FileDirectories { get; set; }
+
+    public virtual DbSet<FileDirectoryRole> FileDirectoryRoles { get; set; }
 
     public virtual DbSet<PermittedIpAddress> PermittedIpAddresses { get; set; }
 
@@ -44,6 +48,27 @@ public partial class KecskeDatabaseContext : DbContext
             entity.Property(e => e.UserName).HasMaxLength(200);
         });
 
+        modelBuilder.Entity<AccountRole>(entity =>
+        {
+            entity.HasKey(e => new { e.RoleId, e.AccountId }).HasName("PK_AccountRole_RoleId_AccountId");
+
+            entity.ToTable("AccountRole");
+
+            entity.Property(e => e.CreatedOnUtc)
+                .HasDefaultValueSql("(getutcdate())", "DF_AccountRole_CreatedOnUtc")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Account).WithMany(p => p.AccountRoles)
+                .HasForeignKey(d => d.AccountId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AccountRole_Account");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.AccountRoles)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AccountRole_Server");
+        });
+
         modelBuilder.Entity<FileDirectory>(entity =>
         {
             entity.HasKey(e => e.FileDirectoryId).HasName("PK_FileDirectory_FileDirectoryId");
@@ -60,6 +85,27 @@ public partial class KecskeDatabaseContext : DbContext
                 .HasDefaultValueSql("(getutcdate())", "DF_FileDirectory_ModifiedOnUtc")
                 .HasColumnType("datetime");
             entity.Property(e => e.RelativePath).HasMaxLength(200);
+        });
+
+        modelBuilder.Entity<FileDirectoryRole>(entity =>
+        {
+            entity.HasKey(e => new { e.RoleId, e.FileDirectoryId }).HasName("PK_FileDirectoryRole_RoleId_FileDirectory");
+
+            entity.ToTable("FileDirectoryRole");
+
+            entity.Property(e => e.CreatedOnUtc)
+                .HasDefaultValueSql("(getutcdate())", "DF_FileDirectoryRole_CreatedOnUtc")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.FileDirectory).WithMany(p => p.FileDirectoryRoles)
+                .HasForeignKey(d => d.FileDirectoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FileDirectoryRole_FileDirectory");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.FileDirectoryRoles)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FileDirectoryRole_Role");
         });
 
         modelBuilder.Entity<PermittedIpAddress>(entity =>
@@ -100,40 +146,6 @@ public partial class KecskeDatabaseContext : DbContext
                 .HasDefaultValueSql("(getutcdate())", "DF_Role_ModifiedOnUtc")
                 .HasColumnType("datetime");
             entity.Property(e => e.Name).HasMaxLength(100);
-
-            entity.HasMany(d => d.Accounts).WithMany(p => p.Roles)
-                .UsingEntity<Dictionary<string, object>>(
-                    "AccountRole",
-                    r => r.HasOne<Account>().WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_AccountRole_Account"),
-                    l => l.HasOne<Role>().WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_AccountRole_Server"),
-                    j =>
-                    {
-                        j.HasKey("RoleId", "AccountId").HasName("PK_AccountRole_RoleId_AccountId");
-                        j.ToTable("AccountRole");
-                    });
-
-            entity.HasMany(d => d.FileDirectories).WithMany(p => p.Roles)
-                .UsingEntity<Dictionary<string, object>>(
-                    "FileDirectoryRole",
-                    r => r.HasOne<FileDirectory>().WithMany()
-                        .HasForeignKey("FileDirectoryId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_FileDirectoryRole_FileDirectory"),
-                    l => l.HasOne<Role>().WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_FileDirectoryRole_Role"),
-                    j =>
-                    {
-                        j.HasKey("RoleId", "FileDirectoryId").HasName("PK_FileDirectoryRole_RoleId_FileDirectory");
-                        j.ToTable("FileDirectoryRole");
-                    });
         });
 
         OnModelCreatingPartial(modelBuilder);

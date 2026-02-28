@@ -2,6 +2,7 @@
 (
 	[AccountId] INT NOT NULL,
     [RoleId] INT NOT NULL,
+    [CreatedOnUtc] DATETIME NOT NULL CONSTRAINT [DF_AccountRole_CreatedOnUtc] DEFAULT GETUTCDATE(),
     CONSTRAINT [FK_AccountRole_Server] FOREIGN KEY ([RoleId]) REFERENCES [Role]([RoleId]),
     CONSTRAINT [FK_AccountRole_Account] FOREIGN KEY ([AccountId]) REFERENCES [Account]([AccountId]),
     CONSTRAINT [PK_AccountRole_RoleId_AccountId] PRIMARY KEY ([RoleId], [AccountId])
