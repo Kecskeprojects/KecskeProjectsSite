@@ -1,4 +1,5 @@
 using Backend.Authentication;
+using Backend.Constants;
 using Backend.Database;
 using Backend.Database.Repository;
 using Backend.Database.Service;
@@ -45,7 +46,7 @@ public class Program
             _ = app.MapGet("/", () => "The backend is running, now shoo!");
         }
 
-        IConfiguration section = builder.Configuration.GetSection("FrontendDomains") ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
+        IConfiguration section = builder.Configuration.GetSection(ConfigurationConstants.FrontendDomains) ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
         string[] frontendDomains = section.Get<string[]>() ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
         _ = app.UseCors(options => options
             .AllowAnyHeader()
@@ -104,7 +105,7 @@ public class Program
         //Database
         services.AddDbContext<KecskeDatabaseContext>(options =>
             options
-                .UseSqlServer(configuration.GetConnectionString("DatabaseConnection"))
+                .UseSqlServer(configuration.GetConnectionString(ConfigurationConstants.DatabaseConnection))
 #if DEBUG
                 .EnableSensitiveDataLogging()
                 .EnableDetailedErrors()

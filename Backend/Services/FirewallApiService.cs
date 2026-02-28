@@ -1,4 +1,5 @@
 ﻿using Backend.Communication.Internal;
+using Backend.Constants;
 using Backend.Database.Service;
 using Backend.Enums;
 using Backend.Tools;
@@ -10,17 +11,6 @@ namespace Backend.Services;
 [SupportedOSPlatform("windows")]
 public class FirewallApiService(PermittedIpAddressService permittedIpAddressService, ILogger<FileStorageService> logger)
 {
-    private const string FWPolicyProgID = "HNetCfg.FwPolicy2";
-    private const string FWRuleProgID = "HNetCfg.FWRule";
-
-#if DEBUG
-    private const string ruleNameTCP = "[DEBUG] RDP Whitelist TCP";
-    private const string ruleNameUDP = "[DEBUG] RDP Whitelist UDP";
-#else
-    const string ruleNameTCP = "RDP Whitelist TCP";
-    const string ruleNameUDP = "RDP Whitelist UDP";
-#endif
-
     public async Task<bool> AddRDPRule(int accountId, string ip)
     {
         //ip format check
@@ -73,8 +63,8 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
                 udpAddresses = udpAddresses.Where(x => !x.Contains(ip));
             }
 
-            firewallRuleTCP.RemoteAddresses = tcpAddresses.Any() ? string.Join(',', tcpAddresses) : "127.0.0.1";
-            firewallRuleUDP.RemoteAddresses = udpAddresses.Any() ? string.Join(',', udpAddresses) : "127.0.0.1";
+            firewallRuleTCP.RemoteAddresses = tcpAddresses.Any() ? string.Join(',', tcpAddresses) : FirewallConstants.DefaultRemoteAddress;
+            firewallRuleUDP.RemoteAddresses = udpAddresses.Any() ? string.Join(',', udpAddresses) : FirewallConstants.DefaultRemoteAddress;
 
             DatabaseActionResult<int> result = await permittedIpAddressService.RemoveIPAddressesAsync(expiredIPs.Data);
 
@@ -86,7 +76,7 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
 
     private async Task<bool> ProcessFirewallRuleChange(Func<INetFwRule, INetFwRule, Task<bool>> changeLogic)
     {
-        Type? fwPolicy = Type.GetTypeFromProgID(FWPolicyProgID);
+        Type? fwPolicy = Type.GetTypeFromProgID(FirewallConstants.FWPolicyProgID);
         if (fwPolicy is null)
         {
             logger.LogError("Failed to get type for firewall list.");
@@ -101,8 +91,8 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
             return false;
         }
 
-        INetFwRule? firewallRuleTCP = GetOrCreateRule(firewallPolicy, ruleNameTCP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_TCP);
-        INetFwRule? firewallRuleUDP = GetOrCreateRule(firewallPolicy, ruleNameUDP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_UDP);
+        INetFwRule? firewallRuleTCP = GetOrCreateRule(firewallPolicy, FirewallConstants.ruleNameTCP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_TCP);
+        INetFwRule? firewallRuleUDP = GetOrCreateRule(firewallPolicy, FirewallConstants.ruleNameUDP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_UDP);
 
         return firewallRuleTCP is not null
             && firewallRuleUDP is not null
@@ -111,10 +101,10 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
 
     private INetFwRule? GetOrCreateRule(INetFwPolicy2 firewallPolicy, string ruleName, NET_FW_IP_PROTOCOL_ protocol)
     {
-        INetFwRule? firewallRule = firewallPolicy.Rules.OfType<INetFwRule>().Where(x => x.Name == ruleName).FirstOrDefault();
+        INetFwRule? firewallRule = firewallPolicy.Rules.OfType<INetFwRule>().FirstOrDefault(x => x.Name == ruleName);
         if (firewallRule == null)
         {
-            Type? fwRule = Type.GetTypeFromProgID(FWRuleProgID);
+            Type? fwRule = Type.GetTypeFromProgID(FirewallConstants.FWRuleProgID);
             if (fwRule is null)
             {
                 logger.LogError("Failed to get type for firewall rule creation.");
@@ -130,11 +120,11 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
             firewallRule.Enabled = true;
             firewallRule.Action = NET_FW_ACTION_.NET_FW_ACTION_ALLOW;
             firewallRule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN;
-            firewallRule.RemoteAddresses = "127.0.0.1";
+            firewallRule.RemoteAddresses = FirewallConstants.DefaultRemoteAddress;
             firewallRule.Protocol = (int) protocol;
-            firewallRule.LocalPorts = "3389";
-            firewallRule.ApplicationName = "%SystemRoot%\\system32\\svchost.exe";
-            firewallRule.Description = "Allows RDP access from specified IP addresses. Created and modified by KecskeProjects Backend.";
+            firewallRule.LocalPorts = FirewallConstants.RDPPort;
+            firewallRule.ApplicationName = FirewallConstants.ApplicationName;
+            firewallRule.Description = FirewallConstants.RuleDescription;
             firewallPolicy.Rules.Add(firewallRule);
         }
 
