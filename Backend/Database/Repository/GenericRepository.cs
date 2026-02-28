@@ -18,10 +18,11 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
         params Expression<Func<TEntity, object>>[]? includes)
     {
         IQueryable<TEntity> dbSet = context.Set<TEntity>();
-
+        dbSet = AddWhere(dbSet, predicate);
         dbSet = AddIncludes(dbSet, includes);
 
-        return dbSet.FirstOrDefaultAsync(predicate);
+        _ = CheckQueryString(dbSet);
+        return dbSet.FirstOrDefaultAsync();
     }
 
     public Task<List<TEntity>> GetListAsync(
@@ -31,27 +32,26 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
         params Expression<Func<TEntity, object>>[]? includes)
     {
         IQueryable<TEntity> dbSet = context.Set<TEntity>();
-
-        if (predicate is not null)
-        {
-            dbSet = dbSet.Where(predicate);
-        }
-
+        dbSet = AddWhere(dbSet, predicate);
         dbSet = AddIncludes(dbSet, includes);
-        dbSet = OrderBy(dbSet, orderBy, ascending);
+        dbSet = AddOrderBy(dbSet, orderBy, ascending);
 
+        _ = CheckQueryString(dbSet);
         return dbSet.ToListAsync();
     }
 
     public Task<bool> ExistsAsync(
         Expression<Func<TEntity, bool>> predicate)
     {
-        return context.Set<TEntity>().AnyAsync(predicate);
+        IQueryable<TEntity> dbSet = context.Set<TEntity>();
+        dbSet = AddWhere(dbSet, predicate);
+
+        return dbSet.AnyAsync();
     }
 
-    public Task<int> SaveChangesAsync()
+    public async Task<int> SaveChangesAsync(bool saveChanges = true)
     {
-        return context.SaveChangesAsync();
+        return saveChanges ? await context.SaveChangesAsync() : 0;
     }
 
     #region Add
@@ -59,14 +59,14 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
     {
         _ = context.Set<TEntity>().Add(item);
 
-        return saveChanges ? await context.SaveChangesAsync() : 0;
+        return await SaveChangesAsync(saveChanges);
     }
 
     public async Task<int> AddAsync(ICollection<TEntity> items, bool saveChanges = true)
     {
         context.Set<TEntity>().AddRange(items);
 
-        return saveChanges ? await context.SaveChangesAsync() : 0;
+        return await SaveChangesAsync(saveChanges);
     }
     #endregion
 
@@ -75,14 +75,23 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
     {
         _ = context.Set<TEntity>().Remove(item);
 
-        return saveChanges ? await context.SaveChangesAsync() : 0;
+        return await SaveChangesAsync(saveChanges);
     }
 
     public async Task<int> RemoveAsync(ICollection<TEntity> items, bool saveChanges = true)
     {
         context.Set<TEntity>().RemoveRange(items);
 
-        return saveChanges ? await context.SaveChangesAsync() : 0;
+        return await SaveChangesAsync(saveChanges);
+    }
+
+    public async Task<int> RemoveAsync(Expression<Func<TEntity, bool>> predicate, bool saveChanges = true)
+    {
+        List<TEntity> query = await GetListAsync(predicate);
+
+        context.Set<TEntity>().RemoveRange(query);
+
+        return await SaveChangesAsync(saveChanges);
     }
     #endregion
 
@@ -91,18 +100,30 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
     {
         _ = context.Set<TEntity>().Update(item);
 
-        return saveChanges ? await context.SaveChangesAsync() : 0;
+        return await SaveChangesAsync(saveChanges);
     }
 
     public async Task<int> UpdateAsync(ICollection<TEntity> items, bool saveChanges = true)
     {
         context.Set<TEntity>().UpdateRange(items);
 
-        return saveChanges ? await context.SaveChangesAsync() : 0;
+        return await SaveChangesAsync(saveChanges);
     }
     #endregion
 
     #region Helper Methods
+    public static IQueryable<TEntity> AddWhere(
+        IQueryable<TEntity> dbSet,
+        Expression<Func<TEntity, bool>>? predicate)
+    {
+        if (predicate is not null)
+        {
+            dbSet = dbSet.Where(predicate);
+        }
+
+        return dbSet;
+    }
+
     public static IQueryable<TEntity> AddIncludes(
         IQueryable<TEntity> dbSet,
         Expression<Func<TEntity, object>>[]? includes)
@@ -118,8 +139,9 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
         return dbSet;
     }
 
-    private static IQueryable<TEntity> OrderBy(
-        IQueryable<TEntity> dbSet, Expression<Func<TEntity, object>>? orderBy,
+    private static IQueryable<TEntity> AddOrderBy(
+        IQueryable<TEntity> dbSet,
+        Expression<Func<TEntity, object>>? orderBy,
         bool ascending = true)
     {
         if (orderBy is not null)
@@ -130,6 +152,16 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
         }
 
         return dbSet;
+    }
+
+    private static string CheckQueryString(IQueryable<TEntity> dbSet)
+    {
+#if DEBUG
+        string sqlString = dbSet.ToQueryString();
+        return sqlString;
+#else
+        return string.Empty;
+#endif
     }
     #endregion
 }
