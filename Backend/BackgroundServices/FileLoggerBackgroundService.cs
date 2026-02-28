@@ -37,7 +37,7 @@ public class FileLoggerBackgroundService(IConfiguration configuration) : Backgro
                 }
                 catch (Exception ex)
                 {
-                    FileLoggerLogStorage.AddLog(new Log(LogLevel.Critical, ex.ToString(), ToString()));
+                    FileLoggerLogStorage.AddLog(new Log(LogLevel.Critical, "Internal FileLogger Exception!", ex, ToString()));
                     await Task.Delay(100, stoppingToken); // Wait before retrying
                 }
             }

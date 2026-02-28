@@ -107,7 +107,14 @@ public class Program
         });
 
         //Database
-        services.AddDbContext<KecskeDatabaseContext>(options => options.UseSqlServer(configuration.GetConnectionString("DatabaseConnection")));
+        services.AddDbContext<KecskeDatabaseContext>(options =>
+            options
+                .UseSqlServer(configuration.GetConnectionString("DatabaseConnection"))
+#if DEBUG
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors()
+#endif
+        );
 
         services.AddScoped<FileStorageService>();
         services.AddScoped<FirewallApiService>();
