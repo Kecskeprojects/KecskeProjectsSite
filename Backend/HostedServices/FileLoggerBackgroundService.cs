@@ -2,7 +2,7 @@
 using Backend.Constants;
 using Backend.Logging;
 
-namespace Backend.BackgroundServices;
+namespace Backend.HostedServices;
 
 public class FileLoggerBackgroundService(IConfiguration configuration) : BackgroundService
 {

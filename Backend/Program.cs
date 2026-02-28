@@ -1,5 +1,4 @@
 using Backend.Authentication;
-using Backend.BackgroundServices;
 using Backend.Database;
 using Backend.Database.Repository;
 using Backend.Database.Service;
