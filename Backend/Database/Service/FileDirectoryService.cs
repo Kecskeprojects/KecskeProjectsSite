@@ -2,7 +2,6 @@
 using Backend.Communication.Outgoing;
 using Backend.Database.Model;
 using Backend.Database.Repository;
-using Backend.Mapping.MappingProfiles;
 
 namespace Backend.Database.Service;
 
@@ -20,6 +19,6 @@ public class FileDirectoryService(GenericRepository<FileDirectory> repository) :
         List<FileDirectory> directories = await repository.GetListAsync(ff => ff.Roles.Any(x => loggedInAccount.Roles.Any(y => y == x.Name))
                                                                     || ff.Roles.Count == 0);
 
-        return CreateMappedResult<SimpleMapper, FileDirectory, FileDirectoryResource>(Enums.DatabaseActionResultEnum.Success, directories);
+        return CreateMappedResult<FileDirectory, FileDirectoryResource>(Enums.DatabaseActionResultEnum.Success, directories);
     }
 }

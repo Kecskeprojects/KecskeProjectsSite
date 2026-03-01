@@ -144,15 +144,17 @@ public class GenericService<TEntity>(GenericRepository<TEntity> repository) wher
         return new DatabaseActionResult<TData?>(result, data, message);
     }
 
-    public DatabaseActionResult<TResource?> CreateMappedResult<TMapper, TData, TResource>(DatabaseActionResultEnum result, TData? data = default, string? message = null) where TMapper : MapperUtilities, new()
+    public DatabaseActionResult<TResource?> CreateMappedResult<TData, TResource>(DatabaseActionResultEnum result, TData? data = default, string? message = null)
     {
-        TResource? mappedData = data is not null ? new TMapper().Map<TData, TResource>(data) : default;
+        TResource? mappedData = data is not null ? new MapperUtilities().Map<TData, TResource>(data) : default;
         return new DatabaseActionResult<TResource?>(result, mappedData, message);
     }
 
-    public DatabaseActionResult<List<TResource>?> CreateMappedResult<TMapper, TData, TResource>(DatabaseActionResultEnum result, List<TData>? data = default, string? message = null) where TMapper : MapperUtilities, new()
+    public DatabaseActionResult<List<TResource>?> CreateMappedResult<TData, TResource>(DatabaseActionResultEnum result, List<TData>? data = default, string? message = null)
     {
-        ICollection<TResource>? mappedData = data is not null ? new TMapper().Map<TData, TResource>(data) : default;
+        ICollection<TResource>? mappedData = data is not null
+            ? new MapperUtilities().Map<TData, TResource>(data)
+            : default;
         return new DatabaseActionResult<List<TResource>?>(result, mappedData?.ToList(), message);
     }
 }
