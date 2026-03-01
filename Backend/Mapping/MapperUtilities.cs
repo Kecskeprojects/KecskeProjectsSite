@@ -47,7 +47,7 @@ public class MapperUtilities
                     m.GetParameters()[0].ParameterType == typeof(TSource) &&
                     m.Name != nameof(Map));
 
-            if(foundMethod != null)
+            if (foundMethod != null)
             {
                 return foundMethod;
             }

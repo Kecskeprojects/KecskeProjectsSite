@@ -90,6 +90,6 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
     internal async Task<DatabaseActionResult<List<AccountResource>?>> GetUsersAsync()
     {
         List<Account> accounts = await repository.GetListAsync();
-        return CreateMappedResult<Account, AccountResource>(DatabaseActionResultEnum.Success, accounts);        
+        return CreateMappedResult<Account, AccountResource>(DatabaseActionResultEnum.Success, accounts);
     }
 }

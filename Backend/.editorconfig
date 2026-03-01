@@ -1,0 +1,11 @@
+# top-most EditorConfig file
+root = true
+
+[/Database/Model/**]
+generated_code = true
+
+[/Database/KecskeDatabaseContext.cs]
+generated_code = true
+
+[/_Compiler_Generated_Files_/**]
+generated_code = true
