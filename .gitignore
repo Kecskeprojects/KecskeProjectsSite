@@ -5,6 +5,7 @@ TestInserts/
 update-scaffold.txt
 
 appsettings*.json
+_Compiler_Generated_Files_
 *.user
 *.jfm
 *.dbmdl
