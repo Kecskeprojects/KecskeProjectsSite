@@ -18,7 +18,7 @@ export default class LogTools {
   }
 
   static setErrorNotification(message: string): void {
-    this.setNotification({
+    LogTools.setNotification({
       message: message,
       notificationType: NotificationTypeEnum.Error,
       notificationId: new Date().getTime(),
@@ -26,7 +26,7 @@ export default class LogTools {
   }
 
   static setSuccessNotification(message: string): void {
-    this.setNotification({
+    LogTools.setNotification({
       message: message,
       notificationType: NotificationTypeEnum.Success,
       notificationId: new Date().getTime(),
@@ -34,7 +34,7 @@ export default class LogTools {
   }
 
   static setInfoNotification(message: string): void {
-    this.setNotification({
+    LogTools.setNotification({
       message: message,
       notificationType: NotificationTypeEnum.Info,
       notificationId: new Date().getTime(),
