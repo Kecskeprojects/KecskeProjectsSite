@@ -6,17 +6,26 @@ public class MapperUtilities
 {
     public virtual List<TTarget> Map<TSource, TTarget>(List<TSource> sources)
     {
-        return [.. sources.Select(Map<TSource, TTarget>)];
+        MethodInfo method = GetMappingMethod<TSource, TTarget>();
+        object? methodParentInstance = Activator.CreateInstance(method.DeclaringType!);
+
+        return [.. sources.Select(s => MapBase<TSource, TTarget>(method, methodParentInstance, s))];
     }
 
     public virtual IEnumerable<TTarget> Map<TSource, TTarget>(IEnumerable<TSource> sources)
     {
-        return sources.Select(Map<TSource, TTarget>);
+        MethodInfo method = GetMappingMethod<TSource, TTarget>();
+        object? methodParentInstance = Activator.CreateInstance(method.DeclaringType!);
+
+        return sources.Select(s => MapBase<TSource, TTarget>(method, methodParentInstance, s));
     }
 
     public virtual TTarget[] Map<TSource, TTarget>(TSource[] sources)
     {
-        return [.. sources.Select(Map<TSource, TTarget>)];
+        MethodInfo method = GetMappingMethod<TSource, TTarget>();
+        object? methodParentInstance = Activator.CreateInstance(method.DeclaringType!);
+
+        return [.. sources.Select(s => MapBase<TSource, TTarget>(method, methodParentInstance, s))];
     }
 
     public virtual TTarget Map<TSource, TTarget>(TSource source)
@@ -24,6 +33,13 @@ public class MapperUtilities
         MethodInfo method = GetMappingMethod<TSource, TTarget>();
         object? methodParentInstance = Activator.CreateInstance(method.DeclaringType!);
 
+        return MapBase<TSource, TTarget>(method, methodParentInstance, source);
+    }
+
+    //By doing the core mapping in a separate method
+    //We minimize the amount of reflection calls needed, as we only need to find the mapping method once per mapping operation, and then we can reuse it for each source object
+    protected virtual TTarget MapBase<TSource, TTarget>(MethodInfo method, object? methodParentInstance, TSource source)
+    {
         //Invoke the method found method using an instance of the class that contains it, passing the source object as a parameter
         TTarget? result = (TTarget?) method.Invoke(methodParentInstance, [source]);
         return result ?? throw new InvalidOperationException("Mapping method returned null.");
