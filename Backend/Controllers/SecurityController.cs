@@ -14,10 +14,8 @@ namespace Backend.Controllers;
 public class SecurityController(
     ILogger<AccountController> logger,
     FirewallApiService firewallApiService
-    ) : ApiControllerBase(logger)
+    ) : ApiControllerBase<FirewallApiService>(logger, firewallApiService)
 {
-    private readonly FirewallApiService firewallApiService = firewallApiService;
-
     [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> AddAddressToRule([FromQuery] string? address)
@@ -29,7 +27,7 @@ public class SecurityController(
             return ErrorResult(StatusCodes.Status400BadRequest, "IP address cannot be determined!");
         }
 
-        bool success = await firewallApiService.AddRDPRule(LoggedInAccount!.AccountId, address);
+        bool success = await service.AddRDPRule(LoggedInAccount!.AccountId, address);
 
         return success
             ? MessageResult("Firewall rule updated successfully.")

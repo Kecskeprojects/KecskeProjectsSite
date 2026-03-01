@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Base;
 
-public class ApiControllerBase(ILogger logger) : ControllerBase
+public class ApiControllerBase<TService>(ILogger logger, TService mainService) : ControllerBase
 {
+    protected readonly TService service = mainService;
     protected ILogger Logger { get; } = logger;
     protected LoggedInAccount? LoggedInAccount => ClaimsPrincipalTools.GetLoggedInAccount(HttpContext.User);
 

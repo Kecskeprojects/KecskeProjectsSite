@@ -8,4 +8,5 @@ namespace Backend.Mapping.MappingProfiles;
 public partial class SimpleMapper : MapperUtilities
 {
     public partial FileDirectoryResource FileDirectoryToFileDirectoryResource(FileDirectory fileDirectory);
+    public partial AccountResource AccountToAccountResource(Account account);
 }

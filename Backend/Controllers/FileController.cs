@@ -14,13 +14,13 @@ namespace Backend.Controllers;
 public class FileController(
     ILogger<AccountController> logger,
     FileStorageService fileStorageService
-    ) : ApiControllerBase(logger)
+    ) : ApiControllerBase<FileStorageService>(logger, fileStorageService)
 {
     [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetFileList([FromQuery] string category, [FromQuery] string? subPath)
     {
-        List<FileData> fileDataList = await fileStorageService.GetFilesInDirectory(LoggedInAccount!, category, subPath);
+        List<FileData> fileDataList = await service.GetFilesInDirectory(LoggedInAccount!, category, subPath);
 
         return ContentResult(fileDataList);
     }
@@ -29,7 +29,7 @@ public class FileController(
     [HttpGet]
     public async Task<IActionResult> GetDirectoryList([FromQuery] string category, [FromQuery] string? subPath)
     {
-        List<DirectoryData> fileDataList = await fileStorageService.GetDirectoriesInDirectory(LoggedInAccount!, category, subPath);
+        List<DirectoryData> fileDataList = await service.GetDirectoriesInDirectory(LoggedInAccount!, category, subPath);
 
         return ContentResult(fileDataList);
     }
@@ -38,7 +38,7 @@ public class FileController(
     [HttpGet("{clientHash}")]
     public async Task<IActionResult> GetSingle([FromRoute] string clientHash, [FromQuery] string category, [FromQuery] string? subPath)
     {
-        string? fileRoute = await fileStorageService.GetFileRoute(LoggedInAccount!, category, subPath, clientHash);
+        string? fileRoute = await service.GetFileRoute(LoggedInAccount!, category, subPath, clientHash);
 
         return fileRoute is not null
             ? PhysicalFile(fileRoute, "application/octet-stream", enableRangeProcessing: true)
@@ -62,7 +62,7 @@ public class FileController(
         }
 
         CancellationToken cancellationToken = HttpContext.RequestAborted;
-        string response = await fileStorageService.SaveViaMultipartReaderAsync(LoggedInAccount!, category, subPath, isNewFile, boundary, Request.Body, cancellationToken);
+        string response = await service.SaveViaMultipartReaderAsync(LoggedInAccount!, category, subPath, isNewFile, boundary, Request.Body, cancellationToken);
         return ContentResult(response);
     }
 }

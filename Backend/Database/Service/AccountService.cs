@@ -1,5 +1,6 @@
 ﻿using Backend.Communication.Incoming;
 using Backend.Communication.Internal;
+using Backend.Communication.Outgoing;
 using Backend.Database.Model;
 using Backend.Database.Repository;
 using Backend.Enums;
@@ -51,7 +52,24 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
         return await SaveChangesAsync();
     }
 
-    internal async Task<DatabaseActionResult<int>> ResetPasswordAsync(ResetPasswordData form)
+    public async Task<DatabaseActionResult<string?>> GenerateNewSecretKeyAsync(int accountId)
+    {
+        Account? account = await repository.FindByIdAsync(accountId);
+        if (account is null)
+        {
+            return CreateResult<string>(DatabaseActionResultEnum.NotFound, null);
+        }
+
+        string uuid = Guid.NewGuid().ToString();
+        account.SecretKey = EncryptionTools.GetHashBytes(account, uuid);
+        DatabaseActionResult<int> updateResult = await UpdateAsync(account);
+
+        return updateResult.Status != DatabaseActionResultEnum.Success
+            ? CreateResult<string>(DatabaseActionResultEnum.Failure, null)
+            : CreateResult(DatabaseActionResultEnum.Success, uuid);
+    }
+
+    public async Task<DatabaseActionResult<int>> ResetPasswordAsync(ResetPasswordData form)
     {
         string username = form.UserName.Trim();
         Account? account = await repository.FirstOrDefaultAsync(a => a.UserName.Equals(username));
@@ -67,5 +85,11 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
 
         account.Password = EncryptionTools.GetHashBytes(account, form.Password);
         return await SaveChangesAsync();
+    }
+
+    internal async Task<DatabaseActionResult<List<AccountResource>?>> GetUsersAsync()
+    {
+        List<Account> accounts = await repository.GetListAsync();
+        return CreateMappedResult<Account, AccountResource>(DatabaseActionResultEnum.Success, accounts);        
     }
 }

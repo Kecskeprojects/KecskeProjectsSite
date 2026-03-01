@@ -15,13 +15,13 @@ namespace Backend.Controllers;
 public class FileDirectoryController(
     ILogger<AccountController> logger,
     FileDirectoryService fileDirectoryService
-    ) : ApiControllerBase(logger)
+    ) : ApiControllerBase<FileDirectoryService>(logger, fileDirectoryService)
 {
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetCategories([FromQuery] string category, [FromQuery] string? subPath)
+    public async Task<IActionResult> GetCategories()
     {
-        DatabaseActionResult<List<FileDirectoryResource>?> fileDataList = await fileDirectoryService.GetAccountAccessibleDirectoriesAsync(LoggedInAccount!);
+        DatabaseActionResult<List<FileDirectoryResource>?> fileDataList = await service.GetAccountAccessibleDirectoriesAsync(LoggedInAccount!);
 
         return fileDataList.Status switch
         {
