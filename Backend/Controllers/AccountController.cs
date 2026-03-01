@@ -29,6 +29,19 @@ public class AccountController(
             : ErrorResult(StatusCodes.Status401Unauthorized, "You are not logged in!");
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpGet]
+    public async Task<IActionResult> GetUsers()
+    {
+        DatabaseActionResult<List<AccountResource>?> result = await service.GetUsersAsync();
+
+        return result.Status switch
+        {
+            DatabaseActionResultEnum.Success => ContentResult(result.Data),
+            _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while retrieving users.")
+        };
+    }
+
     [HttpPost]
     public async Task<IActionResult> Register([FromForm] RegisterData form)
     {
@@ -80,7 +93,7 @@ public class AccountController(
         };
     }
 
-    [Authorize("Admin")]
+    [Authorize(Roles = "Admin")]
     [HttpPut("{accountId}")]
     public async Task<IActionResult> GenerateNewSecretKey([FromRoute] int accountId)
     {
@@ -90,19 +103,6 @@ public class AccountController(
             DatabaseActionResultEnum.Success => ContentResult(result.Data),
             DatabaseActionResultEnum.NotFound => ErrorResult(StatusCodes.Status428PreconditionRequired, "Account with that ID doesn't exist."),
             _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while generating new secret key.")
-        };
-    }
-
-    [Authorize("Admin")]
-    [HttpGet]
-    public async Task<IActionResult> GetUsers()
-    {
-        DatabaseActionResult<List<AccountResource>?> result = await service.GetUsersAsync();
-
-        return result.Status switch
-        {
-            DatabaseActionResultEnum.Success => ContentResult(result.Data),
-            _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while retrieving users.")
         };
     }
 }

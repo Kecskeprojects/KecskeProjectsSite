@@ -22,19 +22,23 @@ public class MapperUtilities
     public virtual TTarget Map<TSource, TTarget>(TSource source)
     {
         MethodInfo method = GetMappingMethod<TSource, TTarget>();
+        object? methodParentInstance = Activator.CreateInstance(method.DeclaringType!);
 
-        TTarget? result = (TTarget?) method.Invoke(this, [source]);
+        //Invoke the method found method using an instance of the class that contains it, passing the source object as a parameter
+        TTarget? result = (TTarget?) method.Invoke(methodParentInstance, [source]);
         return result ?? throw new InvalidOperationException("Mapping method returned null.");
     }
 
     protected virtual MethodInfo GetMappingMethod<TSource, TTarget>()
     {
+        //Get all types in the current assembly that are subclasses of MapperUtilities
         Type parentType = typeof(MapperUtilities);
         Assembly currentAssembly = parentType.Assembly;
         IEnumerable<Type> mappers = currentAssembly
             .GetTypes()
             .Where(t => t.IsSubclassOf(parentType));
 
+        //Iterate through the mappers and find a method that has the correct signature for mapping from TSource to TTarget
         foreach (Type type in mappers)
         {
             MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
