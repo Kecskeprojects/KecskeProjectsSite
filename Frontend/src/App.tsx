@@ -45,21 +45,25 @@ export default function App(): JSX.Element {
         <Routes>
           <Route element={<Notification />}>
             <Route path={Constants.LoginRoute} element={<Login />} />
+            {/*Logged in only routes*/}
             <Route element={<LoginChecker />}>
               <Route path="/" element={<Layout />}>
                 <Route index element={<Home />} />
+                <Route
+                  path={`${Constants.FileBaseRoute}/:category`}
+                  element={<ExampleComponent />}
+                >
+                  <Route path=":subPath" element={<ExampleComponent />} />
+                </Route>
+                {/*Admin only routes*/}
                 <Route element={<RoleChecker roles={["Admin"]} />}>
-                  <Route
-                    path={`${Constants.FileBaseRoute}/:category`}
-                    element={<ExampleComponent />}
-                  >
-                    <Route path=":subPath" element={<ExampleComponent />} />
-                  </Route>
                   <Route path="security" element={<Security />} />
                 </Route>
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/*Admin only routes*/}
               </Route>
             </Route>
+            {/*Logged in only routes*/}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>
