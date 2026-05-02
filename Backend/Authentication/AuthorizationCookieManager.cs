@@ -1,8 +1,8 @@
-﻿using Backend.Communication.Internal;
-using Backend.Communication.Outgoing;
-using Backend.Database.Model;
-using Backend.Database.Service;
-using Backend.Tools;
+﻿using Backend.Tools;
+using DatabaseORM.Communication;
+using DatabaseORM.Model;
+using DatabaseORM.Service;
+using DatabaseORM.Tools;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
@@ -23,7 +23,7 @@ public class AuthorizationCookieManager(AccountService accountService)
 
         if (result.Data is null
             || !result.Data.IsRegistrationApproved
-            || !EncryptionTools.VerifyPassword(result.Data, password, result.Data.Password))
+            || !PasswordHasherTools.VerifyPassword(result.Data, password, result.Data.Password))
         {
             return null;
         }

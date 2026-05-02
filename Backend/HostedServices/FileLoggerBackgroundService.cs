@@ -12,7 +12,7 @@ public class FileLoggerBackgroundService(IConfiguration configuration) : Backgro
     {
         await Task.Delay(5000, stoppingToken); // Initial delay to force ExecuteAsync to be async
 
-        string logDirectoryPath = configuration.GetValue<string>(ConfigurationConstants.LogPathKey) ?? "log";
+        string logDirectoryPath = configuration.GetValue<string>(ConfigurationKeys.LogPathKey) ?? "log";
 
         if (!Path.IsPathFullyQualified(logDirectoryPath))
         {

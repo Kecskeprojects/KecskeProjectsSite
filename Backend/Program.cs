@@ -1,11 +1,9 @@
 using Backend.Authentication;
 using Backend.Constants;
-using Backend.Database;
-using Backend.Database.Repository;
-using Backend.Database.Service;
 using Backend.HostedServices;
 using Backend.Services;
 using Backend.Tools.Extensions;
+using DatabaseORM;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.Versioning;
@@ -46,7 +44,7 @@ public class Program
             _ = app.MapGet("/", () => "The backend is running, now shoo!");
         }
 
-        IConfiguration section = builder.Configuration.GetSection(ConfigurationConstants.FrontendDomains) ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
+        IConfiguration section = builder.Configuration.GetSection(ConfigurationKeys.FrontendDomains) ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
         string[] frontendDomains = section.Get<string[]>() ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
         _ = app.UseCors(options => options
             .AllowAnyHeader()
@@ -80,6 +78,11 @@ public class Program
         //Custom handler for endpoints that require authentication
         services.AddSingleton<CustomCookieAuthenticationEvents>();
 
+        //Services
+        services.AddScoped<FileStorageService>();
+        services.AddScoped<FirewallApiService>();
+
+        //Authentication
         services
             .AddAuthentication(
                 options =>
@@ -102,23 +105,7 @@ public class Program
                     options.SlidingExpiration = true;
                 });
 
-        //Database
-        services.AddDbContext<KecskeDatabaseContext>(options =>
-            options
-                .UseSqlServer(configuration.GetConnectionString(ConfigurationConstants.DatabaseConnection))
-#if DEBUG
-                .EnableSensitiveDataLogging()
-                .EnableDetailedErrors()
-#endif
-        );
-
-        services.AddScoped<FileStorageService>();
-        services.AddScoped<FirewallApiService>();
-
-        services.AddScoped(typeof(GenericRepository<>));
-        services.AddScoped(typeof(GenericService<>));
-        services.AddScoped<AccountService>();
-        services.AddScoped<FileDirectoryService>();
-        services.AddScoped<PermittedIpAddressService>();
+        string? databaseConnectionString = configuration.GetConnectionString(ConfigurationKeys.DatabaseConnection);
+        DatabaseStartup.ConfigureDatabaseServices(services, databaseConnectionString);
     }
 }

@@ -1,8 +1,8 @@
-﻿using Backend.Communication.Internal;
-using Backend.Communication.Outgoing;
+﻿using Backend.Communication.Outgoing;
 using Backend.Constants;
-using Backend.Database.Service;
 using Backend.Tools;
+using DatabaseORM.Communication;
+using DatabaseORM.Service;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 
@@ -21,7 +21,7 @@ public class FileStorageService(
 
         List<FileData> fileDataList = [];
 
-        string? baseDirectory = configuration.GetValue<string>(ConfigurationConstants.BaseFileDirectoryKey);
+        string? baseDirectory = configuration.GetValue<string>(ConfigurationKeys.BaseFileDirectoryKey);
         foreach (string fileRoute in fileRoutes)
         {
             FileInfo fileInfo = new(fileRoute);
@@ -58,7 +58,7 @@ public class FileStorageService(
 
         List<DirectoryData> directoryDataList = [];
 
-        string? baseDirectory = configuration.GetValue<string>(ConfigurationConstants.BaseFileDirectoryKey);
+        string? baseDirectory = configuration.GetValue<string>(ConfigurationKeys.BaseFileDirectoryKey);
         foreach (string directoryRoute in directoryRoutes)
         {
             DirectoryInfo directoryInfo = new(directoryRoute);
@@ -139,7 +139,7 @@ public class FileStorageService(
 
     private async Task<string> GetFullPath(LoggedInAccount loggedInAccount, string categoryDirectory, string? subPath)
     {
-        string? baseDirectory = configuration.GetValue<string>(ConfigurationConstants.BaseFileDirectoryKey);
+        string? baseDirectory = configuration.GetValue<string>(ConfigurationKeys.BaseFileDirectoryKey);
         DatabaseActionResult<bool> directoryAccessAllowed =
             await fileDirectoryService.AccountHasAccessToDirectoryAsync(loggedInAccount, categoryDirectory);
 

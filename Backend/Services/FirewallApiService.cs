@@ -1,15 +1,18 @@
-﻿using Backend.Communication.Internal;
-using Backend.Constants;
-using Backend.Database.Service;
-using Backend.Enums;
+﻿using Backend.Constants;
 using Backend.Tools;
+using DatabaseORM.Communication;
+using DatabaseORM.Enums;
+using DatabaseORM.Service;
 using NetFwTypeLib;
 using System.Runtime.Versioning;
 
 namespace Backend.Services;
 
 [SupportedOSPlatform("windows")]
-public class FirewallApiService(PermittedIpAddressService permittedIpAddressService, ILogger<FileStorageService> logger)
+public class FirewallApiService(
+    PermittedIpAddressService permittedIpAddressService,
+    ILogger<FileStorageService> logger,
+    IConfiguration configuration)
 {
     public async Task<bool> AddRDPRule(int accountId, string ip)
     {
@@ -27,7 +30,8 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
                 return true;
             }
 
-            DatabaseActionResult<int> dbResult = await permittedIpAddressService.AddAsync(accountId, ip);
+            int expirationMinutes = configuration.GetValue<int>(ConfigurationKeys.RDPAccessExpirationMinutesKey);
+            DatabaseActionResult<int> dbResult = await permittedIpAddressService.AddAsync(expirationMinutes, accountId, ip);
 
             if (dbResult.Status != DatabaseActionResultEnum.Success)
             {
@@ -54,8 +58,8 @@ public class FirewallApiService(PermittedIpAddressService permittedIpAddressServ
                 return true;
             }
 
-            IEnumerable<string> tcpAddresses = firewallRuleTCP.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
-            IEnumerable<string> udpAddresses = firewallRuleUDP.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+            IEnumerable<string> tcpAddresses = [.. firewallRuleTCP.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries)];
+            IEnumerable<string> udpAddresses = [.. firewallRuleUDP.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries)];
 
             foreach (string ip in expiredIPs.Data!)
             {

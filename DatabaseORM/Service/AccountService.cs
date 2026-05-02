@@ -22,12 +22,12 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
             UserName = username
         };
 
-        account.Password = EncryptionTools.GetHashBytes(account, password);
+        account.Password = PasswordHasherTools.GetHashBytes(account, password);
 
         //Secret key used to reset password
         string uuid = Guid.NewGuid().ToString();
-        account.SecretKey = EncryptionTools.GetHashBytes(account, uuid);
-        account.Password = EncryptionTools.GetHashBytes(account, password);
+        account.SecretKey = PasswordHasherTools.GetHashBytes(account, uuid);
+        account.Password = PasswordHasherTools.GetHashBytes(account, password);
 
         int result = await repository.AddAsync(account);
 
@@ -59,7 +59,7 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
         }
 
         string uuid = Guid.NewGuid().ToString();
-        account.SecretKey = EncryptionTools.GetHashBytes(account, uuid);
+        account.SecretKey = PasswordHasherTools.GetHashBytes(account, uuid);
         DatabaseActionResult<int> updateResult = await UpdateAsync(account);
 
         return updateResult.Status != DatabaseActionResultEnum.Success
@@ -76,16 +76,16 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
             return CreateResult(DatabaseActionResultEnum.NotFound, 0);
         }
 
-        if (!EncryptionTools.VerifyPassword(account, secretKey, account.SecretKey))
+        if (!PasswordHasherTools.VerifyPassword(account, secretKey, account.SecretKey))
         {
             return CreateResult(DatabaseActionResultEnum.DifferingHash, 0);
         }
 
-        account.Password = EncryptionTools.GetHashBytes(account, newPassword);
+        account.Password = PasswordHasherTools.GetHashBytes(account, newPassword);
         return await SaveChangesAsync();
     }
 
-    internal async Task<DatabaseActionResult<List<AccountResource>?>> GetUsersAsync()
+    public async Task<DatabaseActionResult<List<AccountResource>?>> GetUsersAsync()
     {
         List<Account> accounts = await repository.GetListAsync();
         return CreateMappedResult<Account, AccountResource>(DatabaseActionResultEnum.Success, accounts);

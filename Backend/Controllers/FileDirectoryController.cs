@@ -1,9 +1,8 @@
-﻿using Backend.Communication.Internal;
-using Backend.Communication.Outgoing;
-using Backend.Controllers.Base;
+﻿using Backend.Controllers.Base;
 using Backend.CustomAttributes;
-using Backend.Database.Service;
-using Backend.Enums;
+using DatabaseORM.Communication;
+using DatabaseORM.Enums;
+using DatabaseORM.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

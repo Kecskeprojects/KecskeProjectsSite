@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DatabaseORM.Tools;
 
-public static class EncryptionTools
+public static class PasswordHasherTools
 {
     public static byte[] GetHashBytes(Account account, string password)
     {

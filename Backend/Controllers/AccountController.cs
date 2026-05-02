@@ -1,11 +1,10 @@
 ﻿using Backend.Authentication;
 using Backend.Communication.Incoming;
-using Backend.Communication.Internal;
-using Backend.Communication.Outgoing;
 using Backend.Controllers.Base;
 using Backend.CustomAttributes;
-using Backend.Database.Service;
-using Backend.Enums;
+using DatabaseORM.Communication;
+using DatabaseORM.Enums;
+using DatabaseORM.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,7 +44,7 @@ public class AccountController(
     [HttpPost]
     public async Task<IActionResult> Register([FromForm] RegisterData form)
     {
-        DatabaseActionResult<string?> result = await service.RegisterAsync(form);
+        DatabaseActionResult<string?> result = await service.RegisterAsync(form.UserName, form.Password);
 
         return result.Status switch
         {
@@ -82,7 +81,7 @@ public class AccountController(
     [HttpPut]
     public async Task<IActionResult> ResetPassword([FromForm] ResetPasswordData form)
     {
-        DatabaseActionResult<int> result = await service.ResetPasswordAsync(form);
+        DatabaseActionResult<int> result = await service.ResetPasswordAsync(form.UserName, form.SecretKey, form.Password);
 
         return result.Status switch
         {

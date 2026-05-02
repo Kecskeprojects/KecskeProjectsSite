@@ -1,6 +1,6 @@
 ﻿namespace Backend.Constants;
 
-public static class ConfigurationConstants
+public static class ConfigurationKeys
 {
     public const string BaseFileDirectoryKey = "BaseFileDirectory";
     public const string RDPAccessExpirationMinutesKey = "RDPAccessExpirationMinutes";

@@ -1,5 +1,5 @@
-﻿using Backend.Communication.Outgoing;
-using Backend.Database.Model;
+﻿using DatabaseORM.Communication;
+using DatabaseORM.Model;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 

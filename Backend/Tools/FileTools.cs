@@ -1,5 +1,5 @@
-﻿using Backend.Communication.Internal;
-using Backend.Enums;
+﻿using DatabaseORM.Communication;
+using DatabaseORM.Enums;
 
 namespace Backend.Tools;
 
