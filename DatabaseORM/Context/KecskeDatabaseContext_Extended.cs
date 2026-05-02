@@ -1,10 +1,11 @@
 ﻿using DatabaseORM.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace DatabaseORM;
+namespace DatabaseORM.Context;
 
 public partial class KecskeDatabaseContext
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "The other partial class is generated code")]
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
         _ = modelBuilder.Entity<Role>(entity =>

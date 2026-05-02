@@ -1,4 +1,7 @@
-﻿namespace DatabaseORM.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace DatabaseORM.Model;
 
 public partial class AccountRole
 {

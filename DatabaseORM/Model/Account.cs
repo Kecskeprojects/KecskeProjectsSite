@@ -1,4 +1,7 @@
-﻿namespace DatabaseORM.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace DatabaseORM.Model;
 
 public partial class Account
 {
@@ -18,7 +21,7 @@ public partial class Account
 
     public DateTime ModifiedOnUtc { get; set; }
 
-    public virtual ICollection<AccountRole> AccountRoles { get; set; } = [];
+    public virtual ICollection<AccountRole> AccountRoles { get; set; } = new List<AccountRole>();
 
-    public virtual ICollection<PermittedIpAddress> PermittedIpAddresses { get; set; } = [];
+    public virtual ICollection<PermittedIpAddress> PermittedIpAddresses { get; set; } = new List<PermittedIpAddress>();
 }

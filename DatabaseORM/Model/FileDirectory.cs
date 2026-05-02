@@ -1,4 +1,7 @@
-﻿namespace DatabaseORM.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace DatabaseORM.Model;
 
 public partial class FileDirectory
 {
@@ -12,5 +15,5 @@ public partial class FileDirectory
 
     public DateTime ModifiedOnUtc { get; set; }
 
-    public virtual ICollection<FileDirectoryRole> FileDirectoryRoles { get; set; } = [];
+    public virtual ICollection<FileDirectoryRole> FileDirectoryRoles { get; set; } = new List<FileDirectoryRole>();
 }
