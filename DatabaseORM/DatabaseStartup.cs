@@ -10,11 +10,9 @@ public class DatabaseStartup
 {
     public static void ConfigureDatabaseServices(IServiceCollection services, string? databaseConnectionString)
     {
-
-        //Database
         services.AddDbContext<KecskeDatabaseContext>(options =>
             options
-                .UseSqlServer()
+                .UseSqlServer(databaseConnectionString)
 #if DEBUG
                 .EnableSensitiveDataLogging()
                 .EnableDetailedErrors()
