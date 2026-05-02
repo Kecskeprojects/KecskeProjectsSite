@@ -1,6 +1,6 @@
 ﻿using DatabaseORM.Model;
 
-namespace DatabaseORM.Communication;
+namespace DatabaseORM.Communication.Resource;
 
 public class AccountResource
 {

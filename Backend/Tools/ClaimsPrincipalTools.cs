@@ -1,4 +1,4 @@
-﻿using DatabaseORM.Communication;
+﻿using DatabaseORM.Communication.Resource;
 using DatabaseORM.Model;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;

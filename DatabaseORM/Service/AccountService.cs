@@ -3,6 +3,7 @@ using DatabaseORM.Communication;
 using DatabaseORM.Enums;
 using DatabaseORM.Repository;
 using DatabaseORM.Tools;
+using DatabaseORM.Communication.Resource;
 
 namespace DatabaseORM.Service;
 

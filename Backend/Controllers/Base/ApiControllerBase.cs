@@ -1,6 +1,6 @@
 ﻿using Backend.Communication.Outgoing;
 using Backend.Tools;
-using DatabaseORM.Communication;
+using DatabaseORM.Communication.Resource;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Base;
