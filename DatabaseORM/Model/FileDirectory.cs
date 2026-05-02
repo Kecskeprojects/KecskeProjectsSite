@@ -1,0 +1,16 @@
+﻿namespace DatabaseORM.Model;
+
+public partial class FileDirectory
+{
+    public int FileDirectoryId { get; set; }
+
+    public string RelativePath { get; set; } = null!;
+
+    public string DisplayName { get; set; } = null!;
+
+    public DateTime CreatedOnUtc { get; set; }
+
+    public DateTime ModifiedOnUtc { get; set; }
+
+    public virtual ICollection<FileDirectoryRole> FileDirectoryRoles { get; set; } = [];
+}
