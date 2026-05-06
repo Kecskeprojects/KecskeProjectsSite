@@ -7,7 +7,10 @@ namespace DatabaseORM.Repository;
 public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEntity : class
 {
     protected readonly KecskeDatabaseContext context = context;
-    //Todo: Potentially can be improved with memory caching: https://learn.microsoft.com/en-us/aspnet/core/performance/caching/memory?view=aspnetcore-9.0
+    //Todo: Potentially can be improved with memory caching: https://learn.microsoft.com/en-us/aspnet/core/performance/caching/memory?view=aspnetcore-10.0
+    //Todo: Add pagination for GetListAsync method
+    //Todo: Add support for handling concurrency conflicts: https://learn.microsoft.com/en-us/ef/core/saving/concurrency
+    //https://learn.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency
 
     public ValueTask<TEntity?> FindByIdAsync(int id)
     {
