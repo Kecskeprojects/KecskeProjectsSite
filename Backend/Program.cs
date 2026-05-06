@@ -17,10 +17,10 @@ public class Program
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
+        // Add services to the container
         ConfigureServices(builder.Configuration, builder.Services);
 
-        //Setting custom file logging configuration
+        //Removing built-in logging providers and setting custom file logging configuration
         _ = builder.Logging.ClearProviders();
         _ = builder.Logging.AddFileLogger();
 
@@ -30,19 +30,16 @@ public class Program
 
         WebApplication app = builder.Build();
 
+#if DEBUG
         //Swagger is only available during development
-        if (app.Environment.IsDevelopment())
+        _ = app.MapOpenApi();
+        _ = app.UseSwaggerUI(options =>
         {
-            _ = app.MapOpenApi();
-            _ = app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/openapi/v1.json", "v1");
-            });
-        }
-        else
-        {
-            _ = app.MapGet("/", () => "The backend is running, now shoo!");
-        }
+            options.SwaggerEndpoint("/openapi/v1.json", "v1");
+        });
+#else
+        _ = app.MapGet("/", () => "The backend is running, now shoo!");
+#endif
 
         IConfiguration section = builder.Configuration.GetSection(ConfigurationKeys.FrontendDomains) ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
         string[] frontendDomains = section.Get<string[]>() ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");

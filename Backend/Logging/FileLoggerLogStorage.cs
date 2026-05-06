@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 
 namespace Backend.Logging;
 
+// Static class that serves as a thread-safe storage for log messages produced by the FileLogger instances, allowing the FileLoggerBackgroundService to consume and write them to files asynchronously
 public static class FileLoggerLogStorage
 {
     private static readonly BlockingCollection<Log> LogMessages = [];

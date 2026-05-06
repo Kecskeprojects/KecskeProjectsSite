@@ -4,6 +4,7 @@ using Backend.Tools;
 
 namespace Backend.Logging;
 
+// Custom ILogger implementation that writes log messages to a thread-safe storage, which is then consumed by the FileLoggerBackgroundService to write them to files asynchronously
 public class FileLogger(string name, Func<FileLoggerConfiguration> getCurrentConfig) : ILogger
 {
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull

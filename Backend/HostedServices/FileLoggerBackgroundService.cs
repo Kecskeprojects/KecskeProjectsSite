@@ -4,6 +4,7 @@ using Backend.Logging;
 
 namespace Backend.HostedServices;
 
+// Background service that continuously consumes log messages from the FileLoggerLogStorage and writes them to log files in a specified directory, with retry logic to handle potential file access issues
 public class FileLoggerBackgroundService(IConfiguration configuration) : BackgroundService
 {
     private readonly IConfiguration configuration = configuration;
@@ -27,19 +28,24 @@ public class FileLoggerBackgroundService(IConfiguration configuration) : Backgro
         IEnumerable<Log> logs = FileLoggerLogStorage.GetConsumingEnumerable(stoppingToken);
         foreach (Log msg in logs)
         {
-            int maxTries = 3;
-            for (int i = 0; i < maxTries; i++)
+            await TryWritingToFileAsync(logDirectoryPath, msg, stoppingToken);
+        }
+    }
+
+    private async Task TryWritingToFileAsync(string logDirectoryPath, Log msg, CancellationToken stoppingToken)
+    {
+        int maxTries = 3;
+        for (int i = 0; i < maxTries; i++)
+        {
+            try
             {
-                try
-                {
-                    File.AppendAllText(Path.Combine(logDirectoryPath, $"Backend-Log-{DateTime.UtcNow:yyyy-MM-dd}.txt"), msg.Content + "\n");
-                    break; // Exit the retry loop if successful
-                }
-                catch (Exception ex)
-                {
-                    FileLoggerLogStorage.AddLog(new Log(LogLevel.Critical, "Internal FileLogger Exception!", ex, ToString()));
-                    await Task.Delay(100, stoppingToken); // Wait before retrying
-                }
+                File.AppendAllText(Path.Combine(logDirectoryPath, $"Backend-Log-{DateTime.UtcNow:yyyy-MM-dd}.txt"), msg.Content + "\n");
+                break; // Exit the retry loop if successful
+            }
+            catch (Exception ex)
+            {
+                FileLoggerLogStorage.AddLog(new Log(LogLevel.Critical, "Internal FileLogger Exception!", ex, ToString()));
+                await Task.Delay(100, stoppingToken); // Wait before retrying
             }
         }
     }

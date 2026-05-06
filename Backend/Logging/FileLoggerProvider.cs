@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 
 namespace Backend.Logging;
 
+// Custom ILoggerProvider implementation that creates instances of FileLogger and manages their configuration and lifecycle
 [ProviderAlias("FileLogger")]
 public sealed class FileLoggerProvider : ILoggerProvider
 {
