@@ -15,6 +15,7 @@ public class FileStorageService(
     FileDirectoryService fileDirectoryService)
 {
     //Todo: Cleanup for better readability and maintainability (e.g. split into multiple methods, add more logging, add more error handling, etc.)
+    //Todo: rethink routing on frontend and backend to be able to handle actual routes instead of '>' separators
     public async Task<List<FileData>> GetFilesInDirectory(LoggedInAccount loggedInAccount, string categoryDirectory, string? subPath)
     {
         string fullTargetDirectoryPath = await GetFullPath(loggedInAccount, categoryDirectory, subPath);
