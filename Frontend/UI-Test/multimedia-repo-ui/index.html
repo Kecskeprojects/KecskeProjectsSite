@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multimedia Repository</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Multimedia Repository</h1>
+      <nav>
+        <ul>
+          <li><a href="#files">Files</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <button id="upload-modal-btn" class="upload-float-btn">
+        Upload Files
+      </button>
+      <section id="files">
+        <h2>File Repository</h2>
+        <div id="file-list"></div>
+      </section>
+    </main>
+    <footer>
+      <p>&copy; 2026 Multimedia Repository</p>
+    </footer>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Upload Files</h2>
+        <div class="upload-area">
+          <input type="file" id="file-input" multiple />
+          <label for="file-input">Choose files or drag and drop here</label>
+        </div>
+        <button id="upload-btn">Upload</button>
+      </div>
+    </div>
+
+    <!-- Media Modal -->
+    <div id="media-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Media Player</h2>
+        <div id="media-player">
+          <video id="video-player" controls></video>
+          <audio id="audio-player" controls></audio>
+          <img id="image-viewer" alt="Image" />
+        </div>
+      </div>
+    </div>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>
