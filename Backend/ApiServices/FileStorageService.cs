@@ -7,7 +7,7 @@ using DatabaseORM.Service;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 
-namespace Backend.Services;
+namespace Backend.ApiServices;
 
 public class FileStorageService(
     ILogger<FileStorageService> logger,

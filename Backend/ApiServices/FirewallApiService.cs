@@ -3,10 +3,9 @@ using Backend.Tools;
 using DatabaseORM.Communication;
 using DatabaseORM.Enums;
 using DatabaseORM.Service;
-using NetFwTypeLib;
 using System.Runtime.Versioning;
 
-namespace Backend.Services;
+namespace Backend.ApiServices;
 
 [SupportedOSPlatform("windows")]
 public class FirewallApiService(
@@ -15,124 +14,49 @@ public class FirewallApiService(
     IConfiguration configuration)
 {
     //Todo: Cleanup for better readability and maintainability (e.g. split into multiple methods, add more logging, add more error handling, etc.)
-    public async Task<bool> AddRDPRule(int accountId, string ip)
+    public async Task<bool> AddRDPRule(int accountId, string ipAddress)
     {
         //ip format check
-        if (!StringTools.ValidateIPv4(ip))
+        if (!StringTools.ValidateIPv4(ipAddress))
         {
-            logger.LogError($"Invalid IP address format: {ip}");
+            logger.LogError($"Invalid IP address format: {ipAddress}");
             return false;
         }
 
-        return await ProcessFirewallRuleChange(async (firewallRuleTCP, firewallRuleUDP) =>
+        int expirationMinutes = configuration.GetValue<int>(ConfigurationKeys.RDPAccessExpirationMinutesKey);
+        DatabaseActionResult<int> dbResult = await permittedIpAddressService.AddAsync(expirationMinutes, accountId, ipAddress);
+
+        if (dbResult.Status != DatabaseActionResultEnum.Success)
         {
-            if (firewallRuleTCP.RemoteAddresses.Contains(ip) && firewallRuleUDP.RemoteAddresses.Contains(ip))
-            {
-                return true;
-            }
+            logger.LogError($"Failed to add IP address {ipAddress} to the database for account {accountId}.");
+            return false;
+        }
 
-            int expirationMinutes = configuration.GetValue<int>(ConfigurationKeys.RDPAccessExpirationMinutesKey);
-            DatabaseActionResult<int> dbResult = await permittedIpAddressService.AddAsync(expirationMinutes, accountId, ip);
-
-            if (dbResult.Status != DatabaseActionResultEnum.Success)
-            {
-                logger.LogError($"Failed to add IP address {ip} to the database for account {accountId}.");
-                return false;
-            }
-
-            firewallRuleTCP.RemoteAddresses = $"{firewallRuleTCP.RemoteAddresses.Replace("*", "")},{ip}";
-            firewallRuleUDP.RemoteAddresses = $"{firewallRuleUDP.RemoteAddresses.Replace("*", "")},{ip}";
-
-            logger.LogInformation($"Added the following IP address to the whitelist: {ip}");
-            return true;
-        });
+        return FirewallTools.ProcessFirewallRuleChange(
+            logger,
+            (firewallRule) => FirewallTools.AddIpAddress(logger, firewallRule, ipAddress));
     }
 
     public async Task<bool> RemoveExpiredRDPRules()
     {
-        return await ProcessFirewallRuleChange(async (firewallRuleTCP, firewallRuleUDP) =>
+        DatabaseActionResult<List<string>?> expiredIPs = await permittedIpAddressService.GetExpiredIPAddressesAsync();
+        if (CollectionTools.IsNullOrEmpty(expiredIPs.Data))
         {
-            DatabaseActionResult<List<string>?> expiredIPs = await permittedIpAddressService.GetExpiredIPAddressesAsync();
+            return true;
+        }
 
-            if (CollectionTools.IsNullOrEmpty(expiredIPs.Data))
-            {
-                return true;
-            }
+        bool modificationResult =
+            FirewallTools.ProcessFirewallRuleChange(
+                logger,
+                (firewallRule) => FirewallTools.RemoveExpiredIpAddresses(logger, firewallRule, expiredIPs.Data));
 
-            IEnumerable<string> tcpAddresses = [.. firewallRuleTCP.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries)];
-            IEnumerable<string> udpAddresses = [.. firewallRuleUDP.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries)];
-
-            foreach (string ip in expiredIPs.Data!)
-            {
-                tcpAddresses = tcpAddresses.Where(x => !x.Contains(ip));
-                udpAddresses = udpAddresses.Where(x => !x.Contains(ip));
-            }
-
-            firewallRuleTCP.RemoteAddresses = tcpAddresses.Any() ? string.Join(',', tcpAddresses) : FirewallConstants.DefaultRemoteAddress;
-            firewallRuleUDP.RemoteAddresses = udpAddresses.Any() ? string.Join(',', udpAddresses) : FirewallConstants.DefaultRemoteAddress;
-
-            DatabaseActionResult<int> result = await permittedIpAddressService.RemoveIPAddressesAsync(expiredIPs.Data);
-
-            logger.LogInformation($"Removed the following IP addresses from the whitelist: {string.Join(", ", expiredIPs.Data)}");
-
-            return result.Status == DatabaseActionResultEnum.Success;
-        });
-    }
-
-    private async Task<bool> ProcessFirewallRuleChange(Func<INetFwRule, INetFwRule, Task<bool>> changeLogic)
-    {
-        Type? fwPolicy = Type.GetTypeFromProgID(FirewallConstants.FWPolicyProgID);
-        if (fwPolicy is null)
+        if (!modificationResult)
         {
-            logger.LogError("Failed to get type for firewall list.");
+            logger.LogError("Failed to remove expired IP addresses from the firewall rules.");
             return false;
         }
 
-        INetFwPolicy2? firewallPolicy = (INetFwPolicy2?) Activator.CreateInstance(fwPolicy);
-
-        if (firewallPolicy is null)
-        {
-            logger.LogError("Failed to create firewall policy instance.");
-            return false;
-        }
-
-        INetFwRule? firewallRuleTCP = GetOrCreateRule(firewallPolicy, FirewallConstants.ruleNameTCP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_TCP);
-        INetFwRule? firewallRuleUDP = GetOrCreateRule(firewallPolicy, FirewallConstants.ruleNameUDP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_UDP);
-
-        return firewallRuleTCP is not null
-            && firewallRuleUDP is not null
-            && await changeLogic(firewallRuleTCP, firewallRuleUDP);
-    }
-
-    private INetFwRule? GetOrCreateRule(INetFwPolicy2 firewallPolicy, string ruleName, NET_FW_IP_PROTOCOL_ protocol)
-    {
-        INetFwRule? firewallRule = firewallPolicy.Rules.OfType<INetFwRule>().FirstOrDefault(x => x.Name == ruleName);
-        if (firewallRule == null)
-        {
-            Type? fwRule = Type.GetTypeFromProgID(FirewallConstants.FWRuleProgID);
-            if (fwRule is null)
-            {
-                logger.LogError("Failed to get type for firewall rule creation.");
-                return null;
-            }
-            firewallRule = (INetFwRule?) Activator.CreateInstance(fwRule);
-            if (firewallRule is null)
-            {
-                logger.LogError("Failed to create firewall rule instance.");
-                return null;
-            }
-            firewallRule.Name = ruleName;
-            firewallRule.Enabled = true;
-            firewallRule.Action = NET_FW_ACTION_.NET_FW_ACTION_ALLOW;
-            firewallRule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN;
-            firewallRule.RemoteAddresses = FirewallConstants.DefaultRemoteAddress;
-            firewallRule.Protocol = (int) protocol;
-            firewallRule.LocalPorts = FirewallConstants.RDPPort;
-            firewallRule.ApplicationName = FirewallConstants.ApplicationName;
-            firewallRule.Description = FirewallConstants.RuleDescription;
-            firewallPolicy.Rules.Add(firewallRule);
-        }
-
-        return firewallRule;
+        DatabaseActionResult<int> result = await permittedIpAddressService.RemoveIPAddressesAsync(expiredIPs.Data);
+        return result.Status == DatabaseActionResultEnum.Success;
     }
 }
