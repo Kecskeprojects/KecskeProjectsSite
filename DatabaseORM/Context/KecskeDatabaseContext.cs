@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using DatabaseORM.Model;
+﻿using DatabaseORM.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseORM.Context;

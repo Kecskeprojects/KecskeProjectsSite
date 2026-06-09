@@ -1,9 +1,9 @@
-﻿using DatabaseORM.Model;
-using DatabaseORM.Communication;
+﻿using DatabaseORM.Communication;
+using DatabaseORM.Communication.Resource;
 using DatabaseORM.Enums;
+using DatabaseORM.Model;
 using DatabaseORM.Repository;
 using DatabaseORM.Tools;
-using DatabaseORM.Communication.Resource;
 
 namespace DatabaseORM.Service;
 
