@@ -39,30 +39,38 @@ export default function App(): JSX.Element {
     );
   }
 
+  function GetAdminOnlyRoutes() {
+    return (
+      <Route element={<RoleChecker roles={["Admin"]} />}>
+        <Route path="security" element={<Security />} />
+      </Route>
+    );
+  }
+
+  function GetLoggedInOnlyRoutes() {
+    return (
+      <Route element={<LoginChecker />}>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route
+            path={`${Constants.FileBaseRoute}/:category`}
+            element={<ExampleComponent />}
+          >
+            <Route path=":subPath" element={<ExampleComponent />} />
+          </Route>
+          {GetAdminOnlyRoutes()}
+        </Route>
+      </Route>
+    );
+  }
+
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <BrowserRouter>
         <Routes>
           <Route element={<Notification />}>
             <Route path={Constants.LoginRoute} element={<Login />} />
-            {/*Logged in only routes*/}
-            <Route element={<LoginChecker />}>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route
-                  path={`${Constants.FileBaseRoute}/:category`}
-                  element={<ExampleComponent />}
-                >
-                  <Route path=":subPath" element={<ExampleComponent />} />
-                </Route>
-                {/*Admin only routes*/}
-                <Route element={<RoleChecker roles={["Admin"]} />}>
-                  <Route path="security" element={<Security />} />
-                </Route>
-                {/*Admin only routes*/}
-              </Route>
-            </Route>
-            {/*Logged in only routes*/}
+            {GetLoggedInOnlyRoutes()}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
