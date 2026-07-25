@@ -1,6 +1,6 @@
-﻿using Backend.Constants;
-using Backend.Tools;
+﻿using Backend.Tools;
 using DatabaseORM.Communication;
+using DatabaseORM.Constants;
 using DatabaseORM.Enums;
 using DatabaseORM.Service;
 using System.Runtime.Versioning;
@@ -33,6 +33,7 @@ public class FirewallApiService(
 
         return FirewallTools.ProcessFirewallRuleChange(
             logger,
+            configuration,
             (firewallRule) => FirewallTools.AddIpAddress(logger, firewallRule, ipAddress));
     }
 
@@ -47,6 +48,7 @@ public class FirewallApiService(
         bool modificationResult =
             FirewallTools.ProcessFirewallRuleChange(
                 logger,
+                configuration,
                 (firewallRule) => FirewallTools.RemoveExpiredIpAddresses(logger, firewallRule, expiredIPs.Data));
 
         if (!modificationResult)

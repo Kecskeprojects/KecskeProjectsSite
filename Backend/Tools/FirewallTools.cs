@@ -1,4 +1,5 @@
 ﻿using Backend.Constants;
+using DatabaseORM.Constants;
 using NetFwTypeLib;
 using System.Runtime.Versioning;
 
@@ -35,7 +36,7 @@ public static class FirewallTools
         return true;
     }
 
-    public static bool ProcessFirewallRuleChange(ILogger logger, Func<INetFwRule, bool> changeLogic)
+    public static bool ProcessFirewallRuleChange(ILogger logger, IConfiguration configuration, Func<INetFwRule, bool> changeLogic)
     {
         Type? fwPolicy = Type.GetTypeFromProgID(FirewallConstants.FWPolicyProgID);
         if (fwPolicy is null)
@@ -52,15 +53,21 @@ public static class FirewallTools
             return false;
         }
 
-        INetFwRule? firewallRuleTCP = GetOrCreateFirewallRule(logger, firewallPolicy, FirewallConstants.ruleNameTCP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_TCP);
-        INetFwRule? firewallRuleUDP = GetOrCreateFirewallRule(logger, firewallPolicy, FirewallConstants.ruleNameUDP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_UDP);
+        INetFwRule? firewallRuleTCP = GetOrCreateFirewallRule(logger, configuration, firewallPolicy, FirewallConstants.ruleNameTCP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_TCP);
+        INetFwRule? firewallRuleUDP = GetOrCreateFirewallRule(logger, configuration, firewallPolicy, FirewallConstants.ruleNameUDP, NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_UDP);
 
         return firewallRuleTCP is not null && changeLogic(firewallRuleTCP)
             && firewallRuleUDP is not null && changeLogic(firewallRuleUDP);
     }
 
-    private static INetFwRule? GetOrCreateFirewallRule(ILogger logger, INetFwPolicy2 firewallPolicy, string ruleName, NET_FW_IP_PROTOCOL_ protocol)
+    private static INetFwRule? GetOrCreateFirewallRule(ILogger logger, IConfiguration configuration, INetFwPolicy2 firewallPolicy, string ruleName, NET_FW_IP_PROTOCOL_ protocol)
     {
+        string? environment = configuration.GetValue<string>(ConfigurationKeys.Environment);
+        ruleName =
+            environment == EnvironmentConstants.Production
+                ? ruleName
+                : $"[DEBUG] {ruleName}";
+
         INetFwRule? firewallRuleInstance = firewallPolicy.Rules.OfType<INetFwRule>().FirstOrDefault(x => x.Name == ruleName);
         if (firewallRuleInstance == null)
         {

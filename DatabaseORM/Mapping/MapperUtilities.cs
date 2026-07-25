@@ -19,7 +19,7 @@ public class MapperUtilities
         return sources.Adapt<TTarget[]>();
     }
 
-    public virtual TTarget Map<TSource, TTarget>(TSource source)
+    public virtual TTarget? Map<TSource, TTarget>(TSource source)
     {
         return source.Adapt<TTarget>();
     }

@@ -1,4 +1,5 @@
 ﻿using Backend.ApiServices;
+using DatabaseORM.Constants;
 using System.Runtime.Versioning;
 
 namespace Backend.HostedServices;
@@ -6,7 +7,8 @@ namespace Backend.HostedServices;
 [SupportedOSPlatform("windows")]
 public class FirewallRuleExpirationWatcher(
     IServiceProvider serviceProvider,
-    ILogger<FirewallRuleExpirationWatcher> logger
+    ILogger<FirewallRuleExpirationWatcher> logger,
+    IConfiguration configuration
     ) : IHostedService, IDisposable
 {
     private bool running = false;
@@ -17,11 +19,9 @@ public class FirewallRuleExpirationWatcher(
     {
         logger.LogInformation("Timed Hosted Service is starting.");
 
-#if DEBUG
-        TimeSpan interval = TimeSpan.FromMinutes(1);
-#else
-        TimeSpan interval = TimeSpan.FromMinutes(5);
-#endif
+        string? environment = configuration[ConfigurationKeys.Environment];
+        int repeatIntervalMinutes = ConfigurationKeys.Environment == EnvironmentConstants.Production ? 5 : 1;
+        TimeSpan interval = TimeSpan.FromMinutes(repeatIntervalMinutes);
 
         Timer = new Timer(DoWork, null, TimeSpan.Zero, interval);
 
@@ -82,8 +82,6 @@ public class FirewallRuleExpirationWatcher(
     public void Dispose()
     {
         Dispose(true);
-#if DEBUG
         GC.SuppressFinalize(this);
-#endif
     }
 }

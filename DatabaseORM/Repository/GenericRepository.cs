@@ -1,12 +1,15 @@
-﻿using DatabaseORM.Context;
+﻿using DatabaseORM.Constants;
+using DatabaseORM.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
 
 namespace DatabaseORM.Repository;
 
-public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEntity : class
+public class GenericRepository<TEntity>(KecskeDatabaseContext context, IConfiguration configuration) where TEntity : class
 {
     protected readonly KecskeDatabaseContext context = context;
+    private readonly IConfiguration configuration = configuration;
     //Todo: Potentially can be improved with memory caching: https://learn.microsoft.com/en-us/aspnet/core/performance/caching/memory?view=aspnetcore-10.0
     //Todo: Add pagination for GetListAsync method
     //Todo: Add support for handling concurrency conflicts: https://learn.microsoft.com/en-us/ef/core/saving/concurrency
@@ -158,14 +161,15 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context) where TEn
         return dbSet;
     }
 
-    private static string CheckQueryString(IQueryable<TEntity> dbSet)
+    private string CheckQueryString(IQueryable<TEntity> dbSet)
     {
-#if DEBUG
+        string environment = configuration.GetValue<string>("Environment") ?? EnvironmentConstants.Production;
+        if (environment == EnvironmentConstants.Production)
+        {
+            return string.Empty;
+        }
         string sqlString = dbSet.ToQueryString();
         return sqlString;
-#else
-        return string.Empty;
-#endif
     }
     #endregion
 }
