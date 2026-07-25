@@ -1,7 +1,6 @@
 import type { AxiosProgressEvent } from "axios";
 import DirectoryData from "../models/DirectoryData";
 import FileData from "../models/FileData";
-import BackendServiceTools from "../tools/BackendServiceTools";
 import ConvertTools from "../tools/ConvertTools";
 import EnvironmentTools from "../tools/EnvironmentTools";
 import FileTools from "../tools/FileTools";
@@ -9,55 +8,58 @@ import BaseService from "./BaseService";
 
 export default class FileService {
   static GetSingleFileEndpoint(
-    category?: string,
-    subPath?: string,
+    targetPath?: string,
     identifier?: string,
   ): string {
-    category = BackendServiceTools.SanitizeQueryParameter(category);
-    subPath = BackendServiceTools.SanitizeQueryParameter(subPath);
-    identifier = BackendServiceTools.SanitizeQueryParameter(identifier);
+    if (!identifier) {
+      throw new Error("File identifier is required");
+    }
 
-    return `${EnvironmentTools.getBackendRoute()}/File/GetSingle/${identifier}?category=${category}&subPath=${subPath}`;
+    const route = FileService.BuildWithTargetPath(
+      `/File/GetSingle/${encodeURIComponent(identifier)}`,
+      targetPath,
+    );
+
+    return `${EnvironmentTools.getBackendRoute()}${route}`;
   }
 
-  static async GetFileData(
-    category?: string,
-    subpath?: string,
-  ): Promise<Array<FileData>> {
-    const queryItems = { category, subpath };
+  static async GetFileData(targetPath?: string): Promise<Array<FileData>> {
+    const route = FileService.BuildWithTargetPath(
+      "/File/GetFileList",
+      targetPath,
+    );
 
-    const rawDataList = await BaseService.Get("/File/GetFileList", queryItems);
+    const rawDataList = await BaseService.Get(route);
     return ConvertTools.ConvertListToType(FileData, rawDataList?.content);
   }
 
   static async GetDirectoryData(
-    category?: string,
-    subpath?: string,
+    targetPath?: string,
   ): Promise<Array<DirectoryData>> {
-    const queryItems = { category, subpath };
-
-    const rawDataList = await BaseService.Get(
+    const route = FileService.BuildWithTargetPath(
       "/File/GetDirectoryList",
-      queryItems,
+      targetPath,
     );
+
+    const rawDataList = await BaseService.Get(route);
     return ConvertTools.ConvertListToType(DirectoryData, rawDataList?.content);
   }
 
   static async Upload(
     fileData: FormData,
-    folder?: string,
+    targetPath?: string,
     onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
   ): Promise<string | undefined> {
     const queryItems = {
-      folder: folder,
-      newFile: true,
+      isNewFile: true,
     };
 
     const files = FileTools.getFileData(fileData);
-
     if (!files || files.length === 0) {
       return;
     }
+
+    const route = FileService.BuildWithTargetPath("/File/Upload", targetPath);
 
     for (const file of files) {
       const blobs = FileTools.getBlobChunksByLimit(file);
@@ -67,7 +69,7 @@ export default class FileService {
         partialFormData.append("file", blob);
 
         const response = await BaseService.Post(
-          "/File/Upload",
+          route,
           queryItems,
           partialFormData,
           onUploadProgress,
@@ -77,10 +79,28 @@ export default class FileService {
           return "Error during file upload!";
         }
 
-        queryItems.newFile = false; //This is a flag to help check for existing files before uploading
+        queryItems.isNewFile = false;
       }
     }
 
     return "File uploaded successfully!";
+  }
+
+  private static BuildWithTargetPath(
+    action: string,
+    targetPath?: string,
+  ): string {
+    if (!targetPath) {
+      return action;
+    }
+
+    const encodedSegments = targetPath
+      .split("/")
+      .filter((segment) => segment.length > 0)
+      .map((segment) => encodeURIComponent(segment));
+
+    return encodedSegments.length > 0
+      ? `${action}/${encodedSegments.join("/")}`
+      : action;
   }
 }

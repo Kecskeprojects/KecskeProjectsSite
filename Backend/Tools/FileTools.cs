@@ -22,7 +22,8 @@ public static class FileTools
             throw new InvalidOperationException("Base location for files is not configured.");
         }
 
-        subPath = (subPath ?? "").Replace(">", "\\");
+        subPath = (subPath ?? "").Replace(">", Path.DirectorySeparatorChar.ToString());
+        subPath = subPath.Replace("/", Path.DirectorySeparatorChar.ToString());
         string fullTargetDirectoryPath = Path.GetFullPath(Path.Combine(baseDirectory, categoryDirectory, subPath));
         string relativePathToCategoryDirectory = GetPathRelativeToCategoryDirectory(baseDirectory, categoryDirectory, fullTargetDirectoryPath);
 
@@ -35,6 +36,6 @@ public static class FileTools
     {
         string fullCategoryDirectoryPath = Path.GetFullPath(Path.Combine(baseDirectory ?? "", categoryDirectory));
         string relativePath = Path.GetRelativePath(fullCategoryDirectoryPath, comparedPath ?? comparedPath ?? "");
-        return relativePath.Replace("\\", ">");
+        return relativePath.Replace("\\", "/");
     }
 }

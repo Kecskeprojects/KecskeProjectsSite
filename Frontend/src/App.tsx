@@ -8,7 +8,7 @@ import "./css/App.css";
 import Constants from "./enum/Constants";
 import Layout from "./layout/Layout";
 import UserData from "./models/UserData";
-import ExampleComponent from "./pages/ExampleComponent";
+import DirectoryTest from "./pages/DirectoryTest";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Security from "./pages/Security";
@@ -53,11 +53,9 @@ export default function App(): JSX.Element {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route
-            path={`${Constants.FileBaseRoute}/:category`}
-            element={<ExampleComponent />}
-          >
-            <Route path=":subPath" element={<ExampleComponent />} />
-          </Route>
+            path={`${Constants.FileBaseRoute}/*`}
+            element={<DirectoryTest />}
+          />
           {GetAdminOnlyRoutes()}
         </Route>
       </Route>

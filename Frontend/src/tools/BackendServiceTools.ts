@@ -35,18 +35,21 @@ export default class BackendServiceTools {
   }
 
   static SanitizeQueryParameter(queryItem: any): any {
-    const type = typeof queryItem;
+    if (queryItem === undefined || queryItem === null) {
+      return undefined;
+    }
 
+    const type = typeof queryItem;
     if (type === "function") {
       return "";
     }
 
-    if (type === "bigint" || type == "boolean" || type === "number") {
+    if (type === "bigint" || type === "boolean" || type === "number") {
       return queryItem;
     }
 
     if (type === "string") {
-      return encodeURIComponent(queryItem ? queryItem : "");
+      return encodeURIComponent(queryItem);
     }
 
     const stringified = JSON.stringify(queryItem);
