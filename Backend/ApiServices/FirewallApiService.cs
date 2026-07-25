@@ -13,7 +13,6 @@ public class FirewallApiService(
     ILogger<FileStorageService> logger,
     IConfiguration configuration)
 {
-    //Todo: Cleanup for better readability and maintainability (e.g. split into multiple methods, add more logging, add more error handling, etc.)
     public async Task<bool> AddRDPRule(int accountId, string ipAddress)
     {
         //ip format check

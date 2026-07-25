@@ -1,4 +1,5 @@
 ﻿using DatabaseORM.Context;
+using DatabaseORM.Mapping.MappingProfiles;
 using DatabaseORM.Repository;
 using DatabaseORM.Service;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,9 @@ public class DatabaseStartup
 {
     public static void ConfigureDatabaseServices(IServiceCollection services, string? databaseConnectionString)
     {
+        // Register Mapster mappings
+        MappingConfiguration.RegisterMappings();
+
         services.AddDbContext<KecskeDatabaseContext>(options =>
             options
                 .UseSqlServer(databaseConnectionString)

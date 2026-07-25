@@ -1,12 +1,14 @@
 ﻿using DatabaseORM.Communication.Resource;
 using DatabaseORM.Model;
-using Riok.Mapperly.Abstractions;
+using Mapster;
 
 namespace DatabaseORM.Mapping.MappingProfiles;
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public partial class SimpleMapper : MapperUtilities
+public static class MappingConfiguration
 {
-    public partial FileDirectoryResource FileDirectoryToFileDirectoryResource(FileDirectory fileDirectory);
-    public partial AccountResource AccountToAccountResource(Account account);
+    public static void RegisterMappings()
+    {
+        TypeAdapterConfig<FileDirectory, FileDirectoryResource>.NewConfig().Compile();
+        TypeAdapterConfig<Account, AccountResource>.NewConfig().Compile();
+    }
 }
