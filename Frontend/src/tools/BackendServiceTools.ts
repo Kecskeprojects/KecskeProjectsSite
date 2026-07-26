@@ -1,4 +1,25 @@
 export default class BackendServiceTools {
+  static BuildWithTargetPath(
+    action: string,
+    targetPath?: string,
+    identifier?: string,
+  ): string {
+    if (!targetPath) {
+      return action;
+    }
+
+    let encodedSegments = targetPath.split("/");
+    encodedSegments.push(identifier ?? "");
+
+    encodedSegments = encodedSegments
+      .filter((segment) => segment.length > 0)
+      .map((segment) => BackendServiceTools.SanitizeQueryParameter(segment));
+
+    return encodedSegments.length > 0
+      ? `${action}/${encodedSegments.join("/")}`
+      : action;
+  }
+
   static BuildQuery(queryItems?: any | undefined): string {
     const tempItem = { ...queryItems };
 

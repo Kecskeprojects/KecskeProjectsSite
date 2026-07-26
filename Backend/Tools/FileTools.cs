@@ -1,4 +1,5 @@
-﻿using DatabaseORM.Communication;
+﻿using Backend.Communication.Internal;
+using DatabaseORM.Communication;
 using DatabaseORM.Enums;
 
 namespace Backend.Tools;
@@ -8,8 +9,7 @@ public static class FileTools
     public static string GetFullPathIfValid(
         DatabaseActionResult<bool> directoryAccessAllowed,
         string? baseDirectory,
-        string categoryDirectory,
-        string? subPath)
+        FileStorageTargetPathDetails targetPathDetails)
     {
         if (directoryAccessAllowed.Status != DatabaseActionResultEnum.Success
             || !directoryAccessAllowed.Data)
@@ -22,10 +22,8 @@ public static class FileTools
             throw new InvalidOperationException("Base location for files is not configured.");
         }
 
-        subPath = (subPath ?? "").Replace(">", Path.DirectorySeparatorChar.ToString());
-        subPath = subPath.Replace("/", Path.DirectorySeparatorChar.ToString());
-        string fullTargetDirectoryPath = Path.GetFullPath(Path.Combine(baseDirectory, categoryDirectory, subPath));
-        string relativePathToCategoryDirectory = GetPathRelativeToCategoryDirectory(baseDirectory, categoryDirectory, fullTargetDirectoryPath);
+        string fullTargetDirectoryPath = Path.GetFullPath(Path.Combine(baseDirectory, targetPathDetails.RelativeDirectory));
+        string relativePathToCategoryDirectory = GetPathRelativeToCategoryDirectory(baseDirectory, targetPathDetails.RootDirectory, fullTargetDirectoryPath);
 
         return relativePathToCategoryDirectory.Contains("..") || !Directory.Exists(fullTargetDirectoryPath)
             ? throw new DirectoryNotFoundException("This file or directory does not exist.")
@@ -36,6 +34,6 @@ public static class FileTools
     {
         string fullCategoryDirectoryPath = Path.GetFullPath(Path.Combine(baseDirectory ?? "", categoryDirectory));
         string relativePath = Path.GetRelativePath(fullCategoryDirectoryPath, comparedPath ?? comparedPath ?? "");
-        return relativePath.Replace("\\", "/");
+        return relativePath;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Backend.Communication.Outgoing;
+﻿using Backend.Communication.Internal;
+using Backend.Communication.Outgoing;
 using Backend.Tools;
 using DatabaseORM.Communication;
 using DatabaseORM.Communication.Resource;
@@ -15,10 +16,9 @@ public class FileStorageService(
     FileDirectoryService fileDirectoryService)
 {
     //Todo: Cleanup for better readability and maintainability (e.g. split into multiple methods, add more logging, add more error handling, etc.)
-    //Todo: rethink routing on frontend and backend to be able to handle actual routes instead of '>' separators
-    public async Task<List<FileData>> GetFilesInDirectory(LoggedInAccount loggedInAccount, string? targetPath)
+    public async Task<List<FileData>> GetFilesInDirectory(LoggedInAccount loggedInAccount, FileStorageTargetPathDetails targetPathDetails)
     {
-        var (fullTargetDirectoryPath, categoryDirectory, _) = await GetFullPath(loggedInAccount, targetPath);
+        string fullTargetDirectoryPath = await GetFullPath(loggedInAccount, targetPathDetails);
 
         string[] fileRoutes = Directory.GetFiles(fullTargetDirectoryPath);
 
@@ -35,11 +35,11 @@ public class FileStorageService(
                 continue;
             }
 
-                string relativePath = FileTools.GetPathRelativeToCategoryDirectory(baseDirectory, categoryDirectory, fileInfo.DirectoryName);
+                string relativePath = FileTools.GetPathRelativeToCategoryDirectory(baseDirectory, targetPathDetails.RootDirectory, fileInfo.DirectoryName);
             relativePath = relativePath.Replace(".", "");
             string fullSubPath = string.IsNullOrWhiteSpace(relativePath)
-                ? categoryDirectory
-                : $"{categoryDirectory}/{relativePath}";
+                ? targetPathDetails.RootDirectory
+                : $"{targetPathDetails.RootDirectory}/{relativePath}";
 
             fileDataList.Add(new FileData
             {
@@ -56,9 +56,9 @@ public class FileStorageService(
         return fileDataList;
     }
 
-    public async Task<List<DirectoryData>> GetDirectoriesInDirectory(LoggedInAccount loggedInAccount, string? targetPath)
+    public async Task<List<DirectoryData>> GetDirectoriesInDirectory(LoggedInAccount loggedInAccount, FileStorageTargetPathDetails targetPathDetails)
     {
-        var (fullTargetDirectoryPath, categoryDirectory, _) = await GetFullPath(loggedInAccount, targetPath);
+        string fullTargetDirectoryPath = await GetFullPath(loggedInAccount, targetPathDetails);
 
         string[] directoryRoutes = Directory.GetDirectories(fullTargetDirectoryPath);
 
@@ -75,11 +75,11 @@ public class FileStorageService(
                 continue;
             }
 
-            string relativePath = FileTools.GetPathRelativeToCategoryDirectory(baseDirectory, categoryDirectory, directoryInfo.FullName);
+            string relativePath = FileTools.GetPathRelativeToCategoryDirectory(baseDirectory, targetPathDetails.RootDirectory, directoryInfo.FullName);
             relativePath = relativePath.Replace(".", "");
             string fullSubPath = string.IsNullOrWhiteSpace(relativePath)
-                ? categoryDirectory
-                : $"{categoryDirectory}/{relativePath}";
+                ? targetPathDetails.RootDirectory
+                : $"{targetPathDetails.RootDirectory}/{relativePath}";
 
             directoryDataList.Add(new DirectoryData
             {
@@ -92,16 +92,16 @@ public class FileStorageService(
         return directoryDataList;
     }
 
-    public async Task<string?> GetFileRoute(LoggedInAccount loggedInAccount, string? targetPath, string clientHash)
+    public async Task<string?> GetFileRoute(LoggedInAccount loggedInAccount, FileStorageTargetPathDetails targetPathDetails)
     {
-        var (fullTargetDirectoryPath, _, _) = await GetFullPath(loggedInAccount, targetPath);
+        string fullTargetDirectoryPath = await GetFullPath(loggedInAccount, targetPathDetails);
 
         string[] fileRoutes = Directory.GetFiles(fullTargetDirectoryPath);
 
         foreach (string fileRoute in fileRoutes)
         {
             string fileHash = EncryptionTools.GetMD5HashHexString(fileRoute);
-            if (clientHash.Equals(fileHash, StringComparison.OrdinalIgnoreCase))
+            if (targetPathDetails.FileClientHash?.Equals(fileHash, StringComparison.OrdinalIgnoreCase) == true)
             {
                 return fileRoute;
             }
@@ -112,13 +112,13 @@ public class FileStorageService(
 
     public async Task<string> SaveViaMultipartReaderAsync(
         LoggedInAccount loggedInAccount,
-        string? targetPath,
+        FileStorageTargetPathDetails targetPathDetails,
         bool isNewFile,
         string boundary,
         Stream contentStream,
         CancellationToken cancellationToken)
     {
-        var (fullTargetDirectoryPath, _, _) = await GetFullPath(loggedInAccount, targetPath);
+        string fullTargetDirectoryPath = await GetFullPath(loggedInAccount, targetPathDetails);
 
         MultipartReader reader = new(boundary, contentStream);
         MultipartSection? section;
@@ -145,29 +145,14 @@ public class FileStorageService(
         return "Success!";
     }
 
-    private async Task<(string FullPath, string CategoryDirectory, string? SubPath)> GetFullPath(LoggedInAccount loggedInAccount, string? targetPath)
+    private async Task<string> GetFullPath(LoggedInAccount loggedInAccount, FileStorageTargetPathDetails targetPathDetails)
     {
-        if (string.IsNullOrWhiteSpace(targetPath))
-        {
-            throw new ArgumentException("A target path must be provided.", nameof(targetPath));
-        }
-
-        string normalizedTargetPath = targetPath.Replace("\\", "/");
-        string[] segments = normalizedTargetPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (segments.Length == 0)
-        {
-            throw new ArgumentException("A target path must be provided.", nameof(targetPath));
-        }
-
-        string categoryDirectory = segments[0];
-        string? subPath = segments.Length > 1 ? string.Join("/", segments.Skip(1)) : null;
-
         string? baseDirectory = configuration.GetValue<string>(ConfigurationKeys.BaseFileDirectoryKey);
         DatabaseActionResult<bool> directoryAccessAllowed =
-            await fileDirectoryService.AccountHasAccessToDirectoryAsync(loggedInAccount, categoryDirectory);
+            await fileDirectoryService.AccountHasAccessToDirectoryAsync(loggedInAccount, targetPathDetails.RootDirectory);
 
-        string fullPath = FileTools.GetFullPathIfValid(directoryAccessAllowed, baseDirectory, categoryDirectory, subPath);
-        return (fullPath, categoryDirectory, subPath);
+        string fullPath = FileTools.GetFullPathIfValid(directoryAccessAllowed, baseDirectory, targetPathDetails);
+        return fullPath;
     }
 
     private async Task<long> HandleFileReadAsync(

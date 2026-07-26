@@ -1,4 +1,5 @@
 ﻿using Backend.ApiServices;
+using Backend.Communication.Internal;
 using Backend.Communication.Outgoing;
 using Backend.Controllers.Base;
 using Backend.CustomAttributes;
@@ -16,11 +17,12 @@ public class FileController(
     FileStorageService fileStorageService
     ) : ApiControllerBase<FileStorageService>(logger, fileStorageService)
 {
-        [Authorize]
+    [Authorize]
     [HttpGet("{*targetPath}")]
     public async Task<IActionResult> GetFileList(string? targetPath)
     {
-        List<FileData> fileDataList = await service.GetFilesInDirectory(LoggedInAccount!, targetPath);
+        FileStorageTargetPathDetails targetPathDetails = new(targetPath);
+        List<FileData> fileDataList = await service.GetFilesInDirectory(LoggedInAccount!, targetPathDetails);
 
         return ContentResult(fileDataList);
     }
@@ -29,16 +31,18 @@ public class FileController(
     [HttpGet("{*targetPath}")]
     public async Task<IActionResult> GetDirectoryList(string? targetPath)
     {
-        List<DirectoryData> fileDataList = await service.GetDirectoriesInDirectory(LoggedInAccount!, targetPath);
+        FileStorageTargetPathDetails targetPathDetails = new(targetPath);
+        List<DirectoryData> fileDataList = await service.GetDirectoriesInDirectory(LoggedInAccount!, targetPathDetails);
 
         return ContentResult(fileDataList);
     }
 
     [Authorize]
-    [HttpGet("{clientHash}/{*targetPath}")]
-    public async Task<IActionResult> GetSingle(string clientHash, string? targetPath)
+    [HttpGet("{*targetPath}")]
+    public async Task<IActionResult> GetSingle(string? targetPath)
     {
-        string? fileRoute = await service.GetFileRoute(LoggedInAccount!, targetPath, clientHash);
+        FileStorageTargetPathDetails targetPathDetails = new(targetPath, true);
+        string? fileRoute = await service.GetFileRoute(LoggedInAccount!, targetPathDetails);
 
         return fileRoute is not null
             ? PhysicalFile(fileRoute, "application/octet-stream", enableRangeProcessing: true)
@@ -48,8 +52,9 @@ public class FileController(
     [Authorize]
     [HttpPost("{*targetPath}")]
     [DisableFormValueModelBinding]
-    public async Task<IActionResult> Upload([FromQuery] bool isNewFile, [FromRoute] string? targetPath)
+    public async Task<IActionResult> Upload([FromRoute] string? targetPath, [FromQuery] bool isNewFile)
     {
+        FileStorageTargetPathDetails targetPathDetails = new(targetPath);
         if (!Request.ContentType?.StartsWith("multipart/form-data") ?? true)
         {
             return ErrorResult(StatusCodes.Status400BadRequest, "The request does not contain valid multipart form data.");
@@ -62,7 +67,7 @@ public class FileController(
         }
 
         CancellationToken cancellationToken = HttpContext.RequestAborted;
-        string response = await service.SaveViaMultipartReaderAsync(LoggedInAccount!, targetPath, isNewFile, boundary, Request.Body, cancellationToken);
+        string response = await service.SaveViaMultipartReaderAsync(LoggedInAccount!, targetPathDetails, isNewFile, boundary, Request.Body, cancellationToken);
         return ContentResult(response);
     }
 }

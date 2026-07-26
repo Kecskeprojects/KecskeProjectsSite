@@ -1,6 +1,7 @@
 import type { AxiosProgressEvent } from "axios";
 import DirectoryData from "../models/DirectoryData";
 import FileData from "../models/FileData";
+import BackendServiceTools from "../tools/BackendServiceTools";
 import ConvertTools from "../tools/ConvertTools";
 import EnvironmentTools from "../tools/EnvironmentTools";
 import FileTools from "../tools/FileTools";
@@ -15,16 +16,17 @@ export default class FileService {
       throw new Error("File identifier is required");
     }
 
-    const route = FileService.BuildWithTargetPath(
-      `/File/GetSingle/${encodeURIComponent(identifier)}`,
+    const route = BackendServiceTools.BuildWithTargetPath(
+      `/File/GetSingle/`,
       targetPath,
+      identifier,
     );
 
     return `${EnvironmentTools.getBackendRoute()}${route}`;
   }
 
   static async GetFileData(targetPath?: string): Promise<Array<FileData>> {
-    const route = FileService.BuildWithTargetPath(
+    const route = BackendServiceTools.BuildWithTargetPath(
       "/File/GetFileList",
       targetPath,
     );
@@ -36,7 +38,7 @@ export default class FileService {
   static async GetDirectoryData(
     targetPath?: string,
   ): Promise<Array<DirectoryData>> {
-    const route = FileService.BuildWithTargetPath(
+    const route = BackendServiceTools.BuildWithTargetPath(
       "/File/GetDirectoryList",
       targetPath,
     );
@@ -59,7 +61,10 @@ export default class FileService {
       return;
     }
 
-    const route = FileService.BuildWithTargetPath("/File/Upload", targetPath);
+    const route = BackendServiceTools.BuildWithTargetPath(
+      "/File/Upload",
+      targetPath,
+    );
 
     for (const file of files) {
       const blobs = FileTools.getBlobChunksByLimit(file);
@@ -84,23 +89,5 @@ export default class FileService {
     }
 
     return "File uploaded successfully!";
-  }
-
-  private static BuildWithTargetPath(
-    action: string,
-    targetPath?: string,
-  ): string {
-    if (!targetPath) {
-      return action;
-    }
-
-    const encodedSegments = targetPath
-      .split("/")
-      .filter((segment) => segment.length > 0)
-      .map((segment) => encodeURIComponent(segment));
-
-    return encodedSegments.length > 0
-      ? `${action}/${encodedSegments.join("/")}`
-      : action;
   }
 }
