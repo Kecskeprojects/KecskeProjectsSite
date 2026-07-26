@@ -12,7 +12,7 @@ public class FileStorageTargetPathDetails
 
         IEnumerable<string> parts = normalizedTargetPath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
 
-        if (parts.Count() < 1)
+        if (!parts.Any())
         {
             throw new ArgumentException("The target path must contain at least two parts: the folder and the client file hash.");
         }

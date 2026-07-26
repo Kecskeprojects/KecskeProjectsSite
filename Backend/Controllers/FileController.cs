@@ -32,9 +32,9 @@ public class FileController(
     public async Task<IActionResult> GetDirectoryList(string? targetPath)
     {
         FileStorageTargetPathDetails targetPathDetails = new(targetPath);
-        List<DirectoryData> fileDataList = await service.GetDirectoriesInDirectory(LoggedInAccount!, targetPathDetails);
+        List<DirectoryData> directoryDataList = await service.GetDirectoriesInDirectory(LoggedInAccount!, targetPathDetails);
 
-        return ContentResult(fileDataList);
+        return ContentResult(directoryDataList);
     }
 
     [Authorize]

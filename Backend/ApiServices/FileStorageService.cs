@@ -22,7 +22,7 @@ public class FileStorageService(
 
         string[] fileRoutes = Directory.GetFiles(fullTargetDirectoryPath);
 
-        List<FileData> fileDataList = new();
+        List<FileData> fileDataList = [];
 
         string? baseDirectory = configuration.GetValue<string>(ConfigurationKeys.BaseFileDirectoryKey);
         foreach (string fileRoute in fileRoutes)
@@ -62,7 +62,7 @@ public class FileStorageService(
 
         string[] directoryRoutes = Directory.GetDirectories(fullTargetDirectoryPath);
 
-        List<DirectoryData> directoryDataList = new();
+        List<DirectoryData> directoryDataList = [];
 
         string? baseDirectory = configuration.GetValue<string>(ConfigurationKeys.BaseFileDirectoryKey);
         foreach (string directoryRoute in directoryRoutes)
