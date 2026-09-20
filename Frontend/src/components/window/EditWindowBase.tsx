@@ -4,7 +4,6 @@ import type IEditWindowBaseProps from "../../interface/IEditWIndowBaseProps";
 import type IInputForEdit from "../../interface/IInputForEdit";
 import type IWindowDescription from "../../interface/IWindowDescription";
 import ResponseObject from "../../models/ResponseObject";
-import EnvironmentTools from "../../tools/EnvironmentTools";
 import LogTools from "../../tools/LogTools";
 import InputBase from "../input/InputBase";
 
@@ -17,10 +16,7 @@ export default function EditWindowBase<
   function submitHandler(e: React.SubmitEvent<HTMLFormElement>): void {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-
-    if (!EnvironmentTools.IsProduction()) {
-      LogTools.DebugLog("Edited Item:", formData);
-    }
+    LogTools.DebugLog("Edited Item:", formData);
 
     windowDescription
       .serviceFunction(formData)

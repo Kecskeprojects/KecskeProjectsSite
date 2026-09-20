@@ -1,13 +1,16 @@
 import Constants from "../enum/Constants";
 import NotificationTypeEnum from "../enum/NotificationTypeEnum";
 import type INotificationMessage from "../interface/INotificationMessage";
+import EnvironmentTools from "./EnvironmentTools";
 
 export default class LogTools {
   static DebugLog(header: string, message: any) {
-    console.log(Constants.DebugSeparator);
-    console.log(header);
-    console.log(message);
-    console.log(Constants.DebugSeparator);
+    if (!EnvironmentTools.IsProduction()) {
+      console.log(Constants.DebugSeparator);
+      console.log(header);
+      console.log(message);
+      console.log(Constants.DebugSeparator);
+    }
   }
 
   static setNotification(message: INotificationMessage) {

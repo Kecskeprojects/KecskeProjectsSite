@@ -9,7 +9,7 @@ export default class BaseService {
   static async Get(
     route: string,
     queryItems?: any,
-    additionalHeaders?: AxiosHeaders
+    additionalHeaders?: AxiosHeaders,
   ): Promise<ResponseObject> {
     return BaseService.BaseFetch(
       "GET",
@@ -18,7 +18,7 @@ export default class BaseService {
       undefined,
       undefined,
       undefined,
-      additionalHeaders
+      additionalHeaders,
     );
   }
 
@@ -28,7 +28,7 @@ export default class BaseService {
     body?: FormData,
     onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
     onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void,
-    additionalHeaders?: AxiosHeaders
+    additionalHeaders?: AxiosHeaders,
   ): Promise<ResponseObject> {
     return BaseService.BaseFetch(
       "POST",
@@ -37,7 +37,7 @@ export default class BaseService {
       body,
       onUploadProgress,
       onDownloadProgress,
-      additionalHeaders
+      additionalHeaders,
     );
   }
 
@@ -45,7 +45,7 @@ export default class BaseService {
     route: string,
     queryItems?: any,
     body?: FormData,
-    additionalHeaders?: AxiosHeaders
+    additionalHeaders?: AxiosHeaders,
   ): Promise<ResponseObject> {
     return BaseService.BaseFetch(
       "PUT",
@@ -54,7 +54,7 @@ export default class BaseService {
       body,
       undefined,
       undefined,
-      additionalHeaders
+      additionalHeaders,
     );
   }
 
@@ -62,7 +62,7 @@ export default class BaseService {
     route: string,
     queryItems?: any,
     body?: FormData,
-    additionalHeaders?: AxiosHeaders
+    additionalHeaders?: AxiosHeaders,
   ): Promise<ResponseObject> {
     return BaseService.BaseFetch(
       "DELETE",
@@ -71,7 +71,7 @@ export default class BaseService {
       body,
       undefined,
       undefined,
-      additionalHeaders
+      additionalHeaders,
     );
   }
 
@@ -82,7 +82,7 @@ export default class BaseService {
     body?: FormData,
     onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
     onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void,
-    additionalHeaders?: AxiosHeaders
+    additionalHeaders?: AxiosHeaders,
   ): Promise<ResponseObject> {
     if (!route.startsWith("/") && !route.startsWith("\\")) {
       route = "/" + route;
@@ -96,13 +96,13 @@ export default class BaseService {
         `${EnvironmentTools.getBackendRoute()}${route}${query}`,
         {
           method: method,
-          withCredentials: !EnvironmentTools.IsProduction(),
+          withCredentials: true,
           headers: additionalHeaders,
           data: body,
           validateStatus: (status) => status < 400,
           onDownloadProgress: onDownloadProgress,
           onUploadProgress: onUploadProgress,
-        }
+        },
       );
 
       responseBody = response?.data as ResponseObject;
@@ -120,35 +120,30 @@ export default class BaseService {
       }
     }
 
-    if (!EnvironmentTools.IsProduction() && responseBody) {
-      LogTools.DebugLog("[Success] Response From Backend:", responseBody);
-    }
-
+    LogTools.DebugLog("[Success] Response From Backend:", responseBody);
     return responseBody;
   }
 
   static ErrorHandling(route: string, errorData: any): void {
-    if (!EnvironmentTools.IsProduction()) {
-      if (errorData.response) {
-        // The request was made and the server responded with a status code
-        LogTools.DebugLog(
-          "[Error] Response From Backend:",
-          `${errorData.response.data}\n${errorData.response.status}`
-        );
-      } else if (errorData.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest
-        LogTools.DebugLog(
-          "[Error] No Response From Backend:",
-          `${errorData.request}`
-        );
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        LogTools.DebugLog(
-          "[Error] Pre-Request Configuration Issue:",
-          `${errorData.message}`
-        );
-      }
+    if (errorData.response) {
+      // The request was made and the server responded with a status code
+      LogTools.DebugLog(
+        "[Error] Response From Backend:",
+        `${errorData.response.data}\n${errorData.response.status}`,
+      );
+    } else if (errorData.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of XMLHttpRequest
+      LogTools.DebugLog(
+        "[Error] No Response From Backend:",
+        `${errorData.request}`,
+      );
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      LogTools.DebugLog(
+        "[Error] Pre-Request Configuration Issue:",
+        `${errorData.message}`,
+      );
     }
 
     const status = errorData?.response?.status
