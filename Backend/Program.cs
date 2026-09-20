@@ -1,6 +1,7 @@
 using Backend.ApiServices;
 using Backend.Authentication;
 using Backend.HostedServices;
+using Backend.Middleware;
 using Backend.Tools.Extensions;
 using DatabaseORM;
 using DatabaseORM.Constants;
@@ -47,11 +48,17 @@ public class Program
         IConfiguration section = builder.Configuration.GetSection(ConfigurationKeys.FrontendDomains) ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
         string[] frontendDomains = section.Get<string[]>() ?? throw new InvalidOperationException("FrontendDomain configuration value is missing");
 
+        // Security middleware - runs before other middleware
+        _ = app.UseMiddleware<SecurityHeadersMiddleware>();
+        _ = app.UseMiddleware<RateLimitingMiddleware>();
+
         _ = app.UseCors(options => options
-            .AllowAnyHeader()
-            .AllowAnyMethod()
             .WithOrigins(frontendDomains)
-            .AllowCredentials());
+            .AllowCredentials()
+            .WithMethods("GET", "POST", "PUT", "DELETE")
+            .WithHeaders("Content-Type", "Authorization")
+            .WithExposedHeaders("Content-Disposition")
+            .SetPreflightMaxAge(TimeSpan.FromMinutes(10)));
 
         _ = app.UseHttpsRedirection();
 

@@ -154,8 +154,19 @@ export default class BaseService {
       LogTools.setErrorNotification(response.error);
     }
 
+    // 401 Unauthorized: Redirect to login with expired flag
     if (
-      (status === 401 || status === 403) &&
+      status === 401 &&
+      !route.startsWith(Constants.GetUserStateEndpoint) &&
+      !route.startsWith(Constants.LoginEndpoint)
+    ) {
+      window.location.replace(`${Constants.LoginRoute}?expired=true`);
+      return;
+    }
+
+    // 403 Forbidden: Redirect to login without expired flag
+    if (
+      status === 403 &&
       !route.startsWith(Constants.GetUserStateEndpoint) &&
       !route.startsWith(Constants.LoginEndpoint)
     ) {
