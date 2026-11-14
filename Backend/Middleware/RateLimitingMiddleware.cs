@@ -9,20 +9,14 @@ namespace Backend.Middleware;
 /// Applies to unauthenticated and unauthorized endpoints only.
 /// </summary>
 [SupportedOSPlatform("windows")]
-public class RateLimitingMiddleware
+public class RateLimitingMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-    private static readonly ConcurrentDictionary<string, LoginAttemptTracker> AttemptTrackers = 
-        new();
+    private readonly RequestDelegate _next = next;
+    private static readonly ConcurrentDictionary<string, LoginAttemptTracker> AttemptTrackers = new();
 
     // Configuration
     private const int MaxAttempts = 5;
     private const int BaseBackoffSeconds = 2; // Exponential base: 2^n seconds
-
-    public RateLimitingMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -41,14 +35,14 @@ public class RateLimitingMiddleware
             if (tracker.IsInCooldown(out int remainingSeconds))
             {
                 context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-                context.Response.Headers.Add("Retry-After", remainingSeconds.ToString());
+                context.Response.Headers.Append("Retry-After", remainingSeconds.ToString());
                 await context.Response.WriteAsync($"Too many login attempts. Please try again in {remainingSeconds} seconds.");
                 return;
             }
         }
 
         // Store the original response stream
-        using (var responseBody = new MemoryStream())
+        using (MemoryStream responseBody = new())
         {
             Stream originalBody = context.Response.Body;
             context.Response.Body = responseBody;
@@ -58,7 +52,7 @@ public class RateLimitingMiddleware
                 await _next(context);
 
                 // Check if this is a failed login attempt (401 response to login endpoint)
-                if (context.Request.Path.StartsWithSegments("/api/Account/Login", StringComparison.OrdinalIgnoreCase) 
+                if (context.Request.Path.StartsWithSegments("/api/Account/Login", StringComparison.OrdinalIgnoreCase)
                     && context.Response.StatusCode == StatusCodes.Status401Unauthorized)
                 {
                     string clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
@@ -73,12 +67,12 @@ public class RateLimitingMiddleware
                     // Apply exponential backoff after exceeding max attempts
                     if (tracker.FailedAttempts >= MaxAttempts)
                     {
-                        int backoffSeconds = (int)Math.Pow(BaseBackoffSeconds, tracker.FailedAttempts - MaxAttempts);
+                        int backoffSeconds = (int) Math.Pow(BaseBackoffSeconds, tracker.FailedAttempts - MaxAttempts);
                         tracker.EnterCooldown(backoffSeconds);
                     }
                 }
                 // Clear failed attempts on successful login (200 response)
-                else if (context.Request.Path.StartsWithSegments("/api/Account/Login", StringComparison.OrdinalIgnoreCase) 
+                else if (context.Request.Path.StartsWithSegments("/api/Account/Login", StringComparison.OrdinalIgnoreCase)
                     && context.Response.StatusCode == StatusCodes.Status200OK)
                 {
                     string clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
@@ -110,7 +104,7 @@ public class RateLimitingMiddleware
         {
             if (DateTime.UtcNow < CooldownUntil)
             {
-                remainingSeconds = (int)Math.Ceiling((CooldownUntil - DateTime.UtcNow).TotalSeconds);
+                remainingSeconds = (int) Math.Ceiling((CooldownUntil - DateTime.UtcNow).TotalSeconds);
                 return true;
             }
 
