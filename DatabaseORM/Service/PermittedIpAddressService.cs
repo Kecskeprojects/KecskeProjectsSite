@@ -1,13 +1,14 @@
-﻿using DatabaseORM.Communication;
-using DatabaseORM.Enums;
-using DatabaseORM.Model;
+﻿using DatabaseORM.Model;
 using DatabaseORM.Repository;
 
 namespace DatabaseORM.Service;
 
 public class PermittedIpAddressService(GenericRepository<PermittedIpAddress> repository) : GenericService<PermittedIpAddress>(repository)
 {
-    public async Task<DatabaseActionResult<int>> AddAsync(int expirationMinutes, int accountId, string ipAddress)
+    /// <summary>
+    /// Permits the IP address, or extends its expiry if it is already permitted.
+    /// </summary>
+    public async Task AddAsync(int expirationMinutes, int accountId, string ipAddress)
     {
         PermittedIpAddress? entry = await repository.FirstOrDefaultAsync(entry => entry.IpAddress == ipAddress);
 
@@ -19,20 +20,20 @@ public class PermittedIpAddressService(GenericRepository<PermittedIpAddress> rep
 
         entry.ExpiresOnUtc = DateTime.UtcNow.AddMinutes(expirationMinutes);
 
-        return entry.PermittedIpAddressId > 0 ? await UpdateAsync(entry) : await AddAsync(entry);
+        _ = entry.PermittedIpAddressId > 0
+            ? await repository.UpdateAsync(entry)
+            : await repository.AddAsync(entry);
     }
 
-    public async Task<DatabaseActionResult<List<string>?>> GetExpiredIPAddressesAsync()
+    public async Task<List<string>> GetExpiredIPAddressesAsync()
     {
         List<PermittedIpAddress> expiredEntries = await repository.GetListAsync(entry => entry.ExpiresOnUtc <= DateTime.UtcNow);
-        List<string> expiredIPs = [.. expiredEntries.Select(entry => entry.IpAddress)];
-
-        return CreateResult(DatabaseActionResultEnum.Success, expiredIPs);
+        return [.. expiredEntries.Select(entry => entry.IpAddress)];
     }
 
-    public async Task<DatabaseActionResult<int>> RemoveIPAddressesAsync(List<string> expiredIPs)
+    public async Task RemoveIPAddressesAsync(List<string> expiredIPs)
     {
         List<PermittedIpAddress> entriesToRemove = await repository.GetListAsync(entry => expiredIPs.Contains(entry.IpAddress));
-        return await RemoveAsync(entriesToRemove);
+        _ = await repository.RemoveAsync(entriesToRemove);
     }
 }

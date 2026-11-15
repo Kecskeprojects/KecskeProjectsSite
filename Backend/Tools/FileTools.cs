@@ -1,18 +1,15 @@
 ﻿using Backend.Communication.Internal;
-using DatabaseORM.Communication;
-using DatabaseORM.Enums;
 
 namespace Backend.Tools;
 
 public static class FileTools
 {
     public static string GetFullPathIfValid(
-        DatabaseActionResult<bool> directoryAccessAllowed,
+        bool directoryAccessAllowed,
         string? baseDirectory,
         FileStorageTargetPathDetails targetPathDetails)
     {
-        if (directoryAccessAllowed.Status != DatabaseActionResultEnum.Success
-            || !directoryAccessAllowed.Data)
+        if (!directoryAccessAllowed)
         {
             throw new ApiException(StatusCodes.Status403Forbidden, "You do not have permission to access this directory.");
         }

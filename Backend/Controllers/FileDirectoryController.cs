@@ -1,8 +1,6 @@
 ﻿using Backend.Controllers.Base;
 using Backend.CustomAttributes;
-using DatabaseORM.Communication;
 using DatabaseORM.Communication.Resource;
-using DatabaseORM.Enums;
 using DatabaseORM.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +19,7 @@ public class FileDirectoryController(
     [HttpGet]
     public async Task<IActionResult> GetCategories()
     {
-        DatabaseActionResult<List<FileDirectoryResource>?> fileDataList = await service.GetAccountAccessibleDirectoriesAsync(LoggedInAccount!);
-
-        return fileDataList.Status switch
-        {
-            DatabaseActionResultEnum.Success when fileDataList.Data is not null => ContentResult(fileDataList.Data),
-            _ => ErrorResult(StatusCodes.Status500InternalServerError, "Could not retrieve directories")
-        };
+        List<FileDirectoryResource> directories = await service.GetAccountAccessibleDirectoriesAsync(LoggedInAccount!);
+        return ContentResult(directories);
     }
 }

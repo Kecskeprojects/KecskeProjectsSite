@@ -29,7 +29,6 @@ public class DatabaseStartup
 
         _ = services.AddScoped(typeof(GenericRepository<>));
 
-        _ = services.AddScoped(typeof(GenericService<>));
         _ = services.AddScoped<AccountService>();
         _ = services.AddScoped<FileDirectoryService>();
         _ = services.AddScoped<PermittedIpAddressService>();

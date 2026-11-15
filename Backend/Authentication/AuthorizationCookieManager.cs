@@ -1,5 +1,4 @@
 ﻿using Backend.Tools;
-using DatabaseORM.Communication;
 using DatabaseORM.Communication.Resource;
 using DatabaseORM.Model;
 using DatabaseORM.Service;
@@ -16,20 +15,16 @@ public class AuthorizationCookieManager(AccountService accountService)
 
     public async Task<LoggedInAccount?> SignIn(HttpContext httpContext, string username, string password)
     {
-        username = username.Trim();
-        DatabaseActionResult<Account?> result =
-            await accountService.FirstOrDefaultAsync(
-                a => a.UserName.Equals(username),
-                a => a.Roles);
+        Account? account = await accountService.FindByUserNameAsync(username);
 
-        if (result.Data is null
-            || !result.Data.IsRegistrationApproved
-            || !PasswordHasherTools.VerifyPassword(result.Data, password, result.Data.Password))
+        if (account is null
+            || !account.IsRegistrationApproved
+            || !PasswordHasherTools.VerifyPassword(account, password, account.Password))
         {
             return null;
         }
 
-        ClaimsPrincipal principal = ClaimsPrincipalTools.CreateAccountClaimsPricipal(result.Data);
+        ClaimsPrincipal principal = ClaimsPrincipalTools.CreateAccountClaimsPricipal(account);
 
         await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 

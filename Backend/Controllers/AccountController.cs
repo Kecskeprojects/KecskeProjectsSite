@@ -3,9 +3,7 @@ using Backend.Communication.Incoming;
 using Backend.Constants;
 using Backend.Controllers.Base;
 using Backend.CustomAttributes;
-using DatabaseORM.Communication;
 using DatabaseORM.Communication.Resource;
-using DatabaseORM.Enums;
 using DatabaseORM.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,26 +36,15 @@ public class AccountController(
     [DisableRateLimiting]
     public async Task<IActionResult> GetUsers()
     {
-        DatabaseActionResult<List<AccountResource>?> result = await service.GetUsersAsync();
-
-        return result.Status switch
-        {
-            DatabaseActionResultEnum.Success => ContentResult(result.Data),
-            _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while retrieving users.")
-        };
+        List<AccountResource> users = await service.GetUsersAsync();
+        return ContentResult(users);
     }
 
     [HttpPost]
     public async Task<IActionResult> Register([FromForm] RegisterData form)
     {
-        DatabaseActionResult<string?> result = await service.RegisterAsync(form.UserName, form.Password);
-
-        return result.Status switch
-        {
-            DatabaseActionResultEnum.Success => ContentResult(result.Data),
-            DatabaseActionResultEnum.AlreadyExists => ErrorResult(StatusCodes.Status409Conflict, "Username already exists."),
-            _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while registering.")
-        };
+        string secretKey = await service.RegisterAsync(form.UserName, form.Password);
+        return ContentResult(secretKey);
     }
 
     [HttpPost]
@@ -66,7 +53,7 @@ public class AccountController(
         LoggedInAccount? account = await AccountManager.SignIn(HttpContext, form.UserName, form.Password);
         if (account != null)
         {
-            _ = await service.UpdateLastLoginAsync(account.AccountId);
+            await service.UpdateLastLoginAsync(account.AccountId);
 
             Logger.LogInformation($"Account {account.UserName} logged in successfully.");
             return ContentResult(account);
@@ -88,15 +75,8 @@ public class AccountController(
     [HttpPut]
     public async Task<IActionResult> ResetPassword([FromForm] ResetPasswordData form)
     {
-        DatabaseActionResult<int> result = await service.ResetPasswordAsync(form.UserName, form.SecretKey, form.Password);
-
-        return result.Status switch
-        {
-            DatabaseActionResultEnum.Success => MessageResult("Your password has been reset!"),
-            DatabaseActionResultEnum.NotFound => ErrorResult(StatusCodes.Status428PreconditionRequired, "Account with that name doesn't exist."),
-            DatabaseActionResultEnum.DifferingHash => ErrorResult(StatusCodes.Status401Unauthorized, "Key is incorrect."),
-            _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while resetting password.")
-        };
+        await service.ResetPasswordAsync(form.UserName, form.SecretKey, form.Password);
+        return MessageResult("Your password has been reset!");
     }
 
     [Authorize(Roles = "Admin")]
@@ -104,12 +84,7 @@ public class AccountController(
     [DisableRateLimiting]
     public async Task<IActionResult> GenerateNewSecretKey([FromRoute] int accountId)
     {
-        DatabaseActionResult<string?> result = await service.GenerateNewSecretKeyAsync(accountId);
-        return result.Status switch
-        {
-            DatabaseActionResultEnum.Success => ContentResult(result.Data),
-            DatabaseActionResultEnum.NotFound => ErrorResult(StatusCodes.Status428PreconditionRequired, "Account with that ID doesn't exist."),
-            _ => ErrorResult(StatusCodes.Status500InternalServerError, "An error occurred while generating new secret key.")
-        };
+        string secretKey = await service.GenerateNewSecretKeyAsync(accountId);
+        return ContentResult(secretKey);
     }
 }

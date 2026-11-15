@@ -452,7 +452,7 @@ private bool ValidatePassword(string password)
 - **401** redirects to `/login?expired=true`. The login page shows "Your session has expired" and removes the flag from the URL, so a refresh doesn't show it again
 - **403** only shows the error notification and keeps the user on the page (done 2026-11-15). The backend now also returns 403 when a user opens a file category they have no access to
 - Users who never logged in don't see the "expired" message: `LoginChecker` redirects them on the frontend before any API call
-- **Note**: ResetPassword returns 401 for a wrong key. It is not called from the frontend yet; when that page is built, add its endpoint to the exclusions in `BaseService`, otherwise a wrong key redirects to the login page with the "expired" message
+- **Note**: ResetPassword used to return 401 for a wrong key, which would redirect to the login page with the "expired" message. Since 2026-11-15 it returns 400 (404 for an unknown name), so its future page needs no exclusion in `BaseService`
 
 ### Required Changes
 

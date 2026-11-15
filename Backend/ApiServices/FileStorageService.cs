@@ -1,7 +1,6 @@
 ﻿using Backend.Communication.Internal;
 using Backend.Communication.Outgoing;
 using Backend.Tools;
-using DatabaseORM.Communication;
 using DatabaseORM.Communication.Resource;
 using DatabaseORM.Constants;
 using DatabaseORM.Service;
@@ -147,7 +146,7 @@ public class FileStorageService(
     private async Task<string> GetFullPath(LoggedInAccount loggedInAccount, FileStorageTargetPathDetails targetPathDetails)
     {
         string? baseDirectory = configuration.GetValue<string>(ConfigurationKeys.BaseFileDirectoryKey);
-        DatabaseActionResult<bool> directoryAccessAllowed =
+        bool directoryAccessAllowed =
             await fileDirectoryService.AccountHasAccessToDirectoryAsync(loggedInAccount, targetPathDetails.RootDirectory);
 
         string fullPath = FileTools.GetFullPathIfValid(directoryAccessAllowed, baseDirectory, targetPathDetails);

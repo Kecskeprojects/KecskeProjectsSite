@@ -1,7 +1,5 @@
 ﻿using Backend.Tools;
-using DatabaseORM.Communication;
 using DatabaseORM.Constants;
-using DatabaseORM.Enums;
 using DatabaseORM.Service;
 using System.Runtime.Versioning;
 
@@ -23,13 +21,7 @@ public class FirewallApiService(
         }
 
         int expirationMinutes = configuration.GetValue<int>(ConfigurationKeys.RDPAccessExpirationMinutesKey);
-        DatabaseActionResult<int> dbResult = await permittedIpAddressService.AddAsync(expirationMinutes, accountId, ipAddress);
-
-        if (dbResult.Status != DatabaseActionResultEnum.Success)
-        {
-            logger.LogError($"Failed to add IP address {ipAddress} to the database for account {accountId}.");
-            return false;
-        }
+        await permittedIpAddressService.AddAsync(expirationMinutes, accountId, ipAddress);
 
         return FirewallTools.ProcessFirewallRuleChange(
             logger,
@@ -39,8 +31,8 @@ public class FirewallApiService(
 
     public async Task<bool> RemoveExpiredRDPRules()
     {
-        DatabaseActionResult<List<string>?> expiredIPs = await permittedIpAddressService.GetExpiredIPAddressesAsync();
-        if (CollectionTools.IsNullOrEmpty(expiredIPs.Data))
+        List<string> expiredIPs = await permittedIpAddressService.GetExpiredIPAddressesAsync();
+        if (CollectionTools.IsNullOrEmpty(expiredIPs))
         {
             return true;
         }
@@ -49,7 +41,7 @@ public class FirewallApiService(
             FirewallTools.ProcessFirewallRuleChange(
                 logger,
                 configuration,
-                (firewallRule) => FirewallTools.RemoveExpiredIpAddresses(logger, firewallRule, expiredIPs.Data));
+                (firewallRule) => FirewallTools.RemoveExpiredIpAddresses(logger, firewallRule, expiredIPs));
 
         if (!modificationResult)
         {
@@ -57,7 +49,7 @@ public class FirewallApiService(
             return false;
         }
 
-        DatabaseActionResult<int> result = await permittedIpAddressService.RemoveIPAddressesAsync(expiredIPs.Data);
-        return result.Status == DatabaseActionResultEnum.Success;
+        await permittedIpAddressService.RemoveIPAddressesAsync(expiredIPs);
+        return true;
     }
 }
