@@ -1,5 +1,5 @@
 ﻿using Backend.ApiServices;
-using DatabaseORM.Constants;
+using DatabaseORM.Tools.Extensions;
 using System.Runtime.Versioning;
 
 namespace Backend.HostedServices;
@@ -19,8 +19,7 @@ public class FirewallRuleExpirationWatcher(
     {
         logger.LogInformation("Timed Hosted Service is starting.");
 
-        string? environment = configuration[ConfigurationKeys.Environment];
-        int repeatIntervalMinutes = ConfigurationKeys.Environment == EnvironmentConstants.Production ? 5 : 1;
+        int repeatIntervalMinutes = configuration.IsProduction() ? 5 : 1;
         TimeSpan interval = TimeSpan.FromMinutes(repeatIntervalMinutes);
 
         Timer = new Timer(DoWork, null, TimeSpan.Zero, interval);

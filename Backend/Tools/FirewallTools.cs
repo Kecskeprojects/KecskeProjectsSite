@@ -1,5 +1,5 @@
 ﻿using Backend.Constants;
-using DatabaseORM.Constants;
+using DatabaseORM.Tools.Extensions;
 using NetFwTypeLib;
 using System.Runtime.Versioning;
 
@@ -62,9 +62,8 @@ public static class FirewallTools
 
     private static INetFwRule? GetOrCreateFirewallRule(ILogger logger, IConfiguration configuration, INetFwPolicy2 firewallPolicy, string ruleName, NET_FW_IP_PROTOCOL_ protocol)
     {
-        string? environment = configuration.GetValue<string>(ConfigurationKeys.Environment);
         ruleName =
-            environment == EnvironmentConstants.Production
+            configuration.IsProduction()
                 ? ruleName
                 : $"[DEBUG] {ruleName}";
 

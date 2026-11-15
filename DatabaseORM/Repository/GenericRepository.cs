@@ -1,5 +1,5 @@
-﻿using DatabaseORM.Constants;
-using DatabaseORM.Context;
+﻿using DatabaseORM.Context;
+using DatabaseORM.Tools.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
@@ -163,8 +163,7 @@ public class GenericRepository<TEntity>(KecskeDatabaseContext context, IConfigur
 
     private string CheckQueryString(IQueryable<TEntity> dbSet)
     {
-        string environment = configuration.GetValue<string>("Environment") ?? EnvironmentConstants.Production;
-        if (environment == EnvironmentConstants.Production)
+        if (configuration.IsProduction())
         {
             return string.Empty;
         }

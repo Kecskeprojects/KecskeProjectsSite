@@ -3,6 +3,7 @@ using DatabaseORM.Context;
 using DatabaseORM.Mapping.MappingProfiles;
 using DatabaseORM.Repository;
 using DatabaseORM.Service;
+using DatabaseORM.Tools.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,7 @@ public class DatabaseStartup
     public static void ConfigureDatabaseServices(ConfigurationManager configuration, IServiceCollection services)
     {
         string? databaseConnectionString = configuration.GetConnectionString(ConfigurationKeys.DatabaseConnection);
-        string? environment = configuration[ConfigurationKeys.Environment];
+        bool isProduction = configuration.IsProduction();
 
         if (string.IsNullOrWhiteSpace(databaseConnectionString))
         {
@@ -24,11 +25,7 @@ public class DatabaseStartup
         // Register Mapster mappings
         MappingConfiguration.RegisterMappings();
 
-        _ = services.AddDbContext<KecskeDatabaseContext>(options =>
-                options.UseSqlServer(databaseConnectionString)
-                    .EnableSensitiveDataLogging(environment != EnvironmentConstants.Production)
-                    .EnableDetailedErrors(environment != EnvironmentConstants.Production)
-        );
+        _ = services.AddDbContext<KecskeDatabaseContext>(options => ConfigureDbContext(options, databaseConnectionString, isProduction));
 
         _ = services.AddScoped(typeof(GenericRepository<>));
 
@@ -37,4 +34,13 @@ public class DatabaseStartup
         _ = services.AddScoped<FileDirectoryService>();
         _ = services.AddScoped<PermittedIpAddressService>();
     }
+
+    #region Configuration Methods
+    private static void ConfigureDbContext(DbContextOptionsBuilder options, string connectionString, bool isProduction)
+    {
+        _ = options.UseSqlServer(connectionString)
+            .EnableSensitiveDataLogging(!isProduction)
+            .EnableDetailedErrors(!isProduction);
+    }
+    #endregion
 }

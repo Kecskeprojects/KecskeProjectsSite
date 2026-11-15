@@ -1,5 +1,6 @@
 ﻿using Backend.Authentication;
 using Backend.Communication.Incoming;
+using Backend.Constants;
 using Backend.Controllers.Base;
 using Backend.CustomAttributes;
 using DatabaseORM.Communication;
@@ -8,12 +9,14 @@ using DatabaseORM.Enums;
 using DatabaseORM.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Backend.Controllers;
 
 [ApiController]
 [ErrorLoggingFilter]
 [Route("api/[controller]/[action]")]
+[EnableRateLimiting(RateLimitPolicies.Authentication)]
 public class AccountController(
     AccountService accountService,
     AuthorizationCookieManager AccountManager,
@@ -22,6 +25,7 @@ public class AccountController(
 {
     [Authorize]
     [HttpGet]
+    [DisableRateLimiting]
     public IActionResult GetLoggedInAccount()
     {
         return LoggedInAccount != null
@@ -31,6 +35,7 @@ public class AccountController(
 
     [Authorize(Roles = "Admin")]
     [HttpGet]
+    [DisableRateLimiting]
     public async Task<IActionResult> GetUsers()
     {
         DatabaseActionResult<List<AccountResource>?> result = await service.GetUsersAsync();
@@ -71,6 +76,7 @@ public class AccountController(
     }
 
     [HttpPost]
+    [DisableRateLimiting]
     public async Task<IActionResult> Logout()
     {
         Logger.LogInformation($"Acount {LoggedInAccount?.UserName} is logging out.");
@@ -95,6 +101,7 @@ public class AccountController(
 
     [Authorize(Roles = "Admin")]
     [HttpPut("{accountId}")]
+    [DisableRateLimiting]
     public async Task<IActionResult> GenerateNewSecretKey([FromRoute] int accountId)
     {
         DatabaseActionResult<string?> result = await service.GenerateNewSecretKeyAsync(accountId);
