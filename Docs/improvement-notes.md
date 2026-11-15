@@ -70,8 +70,8 @@ Blockers for the rest: `DateTime.UtcNow` in `PermittedIpAddressService` and `Acc
 ## 4. Backend structure (partly done)
 
 - **`DatabaseActionResult` replaced (done 2026-11-15).** Services return plain values and throw `ServiceException` subclasses, which `ErrorLoggingFilter` maps to status codes. The `switch` in each action and `GenericService`'s pass-through query methods are gone. Behaviour changes: an unknown account in `ResetPassword` / `GenerateNewSecretKey` gives 404 (was 428), a wrong reset key gives 400 (was 401, which would make the frontend redirect to the login page), and "0 rows affected" is no longer reported as a failure. Built with 0 warnings, not yet tried against a running backend.
-- **`FileStorageService` cleanup** (also a code TODO): `GetFilesInDirectory` and `GetDirectoriesInDirectory` still repeat the same listing loop (the sub-path part moved to `FileTools.GetClientSubPath`). Split it into path resolution, listing and upload.
-- **`GenericRepository` TODOs:** memory caching, pagination for `GetListAsync`, concurrency handling (e.g. a `rowversion` column), and EF connection resiliency (`EnableRetryOnFailure`). `CheckQueryString` builds the SQL string in development and throws the result away; log it at debug level or remove it.
+- **`FileStorageService` cleanup** (a former code TODO): `GetFilesInDirectory` and `GetDirectoriesInDirectory` still repeat the same listing loop (the sub-path part moved to `FileTools.GetClientSubPath`). Split it into path resolution, listing and upload.
+- **`GenericRepository` (former code TODOs):** memory caching, pagination for `GetListAsync`, concurrency handling (e.g. a `rowversion` column), and EF connection resiliency (`EnableRetryOnFailure`). `CheckQueryString` builds the SQL string in development and throws the result away; log it at debug level or remove it.
 - **`FirewallRuleExpirationWatcher`** uses a `Timer` callback with sync-over-async (`GetAwaiter().GetResult()`) and a plain `bool` guard. A `BackgroundService` with `PeriodicTimer` is simpler and naturally non-overlapping.
 - **IPv6:** the whitelist is IPv4-only (`varchar(15)`, `ValidateIPv4`). `IPAddress.TryParse` plus a wider column would allow IPv6 if the server gets IPv6 clients.
 - **Generic `BaseService` idea from the bot** is already in place here as `GenericService<T>`, and the DB layer is already its own library (`DatabaseORM`), so those bot sections don't apply.
@@ -82,16 +82,18 @@ The backend has endpoints without a frontend yet:
 - Register page (`AccountService.Register` exists, no page), reset password page (`ResetPassword`; a wrong key gives 400 and an unknown name 404), and an admin user list (`GetUsers`, `GenerateNewSecretKey`) with a way to approve registrations, which currently needs a manual DB update.
 - Category list (`FileDirectory/GetCategories`) for navigation.
 - `DirectoryTest` is the file browser in test form: uploads go to a hard-coded `testFolder` (also in `Home`). `Frontend/UI-Test/multimedia-repo-ui/` is a design mock-up for the real page (dark theme, drag-and-drop upload, media player).
-- `index.html` references `/img/logo192.png`, which doesn't exist in `public/img` (only `favicon.ico`); see the TODO below.
+- `index.html` references `/img/logo192.png`, which doesn't exist in `public/img` (only `favicon.ico`); see "Former code TODOs" below.
 
-## Code TODOs
+## Former code TODOs
 
-Collected 2026-11-15:
+The `TODO` comments were removed from the code on 2026-11-15; this list is now where they are tracked. Don't add new `TODO` comments to the code, add the item here instead.
 
-- `Backend/ApiServices/FileStorageService.cs:17`: clean up for readability and maintainability (split into methods, more logging and error handling). See section 4.
-- `DatabaseORM/Repository/GenericRepository.cs:13`: memory caching.
-- `DatabaseORM/Repository/GenericRepository.cs:14`: pagination for `GetListAsync`.
-- `DatabaseORM/Repository/GenericRepository.cs:15`: concurrency conflict handling (the next line links connection resiliency).
-- `Frontend/index.html:4`: replace the images (Open Graph image and icons).
-- `Frontend/src/components/input/InputBase.tsx:7`: frontend input validation (email, password strength, file size, length limits); same as security doc section 3.
-- `Frontend/src/components/window/EditWindowBase.tsx:56`: `hasCloseFunctionality` and the close behavior itself are not implemented.
+- **`FileStorageService` cleanup** (`Backend/ApiServices/FileStorageService.cs`): better readability and maintainability, split into more methods, more logging and error handling. See section 4.
+- **`GenericRepository`** (`DatabaseORM/Repository/GenericRepository.cs`), see section 4:
+  - memory caching (https://learn.microsoft.com/en-us/aspnet/core/performance/caching/memory),
+  - pagination for `GetListAsync`,
+  - concurrency conflict handling (https://learn.microsoft.com/en-us/ef/core/saving/concurrency),
+  - connection resiliency (https://learn.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency).
+- **Replace the images** (`Frontend/index.html`): the Open Graph image and icons; `logo192.png` is missing (section 5).
+- **Frontend input validation** (`Frontend/src/components/input/InputBase.tsx`): email format, password strength, file size before upload (`EnvironmentTools.getFileSizeLimit()`), and length limits (username max 50 characters, file names max 255, a reasonable `maxlength` on every text field). Use HTML5 attributes (`pattern`, `maxlength`, `required`) first, then JavaScript validation that shows errors before submit. Details in `SECURITY_RECOMMENDATIONS.md` sections 3 and 8.
+- **Closing edit windows** (`Frontend/src/components/window/EditWindowBase.tsx`): `hasCloseFunctionality` and the close behavior itself are not implemented.

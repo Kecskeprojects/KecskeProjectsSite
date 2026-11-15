@@ -53,8 +53,6 @@ export default function EditWindowBase<
     );
   }
 
-  //Todo: hasCloseFunctionality is not implemented, as well as the close functionality itself
-
   const classNames =
     "editwindow-base" +
     (windowDescription.className ? ` ${windowDescription.className}` : "");

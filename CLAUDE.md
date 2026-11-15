@@ -16,7 +16,7 @@ Kecske Projects (`kecske-projects.hu`) is a personal site for sharing media and 
 - `DatabaseORM/`: class library with the EF Core context, scaffolded models, a generic repository/service layer and Mapster mappings. The backend references it.
 - `Database/`: SSDT `.sqlproj`, the **source of truth for the schema**. It builds and publishes only from Visual Studio.
 - `Frontend/`: React 19 + TypeScript + Vite. `Frontend/UI-Test/` is a static HTML/JS design mock-up, not part of the app.
-- `Docs/`: `SECURITY_RECOMMENDATIONS.md` (security review with status per item) and `improvement-notes.md` (findings, ideas, code TODOs).
+- `Docs/`: `SECURITY_RECOMMENDATIONS.md` (security review with status per item) and `improvement-notes.md` (findings, ideas and open work; the code has no `TODO` comments).
 - `Build/`: **a separate private git repository**, ignored by this one. It holds the deployment scripts and the real config files (see Configuration). Never copy its contents into this repository.
 
 There is no test project. `.github/workflows/` exists but is empty, so there is no CI.

@@ -14,7 +14,6 @@ public class FileStorageService(
     IConfiguration configuration,
     FileDirectoryService fileDirectoryService)
 {
-    //Todo: Cleanup for better readability and maintainability (e.g. split into multiple methods, add more logging, add more error handling, etc.)
     public async Task<List<FileData>> GetFilesInDirectory(LoggedInAccount loggedInAccount, FileStorageTargetPathDetails targetPathDetails)
     {
         string fullTargetDirectoryPath = await GetFullPath(loggedInAccount, targetPathDetails);
