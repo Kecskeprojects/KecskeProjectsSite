@@ -36,7 +36,7 @@ import InputTypeDefinitions from "./InputTypeDefinitions";
  *    - Backend validation is CRITICAL - never trust frontend alone
  *    - React automatically escapes content in JSX (safe for display)
  *
- * See SECURITY_RECOMMENDATIONS.md section 8 for backend password policy implementation
+ * See Docs/SECURITY_RECOMMENDATIONS.md section 8 for backend password policy implementation
  */
 
 export default function InputBase(props: IInputBaseProps): JSX.Element {
