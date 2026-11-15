@@ -32,6 +32,10 @@ public class FirewallApiService(
     public async Task<bool> RemoveExpiredRDPRules()
     {
         List<string> expiredIPs = await permittedIpAddressService.GetExpiredIPAddressesAsync();
+
+        IEnumerable<string> currentlyConnected = FirewallTools.GetConnectedRdpAddresses();
+        expiredIPs = expiredIPs.Where(ip => !currentlyConnected.Contains(ip)).ToList();
+
         if (CollectionTools.IsNullOrEmpty(expiredIPs))
         {
             return true;

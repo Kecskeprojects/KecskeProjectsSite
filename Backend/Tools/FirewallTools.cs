@@ -1,6 +1,7 @@
 ﻿using Backend.Constants;
 using DatabaseORM.Tools.Extensions;
 using NetFwTypeLib;
+using System.Net.NetworkInformation;
 using System.Runtime.Versioning;
 
 namespace Backend.Tools;
@@ -115,5 +116,15 @@ public static class FirewallTools
         firewallRuleInstance.ApplicationName = FirewallConstants.ApplicationName;
         firewallRuleInstance.Description = FirewallConstants.RuleDescription;
         return firewallRuleInstance;
+    }
+
+    public static IEnumerable<string> GetConnectedRdpAddresses()
+    {
+        return IPGlobalProperties.GetIPGlobalProperties()
+        .GetActiveTcpConnections()
+        .Where(c => c.State == TcpState.Established && c.LocalEndPoint.Port.ToString() == FirewallConstants.RDPPort)
+        .Select(c => c.RemoteEndPoint.Address)
+        .Select(a => a.IsIPv4MappedToIPv6 ? a.MapToIPv4() : a)
+        .Select(a => a.ToString());
     }
 }
