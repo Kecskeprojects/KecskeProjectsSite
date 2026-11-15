@@ -351,6 +351,9 @@ export function sanitizeErrorMessage(message: string): string {
 - **BaseService.ts**: `ErrorHandling()` method - sanitize error response
 - **LogTools.ts**: `setErrorNotification()` method - ensure safe display
 
+### Backend Side (Done)
+The backend no longer sends raw exception messages: `ErrorLoggingFilterAttribute` returns only the messages of `ApiException`s, which are written for the user, and a generic message for any other exception (see `Docs/improvement-notes.md` section 1). The frontend part above is still open; the notification already renders the message as JSX text, so it is escaped.
+
 ---
 
 ## 8. Secure Password Policy Enforcement (HIGH)
@@ -441,13 +444,13 @@ private bool ValidatePassword(string password)
 ---
 
 ## 9. Session Expiration & Logout Handling (HIGH)
-**Status**: PARTIAL - 401 handling done, 403 handling and user context clearing TODO  
+**Status**: PARTIAL - 401 and 403 handling done, user context clearing TODO  
 **Priority**: HIGH  
 **Location**: Frontend/src/services/BaseService.ts, Frontend/src/pages/Login.tsx, Backend/Program.cs
 
 ### Current Behavior
 - **401** redirects to `/login?expired=true`. The login page shows "Your session has expired" and removes the flag from the URL, so a refresh doesn't show it again
-- **403** still redirects to `/login` (without the flag), which logs the user out of the page. This is the remaining TODO below
+- **403** only shows the error notification and keeps the user on the page (done 2026-11-15). The backend now also returns 403 when a user opens a file category they have no access to
 - Users who never logged in don't see the "expired" message: `LoginChecker` redirects them on the frontend before any API call
 - **Note**: ResetPassword returns 401 for a wrong key. It is not called from the frontend yet; when that page is built, add its endpoint to the exclusions in `BaseService`, otherwise a wrong key redirects to the login page with the "expired" message
 
@@ -596,9 +599,10 @@ _ = app.UseMiddleware<SecurityHeadersMiddleware>();
 - [ ] Section 1F: Add the CSP to `frontend-web.config`
 - [x] Section 2: Restrict CORS to specific methods/headers  
 - [ ] Section 4: Implement CSRF protection (anti-forgery tokens)
-- [ ] Section 7: Add error message sanitization
+- [ ] Section 7: Add error message sanitization (backend part done: no raw exception messages)
 - [x] Section 9: 401 handling and session expiration messaging
-- [ ] Section 9: 403 should show an error without logging out, clear user context on 401
+- [x] Section 9: 403 shows an error without logging out
+- [ ] Section 9: Clear user context on 401
 
 ### HIGH - Do Soon
 - [ ] Section 3: Add frontend input validation (email, password, file size)
@@ -613,7 +617,9 @@ _ = app.UseMiddleware<SecurityHeadersMiddleware>();
 - Security headers middleware (Section 1 A-E, Section 11)
 - CORS restricted to used methods and headers (Section 2)
 - Backend rate limiting on AccountController with built-in ASP.NET Core rate limiter (Section 6)
-- 401 redirects to login with "session expired" message (Section 9)
+- 401 redirects to login with "session expired" message, 403 no longer logs out (Section 9)
+- Backend returns only user-facing error messages (Section 7, backend part)
+- Upload file names can't escape the target folder (path traversal fix, see `improvement-notes.md`)
 - Session configuration (HttpOnly, Secure, SameSite)
 - Credentials handling (withCredentials in production)
 - Debug logging (already disabled in prod)
