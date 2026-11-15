@@ -1,6 +1,4 @@
-﻿using DatabaseORM.Model;
-
-namespace DatabaseORM.Communication.Resource;
+﻿namespace DatabaseORM.Communication.Resource;
 
 public class AccountResource
 {
@@ -16,5 +14,5 @@ public class AccountResource
 
     public DateTime ModifiedOnUtc { get; set; }
 
-    public virtual List<Role?>? Roles { get; set; }
+    public List<string> Roles { get; set; } = [];
 }

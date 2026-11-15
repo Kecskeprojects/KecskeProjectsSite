@@ -12,7 +12,8 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
     public async Task<DatabaseActionResult<string?>> RegisterAsync(string username, string password)
     {
         username = username.Trim();
-        bool usernameAlreadyRegistered = await repository.ExistsAsync(a => a.UserName.Contains(username));
+        // The column's collation is case-insensitive, so this also catches names differing only in case
+        bool usernameAlreadyRegistered = await repository.ExistsAsync(a => a.UserName == username);
         if (usernameAlreadyRegistered)
         {
             return CreateResult(DatabaseActionResultEnum.AlreadyExists, "Username is taken.");
@@ -22,8 +23,6 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
         {
             UserName = username
         };
-
-        account.Password = PasswordHasherTools.GetHashBytes(account, password);
 
         //Secret key used to reset password
         string uuid = Guid.NewGuid().ToString();
@@ -88,7 +87,7 @@ public class AccountService(GenericRepository<Account> repository) : GenericServ
 
     public async Task<DatabaseActionResult<List<AccountResource>?>> GetUsersAsync()
     {
-        List<Account> accounts = await repository.GetListAsync();
+        List<Account> accounts = await repository.GetListAsync(null, a => a.UserName, true, a => a.Roles);
         return CreateMappedResult<Account, AccountResource>(DatabaseActionResultEnum.Success, accounts);
     }
 }

@@ -10,14 +10,9 @@ public static class FirewallTools
 {
     public static bool RemoveExpiredIpAddresses(ILogger logger, INetFwRule firewallRule, List<string> expiredIps)
     {
-        IEnumerable<string> ipAddresses = [.. firewallRule.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries)];
+        List<string> remainingEntries = [.. GetRemoteAddressEntries(firewallRule).Where(entry => !expiredIps.Contains(GetAddressPart(entry)))];
 
-        foreach (string ip in expiredIps)
-        {
-            ipAddresses = ipAddresses.Where(x => !x.Contains(ip));
-        }
-
-        firewallRule.RemoteAddresses = ipAddresses.Any() ? string.Join(',', ipAddresses) : FirewallConstants.DefaultRemoteAddress;
+        firewallRule.RemoteAddresses = remainingEntries.Count > 0 ? string.Join(',', remainingEntries) : FirewallConstants.DefaultRemoteAddress;
 
         logger.LogInformation($"Removed the following IP addresses from the whitelist: {string.Join(", ", expiredIps)}");
         return true;
@@ -25,15 +20,29 @@ public static class FirewallTools
 
     public static bool AddIpAddress(ILogger logger, INetFwRule firewallRule, string ipAddress)
     {
-        if (firewallRule.RemoteAddresses.Contains(ipAddress))
+        List<string> entries = GetRemoteAddressEntries(firewallRule);
+        if (entries.Any(entry => GetAddressPart(entry) == ipAddress))
         {
             return true;
         }
 
-        firewallRule.RemoteAddresses = $"{firewallRule.RemoteAddresses.Replace("*", "")},{ipAddress}";
+        // "*" (any address) would make the whitelist pointless, so it is dropped when an address is added
+        entries = [.. entries.Where(entry => entry != "*"), ipAddress];
+        firewallRule.RemoteAddresses = string.Join(',', entries);
 
         logger.LogInformation($"Added the following IP address to the whitelist: {ipAddress}");
         return true;
+    }
+
+    private static List<string> GetRemoteAddressEntries(INetFwRule firewallRule)
+    {
+        return [.. firewallRule.RemoteAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
+    }
+
+    // Windows reports single addresses with their mask (e.g. "1.2.3.4/255.255.255.255"), so only the part before "/" is compared
+    private static string GetAddressPart(string remoteAddressEntry)
+    {
+        return remoteAddressEntry.Split('/')[0];
     }
 
     public static bool ProcessFirewallRuleChange(ILogger logger, IConfiguration configuration, Func<INetFwRule, bool> changeLogic)

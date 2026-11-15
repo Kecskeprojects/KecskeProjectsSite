@@ -13,11 +13,12 @@ export default class LogTools {
     }
   }
 
+  // Replaced by the Notification component once it renders, this is only the fallback before that
   static setNotification(message: INotificationMessage) {
     if (!message || !message.message || !message.notificationType) {
       return;
     }
-    alert("Not implemented! " + message);
+    alert(message.message);
   }
 
   static setErrorNotification(message: string): void {

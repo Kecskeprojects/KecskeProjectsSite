@@ -13,7 +13,7 @@ namespace Backend.Controllers;
 [ErrorLoggingFilter]
 [Route("api/[controller]/[action]")]
 public class FileDirectoryController(
-    ILogger<AccountController> logger,
+    ILogger<FileDirectoryController> logger,
     FileDirectoryService fileDirectoryService
     ) : ApiControllerBase<FileDirectoryService>(logger, fileDirectoryService)
 {

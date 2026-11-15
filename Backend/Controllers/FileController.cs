@@ -13,7 +13,7 @@ namespace Backend.Controllers;
 [ErrorLoggingFilter]
 [Route("api/[controller]/[action]")]
 public class FileController(
-    ILogger<AccountController> logger,
+    ILogger<FileController> logger,
     FileStorageService fileStorageService
     ) : ApiControllerBase<FileStorageService>(logger, fileStorageService)
 {
@@ -46,7 +46,7 @@ public class FileController(
 
         return fileRoute is not null
             ? PhysicalFile(fileRoute, "application/octet-stream", enableRangeProcessing: true)
-            : ErrorResult(StatusCodes.Status500InternalServerError, "File not found");
+            : ErrorResult(StatusCodes.Status404NotFound, "File not found");
     }
 
     [Authorize]

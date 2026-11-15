@@ -161,16 +161,9 @@ export default class BaseService {
       !route.startsWith(Constants.LoginEndpoint)
     ) {
       window.location.replace(`${Constants.LoginRoute}?expired=true`);
-      return;
     }
 
-    // 403 Forbidden: Redirect to login without expired flag
-    if (
-      status === 403 &&
-      !route.startsWith(Constants.GetUserStateEndpoint) &&
-      !route.startsWith(Constants.LoginEndpoint)
-    ) {
-      window.location.replace(Constants.LoginRoute);
-    }
+    // 403 Forbidden: the user is logged in but lacks access. The error notification above
+    // is enough, the user must not be logged out
   }
 }

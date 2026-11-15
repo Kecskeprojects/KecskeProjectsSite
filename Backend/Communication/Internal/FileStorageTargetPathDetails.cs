@@ -14,7 +14,7 @@ public class FileStorageTargetPathDetails
 
         if (!parts.Any())
         {
-            throw new ArgumentException("The target path must contain at least two parts: the folder and the client file hash.");
+            throw new ApiException(StatusCodes.Status400BadRequest, "The target path must contain at least the folder.");
         }
 
         TargetPath = normalizedTargetPath;
@@ -28,7 +28,7 @@ public class FileStorageTargetPathDetails
 
         if (parts.Count() < 2)
         {
-            throw new ArgumentException("The target path must contain at least two parts: the folder and the client file hash.");
+            throw new ApiException(StatusCodes.Status400BadRequest,"The target path must contain at least two parts: the folder and the client file hash.");
         }
 
         RelativeDirectory = string.Join(Path.DirectorySeparatorChar.ToString(), parts.Take(parts.Count() - 1));

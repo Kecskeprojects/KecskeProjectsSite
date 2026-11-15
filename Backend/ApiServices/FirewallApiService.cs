@@ -10,7 +10,7 @@ namespace Backend.ApiServices;
 [SupportedOSPlatform("windows")]
 public class FirewallApiService(
     PermittedIpAddressService permittedIpAddressService,
-    ILogger<FileStorageService> logger,
+    ILogger<FirewallApiService> logger,
     IConfiguration configuration)
 {
     public async Task<bool> AddRDPRule(int accountId, string ipAddress)

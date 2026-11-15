@@ -12,7 +12,7 @@ namespace Backend.Controllers;
 [Route("api/[controller]/[action]")]
 [SupportedOSPlatform("windows")]
 public class SecurityController(
-    ILogger<AccountController> logger,
+    ILogger<SecurityController> logger,
     FirewallApiService firewallApiService
     ) : ApiControllerBase<FirewallApiService>(logger, firewallApiService)
 {

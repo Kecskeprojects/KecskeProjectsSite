@@ -35,11 +35,7 @@ public class FileStorageService(
                 continue;
             }
 
-                string relativePath = FileTools.GetPathRelativeToCategoryDirectory(baseDirectory, targetPathDetails.RootDirectory, fileInfo.DirectoryName);
-            relativePath = relativePath.Replace(".", "");
-            string fullSubPath = string.IsNullOrWhiteSpace(relativePath)
-                ? targetPathDetails.RootDirectory
-                : $"{targetPathDetails.RootDirectory}/{relativePath}";
+            string fullSubPath = FileTools.GetClientSubPath(baseDirectory, targetPathDetails.RootDirectory, fileInfo.DirectoryName);
 
             fileDataList.Add(new FileData
             {
@@ -75,11 +71,7 @@ public class FileStorageService(
                 continue;
             }
 
-            string relativePath = FileTools.GetPathRelativeToCategoryDirectory(baseDirectory, targetPathDetails.RootDirectory, directoryInfo.FullName);
-            relativePath = relativePath.Replace(".", "");
-            string fullSubPath = string.IsNullOrWhiteSpace(relativePath)
-                ? targetPathDetails.RootDirectory
-                : $"{targetPathDetails.RootDirectory}/{relativePath}";
+            string fullSubPath = FileTools.GetClientSubPath(baseDirectory, targetPathDetails.RootDirectory, directoryInfo.FullName);
 
             directoryDataList.Add(new DirectoryData
             {
@@ -100,6 +92,13 @@ public class FileStorageService(
 
         foreach (string fileRoute in fileRoutes)
         {
+            // Files hidden from the listing must not be downloadable either
+            FileAttributes attributes = File.GetAttributes(fileRoute);
+            if (attributes.HasFlag(FileAttributes.System) || attributes.HasFlag(FileAttributes.Hidden))
+            {
+                continue;
+            }
+
             string fileHash = EncryptionTools.GetMD5HashHexString(fileRoute);
             if (targetPathDetails.FileClientHash?.Equals(fileHash, StringComparison.OrdinalIgnoreCase) == true)
             {
@@ -166,16 +165,19 @@ public class FileStorageService(
     {
         if (string.IsNullOrEmpty(fileName))
         {
-            throw new ArgumentNullException(fileName, "File name must be earlier in the form data than the file content!");
+            throw new ApiException(StatusCodes.Status400BadRequest, "File name must be earlier in the form data than the file content!");
         }
 
-        if (newFile && File.Exists(Path.Combine(fullPath, fileName)))
+        // The file name comes from the client, so it must not be able to point outside the target directory
+        string filePath = FileTools.GetFilePathInDirectory(fullPath, fileName);
+
+        if (newFile && File.Exists(filePath))
         {
-            throw new IOException($"File '{fileName}' already exists in this directory.");
+            throw new ApiException(StatusCodes.Status409Conflict, $"File '{fileName}' already exists in this directory.");
         }
 
         using FileStream outputFileStream = new(
-            path: Path.Combine(fullPath, fileName),
+            path: filePath,
             mode: FileMode.Append,
             access: FileAccess.Write,
             share: FileShare.None,

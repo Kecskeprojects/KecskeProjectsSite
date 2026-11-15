@@ -9,6 +9,8 @@ public static class MappingConfiguration
     public static void RegisterMappings()
     {
         TypeAdapterConfig<FileDirectory, FileDirectoryResource>.NewConfig().Compile();
-        TypeAdapterConfig<Account, AccountResource>.NewConfig().Compile();
+        TypeAdapterConfig<Account, AccountResource>.NewConfig()
+            .Map(dest => dest.Roles, src => src.Roles.Select(role => role.Name).ToList())
+            .Compile();
     }
 }

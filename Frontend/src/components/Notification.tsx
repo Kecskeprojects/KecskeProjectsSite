@@ -12,15 +12,17 @@ export default function Notification(): JSX.Element {
 
   const currentNotification = notification?.length > 0 ? notification[0] : null;
 
+  // Functional updates, so several notifications raised before a re-render are all kept
   function addToArray(message: INotificationMessage) {
-    if (notification.some((x) => x.message === message.message)) {
-      return;
-    }
-    setNotification([...notification, message]);
+    setNotification((current) =>
+      current.some((x) => x.message === message.message)
+        ? current
+        : [...current, message],
+    );
   }
 
   function removeFromArray() {
-    setNotification(notification.slice(1, notification.length - 1));
+    setNotification((current) => current.slice(1));
   }
 
   const classNames =
